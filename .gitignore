@@ -59,6 +59,7 @@ assets/images/portrait/
 # Local data/reference files
 data/
 *.xlsx
+*.pdf
 deep-research-report.md
 
 # macOS

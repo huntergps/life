@@ -9,7 +9,7 @@ import '../../providers/home_provider.dart';
 
 IconData _iconForSlug(String slug) {
   return switch (slug) {
-    'reptiles' => FontAwesomeIcons.dragon,
+    'reptiles' => FontAwesomeIcons.staffSnake,
     'birds' => FontAwesomeIcons.dove,
     'mammals' => FontAwesomeIcons.otter,
     'marine-life' => FontAwesomeIcons.fishFins,
