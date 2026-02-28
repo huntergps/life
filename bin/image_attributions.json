@@ -1,0 +1,682 @@
+[
+  {
+    "species_id": 10,
+    "scientific_name": "Buteo galapagoensis",
+    "filename": "galapagos_hawk.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Galapagos_hawk_01_%28cropped%29.jpg"
+  },
+  {
+    "species_id": 17,
+    "scientific_name": "Conolophus marthae",
+    "filename": "pink_land_iguana.jpg",
+    "author": "Rimini",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f2/Iggy_pink.jpg"
+  },
+  {
+    "species_id": 43,
+    "scientific_name": "Chelonoidis chathamensis",
+    "filename": "san_cristobal_tortoise.jpg",
+    "author": "mtkopone",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/86/Chathamensis.jpg"
+  },
+  {
+    "species_id": 44,
+    "scientific_name": "Chelonoidis hoodensis",
+    "filename": "espanola_tortoise.jpg",
+    "author": "Minglex at en.wikipedia",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Hoodensis.jpg"
+  },
+  {
+    "species_id": 45,
+    "scientific_name": "Chelonoidis vandenburghi",
+    "filename": "alcedo_tortoise.jpg",
+    "author": "William Stephens",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/88/Chelonoidis_vandenburghi_64365666.jpg"
+  },
+  {
+    "species_id": 46,
+    "scientific_name": "Chelonoidis becki",
+    "filename": "wolf_volcano_tortoise.jpg",
+    "author": "Minglex (talk)",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Chelonoidis_nigra_becki.jpg"
+  },
+  {
+    "species_id": 47,
+    "scientific_name": "Chelonoidis darwini",
+    "filename": "santiago_tortoise.jpg",
+    "author": "Minglex (talk)",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Darwini.jpg"
+  },
+  {
+    "species_id": 48,
+    "scientific_name": "Chelonoidis duncanensis",
+    "filename": "pinzon_tortoise.jpg",
+    "author": "Matěj Baťha",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/bb/Geochelone_nigra_duncanensis_%28Zoo_Praha_2011-01-16%29_4088.jpg"
+  },
+  {
+    "species_id": 49,
+    "scientific_name": "Chelonoidis guntheri",
+    "filename": "sierra_negra_tortoise.jpg",
+    "author": "Leonel Roget",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/09/Chelonoidis_guntheri_29532940.jpg"
+  },
+  {
+    "species_id": 50,
+    "scientific_name": "Chelonoidis donfaustoi",
+    "filename": "eastern_santa_cruz_tortoise.jpg",
+    "author": "Kevin Gepford",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/A_giant_Gal%C3%A1pagos_tortoise_%28Chelonoidis_niger_donfaustoi%29.jpg"
+  },
+  {
+    "species_id": 52,
+    "scientific_name": "Chelonoidis abingdonii",
+    "filename": "lonesome_george.jpg",
+    "author": "https://www.flickr.com/photos/mikeweston/",
+    "license": "CC BY 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Lonesome_George_in_profile.png"
+  },
+  {
+    "species_id": 53,
+    "scientific_name": "Chelonoidis microphyes",
+    "filename": "darwin_volcano_tortoise.jpg",
+    "author": "Minglex (talk)",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Chelonoidis_nigra_microphyes.jpg"
+  },
+  {
+    "species_id": 54,
+    "scientific_name": "Chelonoidis vicina",
+    "filename": "cerro_azul_tortoise.jpg",
+    "author": "Bernard Gagnon",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/cf/Chelonoidis_vicina_04.jpg"
+  },
+  {
+    "species_id": 55,
+    "scientific_name": "Conolophus pallidus",
+    "filename": "santa_fe_land_iguana.jpg",
+    "author": "Benjamint444",
+    "license": "GFDL 1.2",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/19/Conolophuspallidus-santafe.jpg"
+  },
+  {
+    "species_id": 56,
+    "scientific_name": "Pseudalsophis dorsalis",
+    "filename": "central_galapagos_racer.jpg",
+    "author": "Anika Patel, Lisa Cheung, Nandini Khatod, Irina Matijosaitiene, Alejandro Arteaga and Joseph W. Gilkey, Jr.",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c5/Pseudalsophis_dorsalis.png"
+  },
+  {
+    "species_id": 58,
+    "scientific_name": "Pseudalsophis hoodensis",
+    "filename": "espanola_racer.jpg",
+    "author": "Anika Patel, Lisa Cheung, Nandini Khatod, Irina Matijosaitiene, Alejandro Arteaga and Joseph W. Gilkey, Jr.",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/80/Pseudalsophis_hoodensis.png"
+  },
+  {
+    "species_id": 59,
+    "scientific_name": "Pseudalsophis steindachneri",
+    "filename": "striped_galapagos_snake.jpg",
+    "author": "Anika Patel, Lisa Cheung, Nandini Khatod, Irina Matijosaitiene, Alejandro Arteaga and Joseph W. Gilkey, Jr.",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/Pseudalsophis_steindachneri.png"
+  },
+  {
+    "species_id": 60,
+    "scientific_name": "Hydrophis platurus",
+    "filename": "yellow_bellied_sea_snake.jpg",
+    "author": "Aloaiza",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/13/Pelamis_platura%2C_Costa_Rica.jpg"
+  },
+  {
+    "species_id": 89,
+    "scientific_name": "Chelonoidis niger",
+    "filename": "floreana_tortoise.jpg",
+    "author": "Mfield, Matthew Field, http://www.photography.mattfield.com",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Galapagos_giant_tortoise_Geochelone_elephantopus.jpg"
+  },
+  {
+    "species_id": 90,
+    "scientific_name": "Chelonoidis sp.",
+    "filename": "santa_fe_tortoise.jpg",
+    "author": "Mfield, Matthew Field, http://www.photography.mattfield.com",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/42/Galapagos_giant_tortoise_Geochelone_elephantopus.jpg"
+  },
+  {
+    "species_id": 106,
+    "scientific_name": "Pseudalsophis slevini",
+    "filename": "pinzon_racer.jpg",
+    "author": "Anika Patel, Lisa Cheung, Nandini Khatod, Irina Matijosaitiene, Alejandro Arteaga and Joseph W. Gilkey, Jr.",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/37/Pseudalsophis_slevini.png"
+  },
+  {
+    "species_id": 107,
+    "scientific_name": "Pseudalsophis hephaestus",
+    "filename": "santiago_racer.jpg",
+    "author": "Anika Patel, Lisa Cheung, Nandini Khatod, Irina Matijosaitiene, Alejandro Arteaga and Joseph W. Gilkey, Jr.",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/cb/Pseudalsophis_hephaestus.png"
+  },
+  {
+    "species_id": 110,
+    "scientific_name": "Pseudalsophis thomasi",
+    "filename": "thomas_racer.jpg",
+    "author": "Simon J. Tonge",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Pseudalsophis_thomasi.jpg"
+  },
+  {
+    "species_id": 14,
+    "scientific_name": "Chelonia mydas",
+    "filename": "green_sea_turtle.jpg",
+    "author": "Charles J. Sharp",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Green_sea_turtle_%28Chelonia_mydas%29_Moorea.jpg"
+  },
+  {
+    "species_id": 19,
+    "scientific_name": "Eretmochelys imbricata",
+    "filename": "hawksbill_sea_turtle.jpg",
+    "author": "Thierry Caro",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b0/Eretmochelys-imbricata-K%C3%A9lonia-2.JPG"
+  },
+  {
+    "species_id": 61,
+    "scientific_name": "Caretta caretta",
+    "filename": "loggerhead_sea_turtle.jpg",
+    "author": "ukanda",
+    "license": "CC BY 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8e/Loggerhead_sea_turtle.jpg"
+  },
+  {
+    "species_id": 62,
+    "scientific_name": "Lepidochelys olivacea",
+    "filename": "olive_ridley_turtle.jpg",
+    "author": "Thierry Caro",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b5/Lepidochelys-olivacea-K%C3%A9lonia-1.JPG"
+  },
+  {
+    "species_id": 63,
+    "scientific_name": "Dermochelys coriacea",
+    "filename": "leatherback_turtle.jpg",
+    "author": "U.S. Fish and Wildlife Service Southeast Region",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Leatherback_sea_turtle_Tinglar%2C_USVI_%285839996547%29.jpg"
+  },
+  {
+    "species_id": 24,
+    "scientific_name": "Asio flammeus galapagoensis",
+    "filename": "galapagos_short_eared_owl.jpg",
+    "author": "Sumeet Moghe",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c7/Short_Eared_Owl_on_the_Ground.jpg"
+  },
+  {
+    "species_id": 26,
+    "scientific_name": "Setophaga petechia aureola",
+    "filename": "galapagos_yellow_warbler.jpg",
+    "author": "Rhododendrites",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/70/Yellow_warbler_%2882905%29.jpg"
+  },
+  {
+    "species_id": 27,
+    "scientific_name": "Mimus parvulus",
+    "filename": "galapagos_mockingbird.jpg",
+    "author": "© Nicolas Völcker",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e5/20180807-Gal%C3%A1pagos_mockingbird-2_at_Genovesa_%289572%29.jpg"
+  },
+  {
+    "species_id": 31,
+    "scientific_name": "Fregata minor",
+    "filename": "great_frigatebird.jpg",
+    "author": "Charles J. Sharp",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/20/Male_greater_frigate_bird_displaying.jpg"
+  },
+  {
+    "species_id": 64,
+    "scientific_name": "Geospiza fuliginosa",
+    "filename": "small_ground_finch.jpg",
+    "author": "Charles J. Sharp",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Female_Gal%C3%A1pagos_small_ground_finch.jpg"
+  },
+  {
+    "species_id": 65,
+    "scientific_name": "Geospiza magnirostris",
+    "filename": "large_ground_finch.jpg",
+    "author": "Peter Wilton",
+    "license": "CC BY 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/65/Large_ground_finch_%284229035966%29.jpg"
+  },
+  {
+    "species_id": 66,
+    "scientific_name": "Geospiza scandens",
+    "filename": "common_cactus_finch.jpg",
+    "author": "putneymark",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Cactus_ground_finch_Santa_Cruz.jpg"
+  },
+  {
+    "species_id": 67,
+    "scientific_name": "Geospiza conirostris",
+    "filename": "large_cactus_finch.jpg",
+    "author": "Erik",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f3/Geospiza_conirostris_-Espanola_Island%2C_Galapagos%2C_Ecuador-8.jpg"
+  },
+  {
+    "species_id": 68,
+    "scientific_name": "Camarhynchus pallidus",
+    "filename": "woodpecker_finch.jpg",
+    "author": "sgene",
+    "license": "CC0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/99/Camarhynchus_pallidus_1033334.jpg"
+  },
+  {
+    "species_id": 69,
+    "scientific_name": "Camarhynchus parvulus",
+    "filename": "small_tree_finch.jpg",
+    "author": "Mike Comber",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Camarhynchus_parvulus.jpg"
+  },
+  {
+    "species_id": 70,
+    "scientific_name": "Platyspiza crassirostris",
+    "filename": "vegetarian_finch.jpg",
+    "author": "MeegsC",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8b/Platyspiza_crassirostris_female_feeding.jpg"
+  },
+  {
+    "species_id": 71,
+    "scientific_name": "Certhidea olivacea",
+    "filename": "green_warbler_finch.jpg",
+    "author": "William Stephens",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Certhidea_olivacea_64237533.jpg"
+  },
+  {
+    "species_id": 72,
+    "scientific_name": "Camarhynchus heliobates",
+    "filename": "mangrove_finch.jpg",
+    "author": "Michael Dvorak",
+    "license": "CC BY 2.5",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/58/Camarhynchus_heliobates.png"
+  },
+  {
+    "species_id": 73,
+    "scientific_name": "Laterallus spilonotus",
+    "filename": "galapagos_rail.jpg",
+    "author": "Adam Jackson",
+    "license": "CC0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Laterallus_spilonota_339600312.jpg"
+  },
+  {
+    "species_id": 74,
+    "scientific_name": "Leucophaeus fuliginosus",
+    "filename": "lava_gull.jpg",
+    "author": "The original uploader was Krugerlive at English Wikipedia.",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/25/Lava_gull_pair.jpg"
+  },
+  {
+    "species_id": 75,
+    "scientific_name": "Mimus macdonaldi",
+    "filename": "espanola_mockingbird.jpg",
+    "author": "Benjamint444",
+    "license": "GFDL 1.2",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d2/Hood-mockingbird.jpg"
+  },
+  {
+    "species_id": 76,
+    "scientific_name": "Mimus trifasciatus",
+    "filename": "floreana_mockingbird.jpg",
+    "author": "williamstephens56",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Mimus_trifasciatus%2C_Floreana%2C_Gal%C3%A1pagos_1.jpg"
+  },
+  {
+    "species_id": 77,
+    "scientific_name": "Myiarchus magnirostris",
+    "filename": "galapagos_flycatcher.jpg",
+    "author": "Charles J. Sharp",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Gal%C3%A1pagos_flycatcher_%28Myiarchus_magnirostris%29_male.jpg"
+  },
+  {
+    "species_id": 78,
+    "scientific_name": "Pyrocephalus nanus",
+    "filename": "galapagos_vermilion_flycatcher.jpg",
+    "author": "Wikimedia Commons",
+    "license": "CC BY 2.5",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Flycatcher1.jpg"
+  },
+  {
+    "species_id": 79,
+    "scientific_name": "Pterodroma phaeopygia",
+    "filename": "galapagos_petrel.jpg",
+    "author": "Rémi Bigonneau",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/1f/Pterodroma_phaeopygia.jpg"
+  },
+  {
+    "species_id": 80,
+    "scientific_name": "Progne modesta",
+    "filename": "galapagos_martin.jpg",
+    "author": "Tristan Jobin",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Progne_modesta_109974847.jpg"
+  },
+  {
+    "species_id": 92,
+    "scientific_name": "Geospiza difficilis",
+    "filename": "sharp_beaked_ground_finch.jpg",
+    "author": "Daderot",
+    "license": "CC0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/29/Geospiza_difficilis_-_Hessisches_Landesmuseum_Darmstadt_-_Darmstadt%2C_Germany_-_DSC00096.jpg"
+  },
+  {
+    "species_id": 93,
+    "scientific_name": "Geospiza septentrionalis",
+    "filename": "vampire_ground_finch.jpg",
+    "author": "Peter Wilton",
+    "license": "CC BY 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Vampire_finch_%284229090408%29.jpg"
+  },
+  {
+    "species_id": 94,
+    "scientific_name": "Geospiza acutirostris",
+    "filename": "genovesa_ground_finch.jpg",
+    "author": "D. Gordon E. Robertson",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/21/Genovesa_Ground_Finch_%28Geospiza_acutirostris%29%2C_female.jpg"
+  },
+  {
+    "species_id": 95,
+    "scientific_name": "Geospiza propinqua",
+    "filename": "genovesa_cactus_finch.jpg",
+    "author": "D. Gordon E. Robertson",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/40/Genovesa_Cactus_Finch_%28Geospiza_propinqua%29%2C_female%2C_Genovesa.jpg"
+  },
+  {
+    "species_id": 96,
+    "scientific_name": "Camarhynchus pauper",
+    "filename": "medium_tree_finch.jpg",
+    "author": "Wikimedia Commons",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/MTF_male.jpg"
+  },
+  {
+    "species_id": 97,
+    "scientific_name": "Camarhynchus psittacula",
+    "filename": "large_tree_finch.jpg",
+    "author": "Adam Jackson",
+    "license": "CC0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Camarhynchus_psittacula_339602671.jpg"
+  },
+  {
+    "species_id": 98,
+    "scientific_name": "Certhidea fusca",
+    "filename": "grey_warbler_finch.jpg",
+    "author": "Unknown",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Certhidea_olivacea.jpg"
+  },
+  {
+    "species_id": 99,
+    "scientific_name": "Pinaroloxias inornata",
+    "filename": "cocos_finch.jpg",
+    "author": "Wikimedia Commons",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/19/Pinaroloxias_inornata_P1150960a.jpg"
+  },
+  {
+    "species_id": 104,
+    "scientific_name": "Mimus melanotis",
+    "filename": "san_cristobal_mockingbird.jpg",
+    "author": "Benjamint444",
+    "license": "GFDL 1.2",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/44/San_Cristobal_Mockingbird.jpg"
+  },
+  {
+    "species_id": 111,
+    "scientific_name": "Anas bahamensis galapagensis",
+    "filename": "white_cheeked_pintail.jpg",
+    "author": "christoph_moning",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Anas_bahamensis_bahamensis%2C_Crossing_Rocks%2C_South_Abaco%2C_Bahamas_94136093.jpg"
+  },
+  {
+    "species_id": 112,
+    "scientific_name": "Nyctanassa violacea pauper",
+    "filename": "yellow_crowned_night_heron.jpg",
+    "author": "Chuck Homler (FocusOnWildlife.Me)",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/7/70/Yellow-crowned_Night_Heron_%28Nyctanassa_violacea%29_perched_on_a_cedar_-_Cape_May_County%2C_New_Jersey%2C_USA.png"
+  },
+  {
+    "species_id": 113,
+    "scientific_name": "Haematopus palliatus galapagensis",
+    "filename": "galapagos_oystercatcher.jpg",
+    "author": "Rhododendrites",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/d0/American_oystercatcher_on_Fort_Tilden_beach_%2893754%29.jpg"
+  },
+  {
+    "species_id": 114,
+    "scientific_name": "Puffinus subalaris",
+    "filename": "galapagos_shearwater.jpg",
+    "author": "Dominic Sherony",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/56/Puffinus_subalaris.jpg"
+  },
+  {
+    "species_id": 116,
+    "scientific_name": "Oceanodroma tethys tethys",
+    "filename": "wedge_rumped_storm_petrel.jpg",
+    "author": "Brian Gratwicke",
+    "license": "CC BY 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Galapagos_storm_petrel.jpg"
+  },
+  {
+    "species_id": 13,
+    "scientific_name": "Arctocephalus galapagoensis",
+    "filename": "galapagos_fur_seal.jpg",
+    "author": "D. Gordon E. Robertson",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f8/Galapagos_Fur_Seal%2C_Santiago_Island.jpg"
+  },
+  {
+    "species_id": 32,
+    "scientific_name": "Aegialomys galapagoensis",
+    "filename": "galapagos_rice_rat.jpg",
+    "author": "MauriceTurner",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/34/Galapagos_Rice_Rat.jpg"
+  },
+  {
+    "species_id": 33,
+    "scientific_name": "Lasiurus blossevillii brachyotis",
+    "filename": "galapagos_red_bat.jpg",
+    "author": "United States National Park Service",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/43/Lasiurus_blossevillii.jpg"
+  },
+  {
+    "species_id": 34,
+    "scientific_name": "Lasiurus villosissimus",
+    "filename": "galapagos_hoary_bat.jpg",
+    "author": "Gonzalo Ossa Gomez",
+    "license": "CC BY 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Histiotus_magellanicus_565915.jpg"
+  },
+  {
+    "species_id": 81,
+    "scientific_name": "Tursiops truncatus",
+    "filename": "bottlenose_dolphin.jpg",
+    "author": "NASA",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/bc/Tursiops_truncatus_01-cropped.jpg"
+  },
+  {
+    "species_id": 82,
+    "scientific_name": "Megaptera novaeangliae",
+    "filename": "humpback_whale.jpg",
+    "author": "Unknown",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/61/Humpback_Whale_underwater_shot.jpg"
+  },
+  {
+    "species_id": 83,
+    "scientific_name": "Orcinus orca",
+    "filename": "orca.jpg",
+    "author": "Robert Pittman",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/37/Killerwhales_jumping.jpg"
+  },
+  {
+    "species_id": 108,
+    "scientific_name": "Physeter macrocephalus",
+    "filename": "sperm_whale.jpg",
+    "author": "Gabriel Barathieu",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/b1/Mother_and_baby_sperm_whale.jpg"
+  },
+  {
+    "species_id": 15,
+    "scientific_name": "Carcharhinus galapagensis",
+    "filename": "galapagos_shark.jpg",
+    "author": "Dr. Dwayne Meadows, NOAA/NMFS/OPR",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/5/53/Carcharinus_galapagensis_1.jpg"
+  },
+  {
+    "species_id": 16,
+    "scientific_name": "Sphyrna lewini",
+    "filename": "scalloped_hammerhead.jpg",
+    "author": "Wikimedia Commons",
+    "license": "CC BY 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Scalloped_Hammerhead_Shark_Sphyrna_Lewini_%28226845659%29.jpeg"
+  },
+  {
+    "species_id": 35,
+    "scientific_name": "Mobula birostris",
+    "filename": "giant_manta_ray.jpg",
+    "author": "jon hanson from london, UK",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/df/Manta_birostris-Thailand4.jpg"
+  },
+  {
+    "species_id": 37,
+    "scientific_name": "Rhincodon typus",
+    "filename": "whale_shark.jpg",
+    "author": "Abe Khao Lak",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Similan_Dive_Center_-_great_whale_shark.jpg"
+  },
+  {
+    "species_id": 38,
+    "scientific_name": "Hippocampus ingens",
+    "filename": "pacific_seahorse.jpg",
+    "author": "LASZLO ILYES from Cleveland, Ohio, USA",
+    "license": "CC BY 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/f5/Hippocampus_ingens.jpg"
+  },
+  {
+    "species_id": 39,
+    "scientific_name": "Octopus oculifer",
+    "filename": "galapagos_reef_octopus.jpg",
+    "author": "Kai Medina (Mk170101)",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Octopus_oculifer.jpg"
+  },
+  {
+    "species_id": 40,
+    "scientific_name": "Triaenodon obesus",
+    "filename": "whitetip_reef_shark.jpg",
+    "author": "Unknown authorUnknown author",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/95/Carcharhinus_albimarginatus-shark.jpg"
+  },
+  {
+    "species_id": 84,
+    "scientific_name": "Mola mola",
+    "filename": "ocean_sunfish.jpg",
+    "author": "U.S. National Oceanic and Atmospheric Administration",
+    "license": "Public domain",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/9/98/Mola_mola.jpg"
+  },
+  {
+    "species_id": 85,
+    "scientific_name": "Diodon holocanthus",
+    "filename": "porcupinefish.jpg",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Pez_erizo_de_espinas_largas_%28Diodon_holocanthus%29%2C_islas_Ad_Dimaniyat%2C_Om%C3%A1n%2C_2024-08-13%2C_DD_45.jpg"
+  },
+  {
+    "species_id": 41,
+    "scientific_name": "Grapsus grapsus",
+    "filename": "sally_lightfoot_crab.jpg",
+    "author": "Nosferattus",
+    "license": "CC0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a5/Sally_Lightfoot_Crab_2019.jpg"
+  },
+  {
+    "species_id": 42,
+    "scientific_name": "Schistocerca melanocera",
+    "filename": "galapagos_painted_locust.jpg",
+    "author": "Benjamint444",
+    "license": "GFDL 1.2",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Painted-Locust.jpg"
+  },
+  {
+    "species_id": 86,
+    "scientific_name": "Panulirus penicillatus",
+    "filename": "galapagos_spiny_lobster.jpg",
+    "author": "Richard Ling",
+    "license": "CC BY-SA 2.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/c/c3/Panulirus_penicillatus.jpg"
+  },
+  {
+    "species_id": 87,
+    "scientific_name": "Holothuria atra",
+    "filename": "black_sea_cucumber.jpg",
+    "author": "Philippe Bourjon",
+    "license": "CC BY-SA 3.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/f/fb/Holothuria_atra.jpg"
+  },
+  {
+    "species_id": 88,
+    "scientific_name": "Tripneustes depressus",
+    "filename": "white_sea_urchin.jpg",
+    "author": "Diego Delso",
+    "license": "CC BY-SA 4.0",
+    "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/44/Erizo_caf%C3%A9_%28Tripneustes_depressus%29%2C_Los_Cabos%2C_Baja_California%2C_M%C3%A9xico%2C_2024-12-17%2C_DD_69.jpg"
+  }
+]

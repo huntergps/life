@@ -1,0 +1,109 @@
+{
+  "" : {
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatch-primary.dia",
+    "emit-module-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatch-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatch-primary-emit-module.dia",
+    "pch" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatch-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatch-primary.swiftdeps"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/ContentView.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/GalapagosWatchApp.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/GalapagosWatchApp~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Models/WatchSighting.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSighting~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Models/WatchSpecies.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchSpecies~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Services/LocalStorageService.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocalStorageService~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Services/LocationService.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/LocationService~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Services/WatchConnectivityService.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/WatchConnectivityService~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Views/SightingLoggerView.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SightingLoggerView~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Views/SpeciesListView.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/SpeciesListView~partial.swiftmodule"
+  },
+  "/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Views/TrailRecordingView.swift" : {
+    "const-values" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.swiftconstvalues",
+    "dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.d",
+    "diagnostics" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.dia",
+    "index-unit-output-path" : "/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.o",
+    "llvm-bc" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.bc",
+    "object" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.o",
+    "swift-dependencies" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView.swiftdeps",
+    "swiftmodule" : "/Users/elmers/Documents/develop/2026/life/ios/build/Runner.build/Debug-watchos/GalapagosWatch.build/Objects-normal/arm64/TrailRecordingView~partial.swiftmodule"
+  }
+}

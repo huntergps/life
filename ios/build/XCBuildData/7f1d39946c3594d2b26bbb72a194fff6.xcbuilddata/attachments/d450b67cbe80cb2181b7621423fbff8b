@@ -1,0 +1,10 @@
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/GalapagosWatchApp.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/ContentView.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Models/WatchSighting.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Models/WatchSpecies.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Views/SightingLoggerView.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Views/TrailRecordingView.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Views/SpeciesListView.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Services/WatchConnectivityService.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Services/LocationService.swift
+/Users/elmers/Documents/develop/2026/life/ios/GalapagosWatch/Services/LocalStorageService.swift
