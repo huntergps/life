@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
@@ -10,8 +11,12 @@ import 'core/services/initial_sync_service.dart';
 Future<void> main() async {
   await Bootstrap.init();
 
-  final syncService = InitialSyncService(Repository());
-  final needsSync = !await syncService.isSyncComplete();
+  // On web, Brick/SQLite is not used — skip local sync check and show app directly.
+  bool needsSync = false;
+  if (!kIsWeb) {
+    final syncService = InitialSyncService(Repository());
+    needsSync = !await syncService.isSyncComplete();
+  }
 
   runApp(
     TranslationProvider(

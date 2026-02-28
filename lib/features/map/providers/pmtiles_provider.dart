@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 // ignore: implementation_imports
 import 'package:flutter_riverpod/legacy.dart';
@@ -15,12 +16,14 @@ import '../services/pmtiles_manager.dart';
 /// Checks if the PMTiles file exists on disk.
 /// Invalidated by MapDownloadNotifier after PMTiles download completes.
 final pmtilesAvailableProvider = FutureProvider<bool>((ref) async {
+  if (kIsWeb) return false;
   return PmTilesManager.isDownloaded;
 });
 
 /// Local file size in bytes (0 if not present).
 /// Invalidated by MapDownloadNotifier after PMTiles download completes.
 final pmtilesFileSizeProvider = FutureProvider<int>((ref) async {
+  if (kIsWeb) return 0;
   return PmTilesManager.localFileSize;
 });
 
@@ -45,6 +48,7 @@ final mapTileModeProvider = StateProvider<MapTileMode>((ref) => MapTileMode.stre
 /// Opens the local PMTiles archive and exposes a [VectorTileProvider].
 final pmtilesVectorTileProvider =
     FutureProvider<PmTilesVectorProvider?>((ref) async {
+  if (kIsWeb) return null;
   final available = await ref.watch(pmtilesAvailableProvider.future);
   if (!available) return null;
 

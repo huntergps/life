@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 
@@ -9,9 +11,12 @@ final speciesConservationFilterProvider = StateProvider<String?>((ref) => null);
 final speciesEndemicFilterProvider = StateProvider<bool?>((ref) => null);
 
 /// All species — fetches from Supabase remote (with local fallback on error).
-/// Deduplicates by id because Brick's local SQLite cache can accumulate
-/// duplicate rows across syncs (no UNIQUE constraint on the `id` column).
+/// On web, queries Supabase directly (no local SQLite).
 final allSpeciesProvider = FutureProvider<List<Species>>((ref) async {
+  if (kIsWeb) {
+    final data = await Supabase.instance.client.from('species').select();
+    return (data as List).map((r) => speciesFromRow(r as Map<String, dynamic>)).toList();
+  }
   return fetchDeduped<Species>(idSelector: (s) => s.id);
 });
 

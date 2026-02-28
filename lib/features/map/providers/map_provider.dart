@@ -1,4 +1,5 @@
 import 'package:brick_offline_first/brick_offline_first.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -10,6 +11,10 @@ import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 
 final islandsProvider = FutureProvider<List<Island>>((ref) async {
+  if (kIsWeb) {
+    final data = await Supabase.instance.client.from('islands').select();
+    return (data as List).map((r) => islandFromRow(r as Map<String, dynamic>)).toList();
+  }
   return fetchDeduped<Island>(
     idSelector: (i) => i.id,
     policy: OfflineFirstGetPolicy.localOnly,
@@ -17,6 +22,10 @@ final islandsProvider = FutureProvider<List<Island>>((ref) async {
 });
 
 final visitSitesProvider = FutureProvider<List<VisitSite>>((ref) async {
+  if (kIsWeb) {
+    final data = await Supabase.instance.client.from('visit_sites').select();
+    return (data as List).map((r) => visitSiteFromRow(r as Map<String, dynamic>)).toList();
+  }
   return fetchDeduped<VisitSite>(
     idSelector: (s) => s.id,
     awaitRemote: true,
@@ -25,6 +34,24 @@ final visitSitesProvider = FutureProvider<List<VisitSite>>((ref) async {
 
 /// Returns species found at a specific visit site.
 final siteSpeciesProvider = FutureProvider.family<List<({Species species, String? frequency})>, int>((ref, siteId) async {
+  if (kIsWeb) {
+    final ssData = await Supabase.instance.client
+        .from('species_sites')
+        .select()
+        .eq('visit_site_id', siteId);
+    final speciesSites = (ssData as List).map((r) => speciesSiteFromRow(r as Map<String, dynamic>)).toList();
+    if (speciesSites.isEmpty) return [];
+    final speciesIds = speciesSites.map((ss) => ss.speciesId).toList();
+    final spData = await Supabase.instance.client
+        .from('species')
+        .select()
+        .inFilter('id', speciesIds);
+    final speciesMap = {for (final r in spData as List) (r['id'] as int): speciesFromRow(r as Map<String, dynamic>)};
+    return speciesSites
+        .where((ss) => speciesMap.containsKey(ss.speciesId))
+        .map((ss) => (species: speciesMap[ss.speciesId]!, frequency: ss.frequency))
+        .toList();
+  }
   final speciesSites = await fetchDeduped<SpeciesSite>(
     idSelector: (ss) => ss.id,
     policy: OfflineFirstGetPolicy.localOnly,

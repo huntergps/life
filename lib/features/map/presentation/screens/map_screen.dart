@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -34,6 +35,14 @@ import '../widgets/field_edit_toolbar.dart';
 import '../widgets/trail_recording_panel.dart';
 import '../widgets/site_info_sheet.dart';
 
+
+/// Returns FMTC tile provider on native, plain NetworkTileProvider on web.
+TileProvider _tileProvider(String storeName) {
+  if (kIsWeb) return NetworkTileProvider();
+  return FMTCTileProvider(
+    stores: {storeName: BrowseStoreStrategy.readUpdateCreate},
+  );
+}
 
 Color _trailDifficultyColor(String? difficulty) {
   switch (difficulty?.toLowerCase()) {
@@ -1200,11 +1209,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             maxZoom: 19,
             subdomains: const [],
             retinaMode: false,
-            tileProvider: FMTCTileProvider(
-              stores: const {
-                'satelliteCache': BrowseStoreStrategy.readUpdateCreate,
-              },
-            ),
+            tileProvider: _tileProvider('satelliteCache'),
             tileBuilder: (context, tileWidget, tile) {
               // Debug: log tile loading
               return tileWidget;
@@ -1224,11 +1229,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             maxZoom: 19,
             subdomains: const [],
             retinaMode: false,
-            tileProvider: FMTCTileProvider(
-              stores: const {
-                'satelliteCache': BrowseStoreStrategy.readUpdateCreate,
-              },
-            ),
+            tileProvider: _tileProvider('satelliteCache'),
             errorTileCallback: (tile, error, stackTrace) {
               print('ESRI tile error at ${tile.coordinates}: $error');
             },
@@ -1242,11 +1243,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             maxZoom: 19,
             subdomains: const ['a', 'b', 'c'],
             retinaMode: false,
-            tileProvider: FMTCTileProvider(
-              stores: const {
-                'labelsCache': BrowseStoreStrategy.readUpdateCreate,
-              },
-            ),
+            tileProvider: _tileProvider('labelsCache'),
             errorTileCallback: (tile, error, stackTrace) {
               print('CartoDB tile error at ${tile.coordinates}: $error');
             },
@@ -1257,11 +1254,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.galapagos.galapagos_wildlife',
             maxNativeZoom: 19,
-            tileProvider: FMTCTileProvider(
-              stores: const {
-                'galapagosMap': BrowseStoreStrategy.readUpdateCreate,
-              },
-            ),
+            tileProvider: _tileProvider('galapagosMap'),
           ),
           // Dark overlay for street tiles in dark mode
           if (isDark)
@@ -1276,11 +1269,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 userAgentPackageName: 'com.galapagos.galapagos_wildlife',
                 maxNativeZoom: 19,
-                tileProvider: FMTCTileProvider(
-                  stores: const {
-                    'galapagosMap': BrowseStoreStrategy.readUpdateCreate,
-                  },
-                ),
+                tileProvider: _tileProvider('galapagosMap'),
               ),
             ),
         ],
