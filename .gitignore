@@ -57,7 +57,7 @@ app.*.map.json
 assets/images/portrait/
 
 # Local data/reference files
-data/
+/data/
 *.xlsx
 *.pdf
 deep-research-report.md
