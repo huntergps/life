@@ -105,7 +105,10 @@ final siteClassificationsProvider = FutureProvider.family<Map<String, List<Strin
 );
 
 /// User's current GPS position, or null if unavailable/denied.
+/// Returns null on web — GPS not supported in web deployment.
 final userLocationProvider = FutureProvider<Position?>((ref) async {
+  if (kIsWeb) return null;
+
   if (!await Geolocator.isLocationServiceEnabled()) return null;
 
   var permission = await Geolocator.checkPermission();

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
@@ -37,6 +38,8 @@ final distanceFromTrailProvider = StateProvider<double>((ref) => 0);
 /// Uses high accuracy and a 5-meter distance filter. The stream automatically
 /// pauses when [isTrackingProvider] is `false`.
 final gpsStreamProvider = StreamProvider<Position>((ref) {
+  if (kIsWeb) return const Stream<Position>.empty();
+
   final isTracking = ref.watch(isTrackingProvider);
 
   if (!isTracking) {
@@ -95,6 +98,8 @@ class TrackingService {
   /// status and distance-from-trail for each GPS fix. Pass `null` for free
   /// walking mode.
   void startTracking([List<LatLng>? trailCoordinates]) {
+    if (kIsWeb) return; // GPS tracking not supported on web
+
     // Reset state
     _ref.read(trackPointsProvider.notifier).state = [];
     _ref.read(offRouteProvider.notifier).state = false;

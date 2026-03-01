@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -65,6 +66,8 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   }
 
   Future<void> _getLocation() async {
+    if (kIsWeb) return; // GPS not supported on web deployment
+
     setState(() => _isLoadingLocation = true);
     try {
       if (!await Geolocator.isLocationServiceEnabled()) {
