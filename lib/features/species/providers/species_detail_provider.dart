@@ -5,6 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/species_image.model.dart';
 import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
+import 'package:galapagos_wildlife/brick/models/species_threat.model.dart';
+import 'package:galapagos_wildlife/brick/models/species_reference.model.dart';
 import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/brick/repository.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
@@ -75,4 +77,49 @@ final speciesVisitSitesProvider = FutureProvider.family<List<({VisitSite site, S
       .where((ss) => siteMap.containsKey(ss.visitSiteId))
       .map((ss) => (site: siteMap[ss.visitSiteId]!, frequency: ss.frequency))
       .toList();
+});
+
+final speciesThreatsProvider = FutureProvider.family<List<SpeciesThreat>, int>((ref, speciesId) async {
+  if (kIsWeb) {
+    final data = await Supabase.instance.client
+        .from('species_threats')
+        .select()
+        .eq('species_id', speciesId);
+    return (data as List).map((r) => SpeciesThreat(
+      id: r['id'] as int,
+      speciesId: r['species_id'] as int,
+      threatType: r['threat_type'] as String,
+      severity: r['severity'] as String,
+      descriptionEs: r['description_es'] as String?,
+      descriptionEn: r['description_en'] as String?,
+    )).toList();
+  }
+  return fetchDeduped<SpeciesThreat>(
+    idSelector: (t) => t.id,
+    policy: OfflineFirstGetPolicy.localOnly,
+    query: Query(where: [Where('speciesId').isExactly(speciesId)]),
+  );
+});
+
+final speciesReferencesProvider = FutureProvider.family<List<SpeciesReference>, int>((ref, speciesId) async {
+  if (kIsWeb) {
+    final data = await Supabase.instance.client
+        .from('species_references')
+        .select()
+        .eq('species_id', speciesId)
+        .order('id');
+    return (data as List).map((r) => SpeciesReference(
+      id: r['id'] as int,
+      speciesId: r['species_id'] as int,
+      citation: r['citation'] as String,
+      url: r['url'] as String?,
+      doi: r['doi'] as String?,
+      referenceType: r['reference_type'] as String?,
+    )).toList();
+  }
+  return fetchDeduped<SpeciesReference>(
+    idSelector: (r) => r.id,
+    policy: OfflineFirstGetPolicy.localOnly,
+    query: Query(where: [Where('speciesId').isExactly(speciesId)]),
+  );
 });

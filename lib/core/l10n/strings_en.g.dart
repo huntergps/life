@@ -297,6 +297,30 @@ class TranslationsSpeciesEn {
 	String thumbnailLabel({required Object index}) => 'Thumbnail ${index}, tap to view full image';
 
 	late final TranslationsSpeciesFrequencyEn frequency = TranslationsSpeciesFrequencyEn._(_root);
+
+	/// en: 'Threats'
+	String get threats => 'Threats';
+
+	/// en: 'Threat Type'
+	String get threatType => 'Threat Type';
+
+	/// en: 'Severity'
+	String get severity => 'Severity';
+
+	/// en: 'Scientific References'
+	String get references => 'Scientific References';
+
+	/// en: 'Citation'
+	String get citation => 'Citation';
+
+	/// en: 'Best Time to Visit'
+	String get bestTimeToVisit => 'Best Time to Visit';
+
+	/// en: 'Breeding Season'
+	String get breedingSeason => 'Breeding Season';
+
+	/// en: 'Activity Pattern'
+	String get activityPattern => 'Activity Pattern';
 }
 
 // Path: conservation
@@ -2521,6 +2545,14 @@ extension on Translations {
 			'species.frequency.uncommon' => 'Uncommon',
 			'species.frequency.rare' => 'Rare',
 			'species.frequency.occasional' => 'Occasional',
+			'species.threats' => 'Threats',
+			'species.threatType' => 'Threat Type',
+			'species.severity' => 'Severity',
+			'species.references' => 'Scientific References',
+			'species.citation' => 'Citation',
+			'species.bestTimeToVisit' => 'Best Time to Visit',
+			'species.breedingSeason' => 'Breeding Season',
+			'species.activityPattern' => 'Activity Pattern',
 			'conservation.EX' => 'Extinct',
 			'conservation.EW' => 'Extinct in Wild',
 			'conservation.CR' => 'Critically Endangered',
@@ -2956,6 +2988,8 @@ extension on Translations {
 			'admin.reproduction' => 'Reproduction',
 			'admin.breedingSeason' => 'Breeding Season',
 			'admin.clutchSize' => 'Clutch Size',
+			_ => null,
+		} ?? switch (path) {
 			'admin.reproductiveFrequency' => 'Reproductive Frequency',
 			'admin.distinguishingFeatures' => 'Distinguishing Features',
 			'admin.distinguishingFeaturesEs' => 'Distinguishing Features (ES)',
@@ -2964,8 +2998,6 @@ extension on Translations {
 			'admin.geographicRanges' => 'Geographic Ranges',
 			'admin.altitudeMinM' => 'Altitude Min (m)',
 			'admin.altitudeMaxM' => 'Altitude Max (m)',
-			_ => null,
-		} ?? switch (path) {
 			'admin.depthMinM' => 'Depth Min (m)',
 			'admin.depthMaxM' => 'Depth Max (m)',
 			'badges.title' => 'Achievements',

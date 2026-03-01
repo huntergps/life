@@ -163,6 +163,14 @@ class _TranslationsSpeciesEs implements TranslationsSpeciesEn {
 	@override String fullscreenImageLabel({required Object index, required Object total}) => 'Imagen ${index} de ${total}';
 	@override String thumbnailLabel({required Object index}) => 'Miniatura ${index}, toca para ver imagen completa';
 	@override late final _TranslationsSpeciesFrequencyEs frequency = _TranslationsSpeciesFrequencyEs._(_root);
+	@override String get threats => 'Amenazas';
+	@override String get threatType => 'Tipo de Amenaza';
+	@override String get severity => 'Severidad';
+	@override String get references => 'Referencias Científicas';
+	@override String get citation => 'Citación';
+	@override String get bestTimeToVisit => 'Mejor Época para Visitar';
+	@override String get breedingSeason => 'Temporada de Cría';
+	@override String get activityPattern => 'Patrón de Actividad';
 }
 
 // Path: conservation
@@ -1083,6 +1091,14 @@ extension on TranslationsEs {
 			'species.frequency.uncommon' => 'Poco común',
 			'species.frequency.rare' => 'Rara',
 			'species.frequency.occasional' => 'Ocasional',
+			'species.threats' => 'Amenazas',
+			'species.threatType' => 'Tipo de Amenaza',
+			'species.severity' => 'Severidad',
+			'species.references' => 'Referencias Científicas',
+			'species.citation' => 'Citación',
+			'species.bestTimeToVisit' => 'Mejor Época para Visitar',
+			'species.breedingSeason' => 'Temporada de Cría',
+			'species.activityPattern' => 'Patrón de Actividad',
 			'conservation.EX' => 'Extinta',
 			'conservation.EW' => 'Extinta en Estado Silvestre',
 			'conservation.CR' => 'En Peligro Crítico',
@@ -1518,6 +1534,8 @@ extension on TranslationsEs {
 			'admin.reproduction' => 'Reproducción',
 			'admin.breedingSeason' => 'Temporada de Cría',
 			'admin.clutchSize' => 'Tamaño de Postura',
+			_ => null,
+		} ?? switch (path) {
 			'admin.reproductiveFrequency' => 'Frecuencia Reproductiva',
 			'admin.distinguishingFeatures' => 'Características Distintivas',
 			'admin.distinguishingFeaturesEs' => 'Características Distintivas (ES)',
@@ -1526,8 +1544,6 @@ extension on TranslationsEs {
 			'admin.geographicRanges' => 'Rangos Geográficos',
 			'admin.altitudeMinM' => 'Altitud Mínima (m)',
 			'admin.altitudeMaxM' => 'Altitud Máxima (m)',
-			_ => null,
-		} ?? switch (path) {
 			'admin.depthMinM' => 'Profundidad Mínima (m)',
 			'admin.depthMaxM' => 'Profundidad Máxima (m)',
 			'badges.title' => 'Logros',

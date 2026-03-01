@@ -8,8 +8,11 @@ import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
+import 'package:galapagos_wildlife/brick/models/species_threat.model.dart';
+import 'package:galapagos_wildlife/brick/models/species_reference.model.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import '../../providers/species_detail_provider.dart';
 import '../widgets/quick_facts_row.dart';
@@ -169,6 +172,8 @@ class _DetailContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isLoggedIn = ref.watch(isAuthenticatedProvider);
+    final threatsAsync = ref.watch(speciesThreatsProvider(species.id));
+    final referencesAsync = ref.watch(speciesReferencesProvider(species.id));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -250,13 +255,18 @@ class _DetailContent extends ConsumerWidget {
         ),
 
         // Extended information (only for logged-in users)
-        if (isLoggedIn) ..._buildExtendedInfo(context, isDark)
+        if (isLoggedIn) ..._buildExtendedInfo(context, isDark, threatsAsync, referencesAsync)
         else ..._buildLoginPrompt(context, isDark),
       ],
     );
   }
 
-  List<Widget> _buildExtendedInfo(BuildContext context, bool isDark) {
+  List<Widget> _buildExtendedInfo(
+    BuildContext context,
+    bool isDark,
+    AsyncValue<List<SpeciesThreat>> threatsAsync,
+    AsyncValue<List<SpeciesReference>> referencesAsync,
+  ) {
     final emptyColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
     final emptyStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: emptyColor,
@@ -333,6 +343,111 @@ class _DetailContent extends ConsumerWidget {
       ));
     }
     widgets.add(const SizedBox(height: 20));
+
+    // Best Time to Visit (H) — from breeding season + activity pattern
+    if (species.breedingSeason != null || species.activityPattern != null) {
+      widgets.add(Text(
+        locale == 'es' ? 'Mejor Epoca para Visitar' : 'Best Time to Visit',
+        style: Theme.of(context).textTheme.titleLarge,
+      ));
+      widgets.add(const SizedBox(height: 8));
+      final bestTimeInfo = <Widget>[];
+      if (species.breedingSeason != null) {
+        bestTimeInfo.add(Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.calendar_today_outlined, size: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '${locale == 'es' ? 'Temporada de cria' : 'Breeding season'}: ${species.breedingSeason}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ));
+        bestTimeInfo.add(const SizedBox(height: 6));
+      }
+      if (species.activityPattern != null) {
+        bestTimeInfo.add(Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.access_time_outlined, size: 16),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                '${locale == 'es' ? 'Patron de actividad' : 'Activity pattern'}: ${_formatEnumValue(species.activityPattern!)}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ));
+      }
+      widgets.addAll(bestTimeInfo);
+      widgets.add(const SizedBox(height: 20));
+    }
+
+    // Threats (B) — from species_threats table
+    final threats = threatsAsync.asData?.value ?? [];
+    if (threats.isNotEmpty) {
+      widgets.add(Text(
+        locale == 'es' ? 'Amenazas' : 'Threats',
+        style: Theme.of(context).textTheme.titleLarge,
+      ));
+      widgets.add(const SizedBox(height: 8));
+      for (final threat in threats) {
+        final description = locale == 'es'
+            ? (threat.descriptionEs ?? threat.descriptionEn)
+            : threat.descriptionEn;
+        widgets.add(_ThreatCard(threat: threat, description: description, isDark: isDark, locale: locale));
+        widgets.add(const SizedBox(height: 8));
+      }
+      widgets.add(const SizedBox(height: 12));
+    }
+
+    // References (C) — from species_references table
+    final references = referencesAsync.asData?.value ?? [];
+    if (references.isNotEmpty) {
+      widgets.add(Text(
+        locale == 'es' ? 'Referencias Cientificas' : 'Scientific References',
+        style: Theme.of(context).textTheme.titleLarge,
+      ));
+      widgets.add(const SizedBox(height: 8));
+      for (int i = 0; i < references.length; i++) {
+        final ref = references[i];
+        final hasLink = ref.url != null || ref.doi != null;
+        widgets.add(Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('${i + 1}. ', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              )),
+              Expanded(
+                child: GestureDetector(
+                  onTap: hasLink ? () async {
+                    final url = ref.url ?? (ref.doi != null ? 'https://doi.org/${ref.doi}' : null);
+                    if (url != null) {
+                      final uri = Uri.parse(url);
+                      if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  } : null,
+                  child: Text(
+                    ref.citation,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: hasLink ? (isDark ? Colors.lightBlue : Colors.blue.shade700) : null,
+                      decoration: hasLink ? TextDecoration.underline : null,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
+      }
+      widgets.add(const SizedBox(height: 12));
+    }
 
     return widgets;
   }
@@ -559,6 +674,82 @@ class _ShareButton extends StatelessWidget {
               : Rect.zero,
         ));
       },
+    );
+  }
+}
+
+class _ThreatCard extends StatelessWidget {
+  final SpeciesThreat threat;
+  final String? description;
+  final bool isDark;
+  final String locale;
+
+  const _ThreatCard({
+    required this.threat,
+    this.description,
+    required this.isDark,
+    required this.locale,
+  });
+
+  Color _severityColor(String severity) {
+    switch (severity.toLowerCase()) {
+      case 'high': return Colors.red.shade700;
+      case 'critical': return Colors.red.shade900;
+      case 'medium': return Colors.orange.shade700;
+      case 'low': return Colors.yellow.shade800;
+      default: return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = _severityColor(threat.severity);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  threat.threatType,
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  threat.severity.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: color,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (description != null && description!.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(description!, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ],
+      ),
     );
   }
 }

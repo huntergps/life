@@ -76,7 +76,15 @@
       "uncommon": "Uncommon",
       "rare": "Rare",
       "occasional": "Occasional"
-    }
+    },
+    "threats": "Threats",
+    "threatType": "Threat Type",
+    "severity": "Severity",
+    "references": "Scientific References",
+    "citation": "Citation",
+    "bestTimeToVisit": "Best Time to Visit",
+    "breedingSeason": "Breeding Season",
+    "activityPattern": "Activity Pattern"
   },
   "conservation": {
     "EX": "Extinct",
