@@ -346,6 +346,11 @@ class _TranslationsSightingsEs implements TranslationsSightingsEn {
 	@override String get calendarView => 'Calendario';
 	@override String get listView => 'Lista';
 	@override String get noSightingsInMonth => 'Sin avistamientos este mes';
+	@override String get photosOnly => 'Con fotos';
+	@override String get favoritesOnly => 'Solo favoritos';
+	@override String get searchNotes => 'Buscar en notas...';
+	@override String get activeFilters => 'Filtros activos';
+	@override String get allSites => 'Todos los Sitios';
 }
 
 // Path: auth
@@ -1225,6 +1230,11 @@ extension on TranslationsEs {
 			'sightings.calendarView' => 'Calendario',
 			'sightings.listView' => 'Lista',
 			'sightings.noSightingsInMonth' => 'Sin avistamientos este mes',
+			'sightings.photosOnly' => 'Con fotos',
+			'sightings.favoritesOnly' => 'Solo favoritos',
+			'sightings.searchNotes' => 'Buscar en notas...',
+			'sightings.activeFilters' => 'Filtros activos',
+			'sightings.allSites' => 'Todos los Sitios',
 			'auth.signIn' => 'Iniciar Sesión',
 			'auth.signUp' => 'Registrarse',
 			'auth.signOut' => 'Cerrar Sesión',
@@ -1516,13 +1526,13 @@ extension on TranslationsEs {
 			'admin.geographicRanges' => 'Rangos Geográficos',
 			'admin.altitudeMinM' => 'Altitud Mínima (m)',
 			'admin.altitudeMaxM' => 'Altitud Máxima (m)',
+			_ => null,
+		} ?? switch (path) {
 			'admin.depthMinM' => 'Profundidad Mínima (m)',
 			'admin.depthMaxM' => 'Profundidad Máxima (m)',
 			'badges.title' => 'Logros',
 			'badges.empty' => 'Sin logros aún',
 			'badges.emptySubtitle' => '¡Empieza a explorar para ganar logros!',
-			_ => null,
-		} ?? switch (path) {
 			'badges.unlocked' => '¡Desbloqueado!',
 			'badges.locked' => 'Bloqueado',
 			'badges.progress' => ({required Object current, required Object target}) => '${current} / ${target}',

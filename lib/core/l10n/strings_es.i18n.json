@@ -231,7 +231,12 @@
     "withPhotos": "Con Fotos",
     "calendarView": "Calendario",
     "listView": "Lista",
-    "noSightingsInMonth": "Sin avistamientos este mes"
+    "noSightingsInMonth": "Sin avistamientos este mes",
+    "photosOnly": "Con fotos",
+    "favoritesOnly": "Solo favoritos",
+    "searchNotes": "Buscar en notas...",
+    "activeFilters": "Filtros activos",
+    "allSites": "Todos los Sitios"
   },
   "auth": {
     "signIn": "Iniciar Sesión",
