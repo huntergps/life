@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,7 +32,8 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   Species? _selectedSpecies;
   double? _latitude;
   double? _longitude;
-  File? _photoFile;
+  /// Bytes of the selected photo — works on all platforms (web, iOS, Android, macOS).
+  Uint8List? _photoBytes;
   bool _isSaving = false;
   bool _isLoadingLocation = false;
   bool _isProcessingPhoto = false;
@@ -39,8 +41,14 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   bool get _hasData =>
       _selectedSpecies != null ||
       _notesController.text.isNotEmpty ||
-      _photoFile != null ||
+      _photoBytes != null ||
       _latitude != null;
+
+  /// True when running on native mobile (iOS or Android), not web/desktop.
+  bool get _isMobile =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.android);
 
   @override
   void dispose() {
@@ -104,7 +112,6 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
         _longitude = position.longitude;
       });
 
-      // Show success toast
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -148,114 +155,97 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
     }
   }
 
+  /// Picks a photo from the gallery, crops on mobile, stores as bytes.
   Future<void> _pickPhoto() async {
-    final title = context.t.sightings.photo;
     final picker = ImagePicker();
-
     setState(() => _isProcessingPhoto = true);
     try {
       final picked = await picker.pickImage(source: ImageSource.gallery);
       if (picked == null) return;
 
-      final cropped = await ImageCropper().cropImage(
-        sourcePath: picked.path,
-        aspectRatio: const CropAspectRatio(ratioX: 16, ratioY: 9),
-        compressQuality: 90,
-        maxWidth: 1280,
-        maxHeight: 720,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: title,
-            toolbarColor: AppColors.primary,
-            toolbarWidgetColor: Colors.white,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            title: title,
-            aspectRatioLockEnabled: true,
-            resetAspectRatioEnabled: false,
-          ),
-        ],
-      );
+      final bytes = await _processPickedImage(picked);
+      if (bytes == null) return;
 
-      if (cropped != null) {
-        setState(() => _photoFile = File(cropped.path));
-
-        // Show success feedback
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text(context.t.sightings.photoAdded ?? 'Photo added'),
-                ],
-              ),
-              backgroundColor: Colors.green.shade700,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      }
+      setState(() => _photoBytes = bytes);
+      _showPhotoAddedSnackbar();
     } finally {
       if (mounted) setState(() => _isProcessingPhoto = false);
     }
   }
 
+  /// Takes a photo with the camera (mobile only), crops, stores as bytes.
   Future<void> _takePhoto() async {
-    final title = context.t.sightings.photo;
+    if (!_isMobile) return; // Camera capture not available on web/desktop
     final picker = ImagePicker();
-
     setState(() => _isProcessingPhoto = true);
     try {
       final picked = await picker.pickImage(source: ImageSource.camera);
       if (picked == null) return;
 
-      final cropped = await ImageCropper().cropImage(
-        sourcePath: picked.path,
-        aspectRatio: const CropAspectRatio(ratioX: 16, ratioY: 9),
-        compressQuality: 90,
-        maxWidth: 1280,
-        maxHeight: 720,
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: title,
-            toolbarColor: AppColors.primary,
-            toolbarWidgetColor: Colors.white,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(
-            title: title,
-            aspectRatioLockEnabled: true,
-            resetAspectRatioEnabled: false,
-          ),
-        ],
-      );
+      final bytes = await _processPickedImage(picked);
+      if (bytes == null) return;
 
-      if (cropped != null) {
-        setState(() => _photoFile = File(cropped.path));
-
-        // Show success feedback
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white, size: 20),
-                  const SizedBox(width: 8),
-                  Text(context.t.sightings.photoAdded ?? 'Photo added'),
-                ],
-              ),
-              backgroundColor: Colors.green.shade700,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      }
+      setState(() => _photoBytes = bytes);
+      _showPhotoAddedSnackbar();
     } finally {
       if (mounted) setState(() => _isProcessingPhoto = false);
     }
+  }
+
+  /// Applies ImageCropper on mobile, reads raw bytes on web/desktop.
+  /// Returns null if the user cancelled the crop.
+  Future<Uint8List?> _processPickedImage(XFile picked) async {
+    if (_isMobile) {
+      // ImageCropper is only available on iOS/Android — never call on web
+      final title = context.t.sightings.photo;
+      try {
+        final cropped = await ImageCropper().cropImage(
+          sourcePath: picked.path,
+          aspectRatio: const CropAspectRatio(ratioX: 16, ratioY: 9),
+          compressQuality: 90,
+          maxWidth: 1280,
+          maxHeight: 720,
+          uiSettings: [
+            AndroidUiSettings(
+              toolbarTitle: title,
+              toolbarColor: AppColors.primary,
+              toolbarWidgetColor: Colors.white,
+              lockAspectRatio: true,
+            ),
+            IOSUiSettings(
+              title: title,
+              aspectRatioLockEnabled: true,
+              resetAspectRatioEnabled: false,
+            ),
+          ],
+        );
+        if (cropped == null) return null; // user cancelled
+        return await File(cropped.path).readAsBytes();
+      } catch (_) {
+        // ImageCropper failed — fall back to raw bytes
+        return await picked.readAsBytes();
+      }
+    } else {
+      // Web and desktop: XFile.readAsBytes() works without dart:io File
+      return await picked.readAsBytes();
+    }
+  }
+
+  void _showPhotoAddedSnackbar() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Text(context.t.sightings.photoAdded ?? 'Photo added'),
+          ],
+        ),
+        backgroundColor: Colors.green.shade700,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   void _showPhotoOptions() {
@@ -265,14 +255,16 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(context.t.sightings.takePhoto),
-              onTap: () {
-                Navigator.pop(ctx);
-                _takePhoto();
-              },
-            ),
+            // Camera option only on mobile (iOS/Android)
+            if (_isMobile)
+              ListTile(
+                leading: const Icon(Icons.camera_alt),
+                title: Text(context.t.sightings.takePhoto),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _takePhoto();
+                },
+              ),
             ListTile(
               leading: const Icon(Icons.photo_library),
               title: Text(context.t.sightings.fromGallery),
@@ -281,13 +273,13 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
                 _pickPhoto();
               },
             ),
-            if (_photoFile != null)
+            if (_photoBytes != null)
               ListTile(
                 leading: const Icon(Icons.delete, color: Colors.red),
                 title: Text(context.t.sightings.removePhoto),
                 onTap: () {
                   Navigator.pop(ctx);
-                  setState(() => _photoFile = null);
+                  setState(() => _photoBytes = null);
                 },
               ),
           ],
@@ -308,9 +300,8 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
       final service = SightingsService();
       String? photoUrl;
 
-      if (_photoFile != null) {
-        final bytes = await _photoFile!.readAsBytes();
-        final compressed = ImageProcessingService.compressImage(bytes);
+      if (_photoBytes != null) {
+        final compressed = ImageProcessingService.compressImage(_photoBytes!);
         final fileName = 'sighting_${DateTime.now().millisecondsSinceEpoch}.jpg';
         photoUrl = await service.uploadPhoto(bytes: compressed, fileName: fileName);
       }
@@ -497,17 +488,16 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
           maxLines: 4,
         ),
         const SizedBox(height: 16),
-        // Location — dos opciones: GPS actual o seleccionar en mapa
+        // Location
         Card(
           child: Column(
             children: [
-              // Coordenadas actuales (si hay selección)
               if (_latitude != null && _longitude != null)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 0),
                   child: Row(
                     children: [
-                      Icon(Icons.location_on, color: Colors.green, size: 20),
+                      const Icon(Icons.location_on, color: Colors.green, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         '${_latitude!.toStringAsFixed(5)}, ${_longitude!.toStringAsFixed(5)}',
@@ -527,25 +517,26 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
                     ],
                   ),
                 ),
-              // Botón: Ubicación actual (GPS)
-              ListTile(
-                leading: _isLoadingLocation
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : Icon(
-                        Icons.my_location,
-                        color: isDark ? AppColors.accentOrange : AppColors.primary,
-                      ),
-                title: Text(context.t.sightings.useCurrentLocation),
-                subtitle: const Text('Usar coordenadas del GPS'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: _isLoadingLocation ? null : _getLocation,
-              ),
-              const Divider(height: 1, indent: 16, endIndent: 16),
-              // Botón: Seleccionar en mapa
+              // GPS button — hidden on web
+              if (!kIsWeb)
+                ListTile(
+                  leading: _isLoadingLocation
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Icon(
+                          Icons.my_location,
+                          color: isDark ? AppColors.accentOrange : AppColors.primary,
+                        ),
+                  title: Text(context.t.sightings.useCurrentLocation),
+                  subtitle: const Text('Usar coordenadas del GPS'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: _isLoadingLocation ? null : _getLocation,
+                ),
+              if (!kIsWeb) const Divider(height: 1, indent: 16, endIndent: 16),
+              // Map picker — always available
               ListTile(
                 leading: Icon(
                   Icons.map_outlined,
@@ -566,12 +557,13 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   Widget _buildPhotoSection(bool isDark) {
     return Column(
       children: [
-        if (_photoFile != null) ...[
+        // Preview: Image.memory works on ALL platforms (web, iOS, Android, macOS)
+        if (_photoBytes != null) ...[
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: AspectRatio(
               aspectRatio: 16 / 9,
-              child: Image.file(_photoFile!, fit: BoxFit.cover),
+              child: Image.memory(_photoBytes!, fit: BoxFit.cover),
             ),
           ),
           const SizedBox(height: 8),
@@ -585,13 +577,13 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : Icon(
-                    _photoFile != null ? Icons.photo : Icons.add_a_photo,
+                    _photoBytes != null ? Icons.photo : Icons.add_a_photo,
                     color: isDark ? AppColors.accentOrange : null,
                   ),
             title: Text(
               _isProcessingPhoto
                   ? (context.t.sightings.processingPhoto ?? 'Processing photo...')
-                  : (_photoFile != null
+                  : (_photoBytes != null
                       ? context.t.sightings.changePhoto
                       : context.t.sightings.addPhoto),
             ),

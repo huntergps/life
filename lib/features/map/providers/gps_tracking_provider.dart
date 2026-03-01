@@ -1,7 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
@@ -60,7 +59,7 @@ class GpsTrackingNotifier extends StateNotifier<bool> {
     // screen is locked or another app is in the foreground.
     // Each profile sets the appropriate activityType so iOS's motion
     // coprocessor can apply the right dead-reckoning corrections.
-    final locationSettings = Platform.isIOS
+    final locationSettings = defaultTargetPlatform == TargetPlatform.iOS
         ? AppleSettings(
             accuracy: LocationAccuracy.best,
             distanceFilter: distFilter,
