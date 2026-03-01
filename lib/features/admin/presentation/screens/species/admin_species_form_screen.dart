@@ -8,6 +8,7 @@ import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import '../../../providers/admin_species_provider.dart';
 import '../../../providers/admin_category_provider.dart';
 import '../../../providers/admin_taxonomy_provider.dart';
+import '../../../providers/species_form_provider.dart';
 import '../../widgets/admin_form_field.dart';
 import '../../widgets/admin_taxonomy_selector.dart';
 
@@ -84,9 +85,6 @@ class _AdminSpeciesFormScreenState
   final _altitudeMaxController = TextEditingController();
   final _depthMinController = TextEditingController();
   final _depthMaxController = TextEditingController();
-
-  // Taxonomy (selected via tree)
-  int? _selectedGenusId;
 
   int? _selectedCategoryId;
   String? _conservationStatus;
@@ -218,7 +216,14 @@ class _AdminSpeciesFormScreenState
     _activityPattern = data['activity_pattern'];
     _dietType = data['diet_type'];
     _sexualDimorphism = data['sexual_dimorphism'] ?? false;
-    _selectedGenusId = data['genus_id'];
+
+    // Populate the SpeciesFormNotifier with genus id from data
+    final genusId = data['genus_id'] as int?;
+    ref.read(speciesFormProvider.notifier).loadFromSpecies(
+          genusId: genusId,
+          conservationStatus: data['conservation_status'],
+        );
+
     _isPopulating = false;
   }
 
@@ -240,11 +245,13 @@ class _AdminSpeciesFormScreenState
 
     try {
       final service = ref.read(adminSupabaseServiceProvider);
+      final formState = ref.read(speciesFormProvider);
+      final selectedGenusId = formState.selectedGenusId;
 
       // Resolve taxonomy text fields from genus_id
       Map<String, String?>? taxonomyFields;
-      if (_selectedGenusId != null) {
-        taxonomyFields = await resolveTaxonomyFromGenusId(_selectedGenusId!);
+      if (selectedGenusId != null) {
+        taxonomyFields = await resolveTaxonomyFromGenusId(selectedGenusId);
       }
 
       final data = <String, dynamic>{
@@ -298,7 +305,7 @@ class _AdminSpeciesFormScreenState
         'activity_pattern': _activityPattern,
         'diet_type': _dietType,
         'sexual_dimorphism': _sexualDimorphism,
-        'genus_id': _selectedGenusId,
+        'genus_id': selectedGenusId,
         'taxonomy_kingdom': taxonomyFields?['taxonomy_kingdom'],
         'taxonomy_phylum': taxonomyFields?['taxonomy_phylum'],
         'taxonomy_class': taxonomyFields?['taxonomy_class'],
@@ -438,7 +445,7 @@ class _AdminSpeciesFormScreenState
             tabs: [
               Tab(text: context.t.admin.tabGeneral),
               Tab(text: context.t.admin.tabDescription),
-              Tab(text: 'Detalles'), // TODO: Add to i18n
+              Tab(text: context.t.admin.tabDetails),
             ],
           ),
         ),
@@ -471,7 +478,7 @@ class _AdminSpeciesFormScreenState
 // ════════════════════════════════════════════════
 // TAB 0 - General (Taxonomy + Hero + Basic + Classification + Physical)
 // ════════════════════════════════════════════════
-class _TabGeneral extends StatefulWidget {
+class _TabGeneral extends ConsumerStatefulWidget {
   final _AdminSpeciesFormScreenState parent;
   final bool isDark;
   final AsyncValue<List<Map<String, dynamic>>> categoriesAsync;
@@ -483,10 +490,10 @@ class _TabGeneral extends StatefulWidget {
   });
 
   @override
-  State<_TabGeneral> createState() => _TabGeneralState();
+  ConsumerState<_TabGeneral> createState() => _TabGeneralState();
 }
 
-class _TabGeneralState extends State<_TabGeneral>
+class _TabGeneralState extends ConsumerState<_TabGeneral>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
@@ -584,6 +591,7 @@ class _TabGeneralState extends State<_TabGeneral>
 
   Widget _buildTaxonomyPanel(BuildContext context, bool isDark) {
     final p = widget.parent;
+    final formState = ref.watch(speciesFormProvider);
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
@@ -591,13 +599,12 @@ class _TabGeneralState extends State<_TabGeneral>
             context, isDark, context.t.species.taxonomy),
         const SizedBox(height: 4),
         AdminTaxonomySelector(
-          selectedGenusId: p._selectedGenusId,
+          selectedGenusId: formState.selectedGenusId,
           onGenusSelected: (genusId) {
-            p.setState(() => p._selectedGenusId = genusId);
+            ref.read(speciesFormProvider.notifier).setGenus(genusId);
             p._markDirty();
           },
         ),
-        const SizedBox(height: 80),
       ],
     );
   }
@@ -839,7 +846,7 @@ class _TabGeneralState extends State<_TabGeneral>
       child: DropdownButtonFormField<String>(
         value: p._populationTrend,
         decoration: InputDecoration(
-          labelText: 'Population Trend', // TODO: i18n
+          labelText: context.t.admin.populationTrend,
           border: const OutlineInputBorder(),
           enabledBorder: OutlineInputBorder(
             borderSide: BorderSide(
@@ -849,11 +856,11 @@ class _TabGeneralState extends State<_TabGeneral>
           fillColor: isDark ? AppColors.darkSurface : null,
         ),
         dropdownColor: isDark ? AppColors.darkCard : null,
-        items: const [
-          DropdownMenuItem(value: 'increasing', child: Text('Increasing')),
-          DropdownMenuItem(value: 'stable', child: Text('Stable')),
-          DropdownMenuItem(value: 'decreasing', child: Text('Decreasing')),
-          DropdownMenuItem(value: 'unknown', child: Text('Unknown')),
+        items: [
+          DropdownMenuItem(value: 'increasing', child: Text(context.t.admin.trendIncreasing)),
+          DropdownMenuItem(value: 'stable', child: Text(context.t.admin.trendStable)),
+          DropdownMenuItem(value: 'decreasing', child: Text(context.t.admin.trendDecreasing)),
+          DropdownMenuItem(value: 'unknown', child: Text(context.t.admin.trendUnknown)),
         ],
         onChanged: (v) {
           p.setState(() => p._populationTrend = v);
@@ -870,7 +877,7 @@ class _TabGeneralState extends State<_TabGeneral>
       children: [
         // Checkboxes for origin
         CheckboxListTile(
-          title: Text('Native', style: TextStyle(color: isDark ? Colors.white : null)),
+          title: Text(context.t.admin.native, style: TextStyle(color: isDark ? Colors.white : null)),
           value: p._isNative,
           onChanged: (v) {
             p.setState(() => p._isNative = v ?? false);
@@ -881,7 +888,7 @@ class _TabGeneralState extends State<_TabGeneral>
           activeColor: AppColors.primary,
         ),
         CheckboxListTile(
-          title: Text('Introduced', style: TextStyle(color: isDark ? Colors.white : null)),
+          title: Text(context.t.admin.introduced, style: TextStyle(color: isDark ? Colors.white : null)),
           value: p._isIntroduced,
           onChanged: (v) {
             p.setState(() => p._isIntroduced = v ?? false);
@@ -908,7 +915,7 @@ class _TabGeneralState extends State<_TabGeneral>
         DropdownButtonFormField<String>(
           value: p._endemismLevel,
           decoration: InputDecoration(
-            labelText: 'Endemism Level', // TODO: i18n
+            labelText: context.t.admin.endemismLevel,
             border: const OutlineInputBorder(),
             enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
@@ -918,9 +925,9 @@ class _TabGeneralState extends State<_TabGeneral>
             fillColor: isDark ? AppColors.darkSurface : null,
           ),
           dropdownColor: isDark ? AppColors.darkCard : null,
-          items: const [
-            DropdownMenuItem(value: 'archipelago', child: Text('Archipelago Endemic')),
-            DropdownMenuItem(value: 'island_specific', child: Text('Island-Specific Endemic')),
+          items: [
+            DropdownMenuItem(value: 'archipelago', child: Text(context.t.admin.endemismArchipelago)),
+            DropdownMenuItem(value: 'island_specific', child: Text(context.t.admin.endemismIslandSpecific)),
           ],
           onChanged: (v) {
             p.setState(() => p._endemismLevel = v);
@@ -983,6 +990,7 @@ class _TabGeneralState extends State<_TabGeneral>
   /// Collapsible taxonomy section for narrow screens.
   Widget _buildCollapsibleTaxonomy(BuildContext context, bool isDark) {
     final p = widget.parent;
+    final formState = ref.watch(speciesFormProvider);
     return ExpansionTile(
       title: Text(
         context.t.species.taxonomy,
@@ -993,12 +1001,12 @@ class _TabGeneralState extends State<_TabGeneral>
       ),
       tilePadding: EdgeInsets.zero,
       childrenPadding: EdgeInsets.zero,
-      initiallyExpanded: p._selectedGenusId != null,
+      initiallyExpanded: formState.selectedGenusId != null,
       children: [
         AdminTaxonomySelector(
-          selectedGenusId: p._selectedGenusId,
+          selectedGenusId: formState.selectedGenusId,
           onGenusSelected: (genusId) {
-            p.setState(() => p._selectedGenusId = genusId);
+            ref.read(speciesFormProvider.notifier).setGenus(genusId);
             p._markDirty();
           },
         ),
@@ -1302,7 +1310,7 @@ class _TabDetallesState extends State<_TabDetalles>
   Widget _buildBehaviorSection(BuildContext context, bool isDark, _AdminSpeciesFormScreenState p) {
     return ExpansionTile(
       title: Text(
-        'Comportamiento', // TODO: i18n
+        context.t.admin.behavior,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: isDark ? AppColors.accentOrange : AppColors.primary,
               fontWeight: FontWeight.bold,
@@ -1318,7 +1326,7 @@ class _TabDetallesState extends State<_TabDetalles>
           child: DropdownButtonFormField<String>(
             value: p._socialStructure,
             decoration: InputDecoration(
-              labelText: 'Social Structure', // TODO: i18n
+              labelText: context.t.admin.socialStructure,
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -1328,12 +1336,12 @@ class _TabDetallesState extends State<_TabDetalles>
               fillColor: isDark ? AppColors.darkSurface : null,
             ),
             dropdownColor: isDark ? AppColors.darkCard : null,
-            items: const [
-              DropdownMenuItem(value: 'solitary', child: Text('Solitary')),
-              DropdownMenuItem(value: 'pair', child: Text('Pair')),
-              DropdownMenuItem(value: 'small_group', child: Text('Small Group')),
-              DropdownMenuItem(value: 'colony', child: Text('Colony')),
-              DropdownMenuItem(value: 'harem', child: Text('Harem')),
+            items: [
+              DropdownMenuItem(value: 'solitary', child: Text(context.t.admin.socialSolitary)),
+              DropdownMenuItem(value: 'pair', child: Text(context.t.admin.socialPair)),
+              DropdownMenuItem(value: 'small_group', child: Text(context.t.admin.socialSmallGroup)),
+              DropdownMenuItem(value: 'colony', child: Text(context.t.admin.socialColony)),
+              DropdownMenuItem(value: 'harem', child: Text(context.t.admin.socialHarem)),
             ],
             onChanged: (v) {
               p.setState(() => p._socialStructure = v);
@@ -1348,7 +1356,7 @@ class _TabDetallesState extends State<_TabDetalles>
           child: DropdownButtonFormField<String>(
             value: p._activityPattern,
             decoration: InputDecoration(
-              labelText: 'Activity Pattern', // TODO: i18n
+              labelText: context.t.admin.activityPattern,
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -1358,10 +1366,10 @@ class _TabDetallesState extends State<_TabDetalles>
               fillColor: isDark ? AppColors.darkSurface : null,
             ),
             dropdownColor: isDark ? AppColors.darkCard : null,
-            items: const [
-              DropdownMenuItem(value: 'diurnal', child: Text('Diurnal')),
-              DropdownMenuItem(value: 'nocturnal', child: Text('Nocturnal')),
-              DropdownMenuItem(value: 'crepuscular', child: Text('Crepuscular')),
+            items: [
+              DropdownMenuItem(value: 'diurnal', child: Text(context.t.admin.activityDiurnal)),
+              DropdownMenuItem(value: 'nocturnal', child: Text(context.t.admin.activityNocturnal)),
+              DropdownMenuItem(value: 'crepuscular', child: Text(context.t.admin.activityCrepuscular)),
             ],
             onChanged: (v) {
               p.setState(() => p._activityPattern = v);
@@ -1376,7 +1384,7 @@ class _TabDetallesState extends State<_TabDetalles>
           child: DropdownButtonFormField<String>(
             value: p._dietType,
             decoration: InputDecoration(
-              labelText: 'Diet Type', // TODO: i18n
+              labelText: context.t.admin.dietType,
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -1386,14 +1394,14 @@ class _TabDetallesState extends State<_TabDetalles>
               fillColor: isDark ? AppColors.darkSurface : null,
             ),
             dropdownColor: isDark ? AppColors.darkCard : null,
-            items: const [
-              DropdownMenuItem(value: 'carnivore', child: Text('Carnivore')),
-              DropdownMenuItem(value: 'herbivore', child: Text('Herbivore')),
-              DropdownMenuItem(value: 'omnivore', child: Text('Omnivore')),
-              DropdownMenuItem(value: 'insectivore', child: Text('Insectivore')),
-              DropdownMenuItem(value: 'piscivore', child: Text('Piscivore')),
-              DropdownMenuItem(value: 'frugivore', child: Text('Frugivore')),
-              DropdownMenuItem(value: 'nectarivore', child: Text('Nectarivore')),
+            items: [
+              DropdownMenuItem(value: 'carnivore', child: Text(context.t.admin.dietCarnivore)),
+              DropdownMenuItem(value: 'herbivore', child: Text(context.t.admin.dietHerbivore)),
+              DropdownMenuItem(value: 'omnivore', child: Text(context.t.admin.dietOmnivore)),
+              DropdownMenuItem(value: 'insectivore', child: Text(context.t.admin.dietInsectivore)),
+              DropdownMenuItem(value: 'piscivore', child: Text(context.t.admin.dietPiscivore)),
+              DropdownMenuItem(value: 'frugivore', child: Text(context.t.admin.dietFrugivore)),
+              DropdownMenuItem(value: 'nectarivore', child: Text(context.t.admin.dietNectarivore)),
             ],
             onChanged: (v) {
               p.setState(() => p._dietType = v);
@@ -1404,7 +1412,7 @@ class _TabDetallesState extends State<_TabDetalles>
 
         // Primary food sources text field
         AdminFormField(
-          label: 'Primary Food Sources', // TODO: i18n
+          label: context.t.admin.primaryFoodSources,
           controller: p._primaryFoodSourcesController,
           maxLines: 2,
         ),
@@ -1415,7 +1423,7 @@ class _TabDetallesState extends State<_TabDetalles>
   Widget _buildReproductionSection(BuildContext context, bool isDark, _AdminSpeciesFormScreenState p) {
     return ExpansionTile(
       title: Text(
-        'Reproducción', // TODO: i18n
+        context.t.admin.reproduction,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: isDark ? AppColors.accentOrange : AppColors.primary,
               fontWeight: FontWeight.bold,
@@ -1426,16 +1434,16 @@ class _TabDetallesState extends State<_TabDetalles>
       initiallyExpanded: false,
       children: [
         AdminFormField(
-          label: 'Breeding Season', // TODO: i18n
+          label: context.t.admin.breedingSeason,
           controller: p._breedingSeasonController,
         ),
         AdminFormField(
-          label: 'Clutch Size', // TODO: i18n
+          label: context.t.admin.clutchSize,
           controller: p._clutchSizeController,
           keyboardType: TextInputType.number,
         ),
         AdminFormField(
-          label: 'Reproductive Frequency', // TODO: i18n
+          label: context.t.admin.reproductiveFrequency,
           controller: p._reproductiveFrequencyController,
         ),
       ],
@@ -1445,7 +1453,7 @@ class _TabDetallesState extends State<_TabDetalles>
   Widget _buildDistinguishingFeaturesSection(BuildContext context, bool isDark, _AdminSpeciesFormScreenState p) {
     return ExpansionTile(
       title: Text(
-        'Características Distintivas', // TODO: i18n
+        context.t.admin.distinguishingFeatures,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: isDark ? AppColors.accentOrange : AppColors.primary,
               fontWeight: FontWeight.bold,
@@ -1456,17 +1464,17 @@ class _TabDetallesState extends State<_TabDetalles>
       initiallyExpanded: false,
       children: [
         AdminFormField(
-          label: 'Distinguishing Features (ES)', // TODO: i18n
+          label: context.t.admin.distinguishingFeaturesEs,
           controller: p._distinguishingFeaturesEsController,
           maxLines: 4,
         ),
         AdminFormField(
-          label: 'Distinguishing Features (EN)', // TODO: i18n
+          label: context.t.admin.distinguishingFeaturesEn,
           controller: p._distinguishingFeaturesEnController,
           maxLines: 4,
         ),
         CheckboxListTile(
-          title: Text('Sexual Dimorphism',
+          title: Text(context.t.admin.sexualDimorphism,
               style: TextStyle(color: isDark ? Colors.white : null)),
           value: p._sexualDimorphism,
           onChanged: (v) {
@@ -1484,7 +1492,7 @@ class _TabDetallesState extends State<_TabDetalles>
   Widget _buildGeographicRangesSection(BuildContext context, bool isDark, _AdminSpeciesFormScreenState p) {
     return ExpansionTile(
       title: Text(
-        'Rangos Geográficos', // TODO: i18n
+        context.t.admin.geographicRanges,
         style: Theme.of(context).textTheme.titleSmall?.copyWith(
               color: isDark ? AppColors.accentOrange : AppColors.primary,
               fontWeight: FontWeight.bold,
@@ -1498,7 +1506,7 @@ class _TabDetallesState extends State<_TabDetalles>
           children: [
             Expanded(
               child: AdminFormField(
-                label: 'Altitude Min (m)', // TODO: i18n
+                label: context.t.admin.altitudeMinM,
                 controller: p._altitudeMinController,
                 keyboardType: TextInputType.number,
               ),
@@ -1506,7 +1514,7 @@ class _TabDetallesState extends State<_TabDetalles>
             const SizedBox(width: 16),
             Expanded(
               child: AdminFormField(
-                label: 'Altitude Max (m)', // TODO: i18n
+                label: context.t.admin.altitudeMaxM,
                 controller: p._altitudeMaxController,
                 keyboardType: TextInputType.number,
               ),
@@ -1517,7 +1525,7 @@ class _TabDetallesState extends State<_TabDetalles>
           children: [
             Expanded(
               child: AdminFormField(
-                label: 'Depth Min (m)', // TODO: i18n
+                label: context.t.admin.depthMinM,
                 controller: p._depthMinController,
                 keyboardType: TextInputType.number,
               ),
@@ -1525,7 +1533,7 @@ class _TabDetallesState extends State<_TabDetalles>
             const SizedBox(width: 16),
             Expanded(
               child: AdminFormField(
-                label: 'Depth Max (m)', // TODO: i18n
+                label: context.t.admin.depthMaxM,
                 controller: p._depthMaxController,
                 keyboardType: TextInputType.number,
               ),
