@@ -9,6 +9,7 @@ import '../../../providers/admin_species_provider.dart';
 import '../../../providers/admin_category_provider.dart';
 import '../../../providers/admin_taxonomy_provider.dart';
 import '../../../providers/species_form_provider.dart';
+import '../../../services/admin_form_validator.dart';
 import '../../widgets/admin_form_field.dart';
 import '../../widgets/admin_taxonomy_selector.dart';
 
@@ -236,15 +237,21 @@ class _AdminSpeciesFormScreenState
   /// Validate the form across both tabs. If validation fails on another tab,
   /// switch to it so the user can see the errors.
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) {
-      _switchToFirstErrorTab();
-      return;
-    }
-    if (_selectedCategoryId == null) {
-      _tabController.animateTo(0);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.t.admin.selectCategoryRequired)),
-      );
+    final result = AdminFormValidator.validateSpecies(
+      formKey: _formKey,
+      nameEs: _nameEsController.text,
+      nameEn: _nameEnController.text,
+      scientificName: _scientificNameController.text,
+      categoryId: _selectedCategoryId,
+    );
+    if (!result.isValid) {
+      _tabController.animateTo(result.firstErrorTabIndex);
+      if (result.errorMessage != null) {
+        // Category missing — use i18n message.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.t.admin.selectCategoryRequired)),
+        );
+      }
       return;
     }
     setState(() => _isLoading = true);
@@ -350,20 +357,6 @@ class _AdminSpeciesFormScreenState
         ref.read(speciesFormProvider.notifier).setLoading(false);
       }
     }
-  }
-
-  void _switchToFirstErrorTab() {
-    // Tab 0: basic (name_es, name_en, scientific_name, category)
-    final basicHasError = _nameEsController.text.trim().isEmpty ||
-        _nameEnController.text.trim().isEmpty ||
-        _scientificNameController.text.trim().isEmpty ||
-        _selectedCategoryId == null;
-    if (basicHasError) {
-      _tabController.animateTo(0);
-      return;
-    }
-    // Default to tab 0
-    _tabController.animateTo(0);
   }
 
   void _showDiscardDialog() {
