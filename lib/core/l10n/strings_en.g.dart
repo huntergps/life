@@ -596,6 +596,12 @@ class TranslationsMapEn {
 
 	/// en: 'Login required for satellite view'
 	String get loginRequiredForSatellite => 'Login required for satellite view';
+
+	/// en: 'Filter sites'
+	String get filterSites => 'Filter sites';
+
+	/// en: 'Filter visit sites'
+	String get filterVisitSites => 'Filter visit sites';
 }
 
 // Path: favorites
@@ -2380,6 +2386,8 @@ extension on Translations {
 			'map.modeHybrid' => 'Hybrid',
 			'map.modeHybridDesc' => 'Satellite imagery with labels',
 			'map.loginRequiredForSatellite' => 'Login required for satellite view',
+			'map.filterSites' => 'Filter sites',
+			'map.filterVisitSites' => 'Filter visit sites',
 			'favorites.title' => 'Favorites',
 			'favorites.empty' => 'No favorites yet',
 			'favorites.emptySubtitle' => 'Tap the heart icon on any species to add it here',
@@ -2727,10 +2735,10 @@ extension on Translations {
 			'badges.title' => 'Achievements',
 			'badges.empty' => 'No badges yet',
 			'badges.emptySubtitle' => 'Start exploring to earn badges!',
-			'badges.unlocked' => 'Unlocked!',
-			'badges.locked' => 'Locked',
 			_ => null,
 		} ?? switch (path) {
+			'badges.unlocked' => 'Unlocked!',
+			'badges.locked' => 'Locked',
 			'badges.progress' => ({required Object current, required Object target}) => '${current} / ${target}',
 			'badges.firstSighting' => 'First Sighting',
 			'badges.firstSightingDesc' => 'Record your first wildlife sighting',

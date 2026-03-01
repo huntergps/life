@@ -274,6 +274,8 @@ class _TranslationsMapEs implements TranslationsMapEn {
 	@override String get modeHybrid => 'Híbrido';
 	@override String get modeHybridDesc => 'Imágenes satelitales con etiquetas';
 	@override String get loginRequiredForSatellite => 'Requiere iniciar sesión para vista satelital';
+	@override String get filterSites => 'Filtrar sitios';
+	@override String get filterVisitSites => 'Filtrar sitios de visita';
 }
 
 // Path: favorites
@@ -1092,6 +1094,8 @@ extension on TranslationsEs {
 			'map.modeHybrid' => 'Híbrido',
 			'map.modeHybridDesc' => 'Imágenes satelitales con etiquetas',
 			'map.loginRequiredForSatellite' => 'Requiere iniciar sesión para vista satelital',
+			'map.filterSites' => 'Filtrar sitios',
+			'map.filterVisitSites' => 'Filtrar sitios de visita',
 			'favorites.title' => 'Favoritos',
 			'favorites.empty' => 'Sin favoritos aún',
 			'favorites.emptySubtitle' => 'Toca el corazón en cualquier especie para agregarla aquí',
@@ -1439,10 +1443,10 @@ extension on TranslationsEs {
 			'badges.title' => 'Logros',
 			'badges.empty' => 'Sin logros aún',
 			'badges.emptySubtitle' => '¡Empieza a explorar para ganar logros!',
-			'badges.unlocked' => '¡Desbloqueado!',
-			'badges.locked' => 'Bloqueado',
 			_ => null,
 		} ?? switch (path) {
+			'badges.unlocked' => '¡Desbloqueado!',
+			'badges.locked' => 'Bloqueado',
 			'badges.progress' => ({required Object current, required Object target}) => '${current} / ${target}',
 			'badges.firstSighting' => 'Primer Avistamiento',
 			'badges.firstSightingDesc' => 'Registra tu primer avistamiento',

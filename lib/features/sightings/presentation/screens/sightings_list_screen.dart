@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
@@ -12,6 +11,7 @@ import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sighting_filters_provider.dart';
+import 'package:galapagos_wildlife/features/sightings/providers/sightings_ui_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_csv_export.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
@@ -19,17 +19,6 @@ import 'package:intl/intl.dart';
 import 'package:galapagos_wildlife/features/sightings/presentation/widgets/sighting_detail.dart';
 import 'package:galapagos_wildlife/features/sightings/presentation/widgets/sightings_filter_bar.dart';
 import 'package:galapagos_wildlife/features/sightings/utils/sightings_grouping.dart';
-
-/// Tracks the selected sighting index for master-detail on tablet.
-final _selectedSightingIndexProvider = StateProvider<int?>((ref) => null);
-
-/// Tracks whether the filter bar is visible.
-final _showFiltersProvider = StateProvider<bool>((ref) => false);
-
-/// Tracks the current view mode: list or calendar (month-grouped).
-enum _ViewMode { list, calendar }
-
-final _viewModeProvider = StateProvider<_ViewMode>((ref) => _ViewMode.list);
 
 class SightingsListScreen extends ConsumerWidget {
   const SightingsListScreen({super.key});
@@ -102,10 +91,10 @@ class _PhoneSightings extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final speciesLookupAsync = ref.watch(speciesLookupProvider);
     final speciesMapForExport = speciesLookupAsync.asData?.value ?? {};
-    final showFilters = ref.watch(_showFiltersProvider);
+    final showFilters = ref.watch(showFiltersProvider);
     final hasFilters = ref.watch(hasActiveFiltersProvider);
-    final viewMode = ref.watch(_viewModeProvider);
-    final isCalendar = viewMode == _ViewMode.calendar;
+    final viewMode = ref.watch(viewModeProvider);
+    final isCalendar = viewMode == SightingsViewMode.calendar;
 
     return Scaffold(
       appBar: AppBar(
@@ -121,7 +110,7 @@ class _PhoneSightings extends ConsumerWidget {
             ),
             tooltip: context.t.sightings.filters,
             onPressed: () {
-              ref.read(_showFiltersProvider.notifier).state = !showFilters;
+              ref.read(showFiltersProvider.notifier).state = !showFilters;
             },
           ),
           IconButton(
@@ -132,8 +121,8 @@ class _PhoneSightings extends ConsumerWidget {
                 ? context.t.sightings.listView
                 : context.t.sightings.calendarView,
             onPressed: () {
-              ref.read(_viewModeProvider.notifier).state =
-                  isCalendar ? _ViewMode.list : _ViewMode.calendar;
+              ref.read(viewModeProvider.notifier).state =
+                  isCalendar ? SightingsViewMode.list : SightingsViewMode.calendar;
             },
           ),
           IconButton(
@@ -260,11 +249,11 @@ class _TabletSightings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = ref.watch(_selectedSightingIndexProvider);
-    final showFilters = ref.watch(_showFiltersProvider);
+    final selectedIndex = ref.watch(selectedSightingIndexProvider);
+    final showFilters = ref.watch(showFiltersProvider);
     final hasFilters = ref.watch(hasActiveFiltersProvider);
-    final viewMode = ref.watch(_viewModeProvider);
-    final isCalendar = viewMode == _ViewMode.calendar;
+    final viewMode = ref.watch(viewModeProvider);
+    final isCalendar = viewMode == SightingsViewMode.calendar;
 
     return Scaffold(
       appBar: AppBar(
@@ -280,7 +269,7 @@ class _TabletSightings extends StatelessWidget {
             ),
             tooltip: context.t.sightings.filters,
             onPressed: () {
-              ref.read(_showFiltersProvider.notifier).state = !showFilters;
+              ref.read(showFiltersProvider.notifier).state = !showFilters;
             },
           ),
           IconButton(
@@ -291,8 +280,8 @@ class _TabletSightings extends StatelessWidget {
                 ? context.t.sightings.listView
                 : context.t.sightings.calendarView,
             onPressed: () {
-              ref.read(_viewModeProvider.notifier).state =
-                  isCalendar ? _ViewMode.list : _ViewMode.calendar;
+              ref.read(viewModeProvider.notifier).state =
+                  isCalendar ? SightingsViewMode.list : SightingsViewMode.calendar;
             },
           ),
           IconButton(
@@ -371,7 +360,7 @@ class _TabletSightings extends StatelessWidget {
                                 final idx = sightings.indexOf(sighting);
                                 if (idx >= 0) {
                                   ref
-                                      .read(_selectedSightingIndexProvider
+                                      .read(selectedSightingIndexProvider
                                           .notifier)
                                       .state = idx;
                                 }
@@ -402,7 +391,7 @@ class _TabletSightings extends StatelessWidget {
                                     child: InkWell(
                                       onTap: () {
                                         ref
-                                            .read(_selectedSightingIndexProvider
+                                            .read(selectedSightingIndexProvider
                                                 .notifier)
                                             .state = index;
                                       },
@@ -1070,7 +1059,7 @@ Future<void> _confirmDelete(
       }
       await service.deleteSighting(sighting.id);
       ref.invalidate(sightingsProvider);
-      ref.read(_selectedSightingIndexProvider.notifier).state = null;
+      ref.read(selectedSightingIndexProvider.notifier).state = null;
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(context.t.sightings.deleted)),
