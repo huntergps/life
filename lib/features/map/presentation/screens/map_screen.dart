@@ -1400,8 +1400,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       _mapController.camera.center,
                       (zoom + 1).clamp(6, 19),
                     );
-                  } catch (_) {
-                    AppLogger.warning('Zoom in failed: map controller not ready', _);
+                  } catch (e) {
+                    AppLogger.warning('Zoom in failed: map controller not ready', e);
                   }
                 },
               ),
@@ -1416,8 +1416,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       _mapController.camera.center,
                       (zoom - 1).clamp(6, 19),
                     );
-                  } catch (_) {
-                    AppLogger.warning('Zoom out failed: map controller not ready', _);
+                  } catch (e) {
+                    AppLogger.warning('Zoom out failed: map controller not ready', e);
                   }
                 },
               ),
@@ -1549,8 +1549,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             LatLng(userPos.latitude, userPos.longitude),
                             14,
                           );
-                        } catch (_) {
-                          AppLogger.warning('Go to my location failed: map controller not ready', _);
+                        } catch (e) {
+                          AppLogger.warning('Go to my location failed: map controller not ready', e);
                         }
                       } else {
                         // Refresh location provider
