@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import '../utils/route_utils.dart';
 
 // ---------------------------------------------------------------------------
@@ -47,9 +48,9 @@ final gpsStreamProvider = StreamProvider<Position>((ref) {
     return const Stream<Position>.empty();
   }
 
-  const settings = LocationSettings(
+  final settings = LocationSettings(
     accuracy: LocationAccuracy.high,
-    distanceFilter: 5,
+    distanceFilter: AppConstants.gpsDistanceFilterMeters,
   );
 
   return Geolocator.getPositionStream(locationSettings: settings);
@@ -115,9 +116,9 @@ class TrackingService {
     // issues with provider subscriptions).
     _gpsSub?.cancel();
     _gpsSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
+      locationSettings: LocationSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 5,
+        distanceFilter: AppConstants.gpsDistanceFilterMeters,
       ),
     ).listen(
       _onPosition,
@@ -141,7 +142,7 @@ class TrackingService {
     if (trailCoords != null && trailCoords.length >= 2) {
       final result = distanceToPolyline(latLng, trailCoords);
       _ref.read(distanceFromTrailProvider.notifier).state = result.distance;
-      _ref.read(offRouteProvider.notifier).state = result.distance > 50;
+      _ref.read(offRouteProvider.notifier).state = result.distance > AppConstants.offRouteThresholdMeters;
     }
   }
 

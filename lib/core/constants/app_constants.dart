@@ -20,4 +20,12 @@ class AppConstants {
   // Cache
   static const Duration cacheMaxAge = Duration(days: 7);
   static const int maxCachedTiles = 150000;
+
+  // GPS & tracking
+  static const double offRouteThresholdMeters = 50.0;
+  static const int gpsDistanceFilterMeters = 5;
+
+  // Map layout
+  static const double mapSidebarWidthFraction = 0.22;
+  static const double adminTabletBreakpoint = 700.0;
 }
