@@ -304,35 +304,35 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                         ),
                       ),
 
-                      // Monitoring type & Difficulty row
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: _buildMonitoringTypeDropdown(isDark)),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildDifficultyDropdown(isDark)),
-                          ],
-                        )
-                      else ...[
-                        _buildMonitoringTypeDropdown(isDark),
-                        _buildDifficultyDropdown(isDark),
-                      ],
-
-                      // Conservation zone & Public use zone row
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: _buildConservationZoneDropdown(isDark)),
-                            const SizedBox(width: 16),
-                            Expanded(child: _buildPublicUseZoneDropdown(isDark)),
-                          ],
-                        )
-                      else ...[
-                        _buildConservationZoneDropdown(isDark),
-                        _buildPublicUseZoneDropdown(isDark),
-                      ],
+                      // Classification dropdowns (monitoring type, difficulty, zones)
+                      _ClassificationSection(
+                        isDark: isDark,
+                        isWide: isWide,
+                        monitoringTypes: _monitoringTypes,
+                        difficulties: _difficulties,
+                        conservationZones: _conservationZones,
+                        publicUseZones: _publicUseZones,
+                        selectedMonitoringType: _selectedMonitoringType,
+                        selectedDifficulty: _selectedDifficulty,
+                        selectedConservationZone: _selectedConservationZone,
+                        selectedPublicUseZone: _selectedPublicUseZone,
+                        onMonitoringTypeChanged: (v) => setState(() {
+                          _selectedMonitoringType = v;
+                          if (_initialized) _hasUnsavedChanges = true;
+                        }),
+                        onDifficultyChanged: (v) => setState(() {
+                          _selectedDifficulty = v;
+                          if (_initialized) _hasUnsavedChanges = true;
+                        }),
+                        onConservationZoneChanged: (v) => setState(() {
+                          _selectedConservationZone = v;
+                          if (_initialized) _hasUnsavedChanges = true;
+                        }),
+                        onPublicUseZoneChanged: (v) => setState(() {
+                          _selectedPublicUseZone = v;
+                          if (_initialized) _hasUnsavedChanges = true;
+                        }),
+                      ),
 
                       AdminBilingualField(
                         label: context.t.admin.name,
@@ -365,8 +365,7 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                       // ── Catalog sections (only when editing) ──
                       if (isEditing) ...[
                         const SizedBox(height: 8),
-                        _buildCatalogSection(
-                          context: context,
+                        _CatalogSection(
                           isDark: isDark,
                           icon: Icons.category,
                           title: 'Tipos de Sitio',
@@ -382,8 +381,7 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                           },
                         ),
                         const SizedBox(height: 8),
-                        _buildCatalogSection(
-                          context: context,
+                        _CatalogSection(
                           isDark: isDark,
                           icon: Icons.directions_boat,
                           title: 'Modalidades de Acceso',
@@ -399,8 +397,7 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                           },
                         ),
                         const SizedBox(height: 8),
-                        _buildCatalogSection(
-                          context: context,
+                        _CatalogSection(
                           isDark: isDark,
                           icon: Icons.directions_run,
                           title: 'Actividades',
@@ -419,7 +416,14 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
 
                       // ── Species Section ──
                       const SizedBox(height: 24),
-                      _buildSpeciesSection(context, isDark),
+                      _SpeciesSection(
+                        siteId: isEditing ? widget.siteId : null,
+                        isDark: isDark,
+                        onDeleteSpeciesSite: isEditing ? _deleteSpeciesSite : null,
+                        onSpeciesAdded: isEditing
+                            ? () => ref.invalidate(speciesSitesByVisitSiteProvider(widget.siteId!))
+                            : null,
+                      ),
                     ],
                   ),
                 ),
@@ -431,13 +435,124 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
     );
   }
 
-  // ── Dropdown helpers ──────────────────────────────────────────────────────
+  Future<void> _deleteSpeciesSite(int speciesId, int visitSiteId, String speciesName) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.t.admin.deleteSpeciesFromSite),
+        content: Text(context.t.admin.confirmDeleteSpeciesFromSite(name: speciesName)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.t.common.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.error),
+            child: Text(context.t.common.delete),
+          ),
+        ],
+      ),
+    );
 
-  Widget _buildMonitoringTypeDropdown(bool isDark) {
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final service = ref.read(adminSupabaseServiceProvider);
+      await service.deleteSpeciesSite(speciesId, visitSiteId);
+      ref.invalidate(speciesSitesByVisitSiteProvider(widget.siteId!));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.t.admin.speciesRemovedFromSite)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ErrorHandler.showError(context, e);
+      }
+    }
+  }
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Classification Section (monitoring type, difficulty, zones)
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _ClassificationSection extends StatelessWidget {
+  final bool isDark;
+  final bool isWide;
+  final List<String> monitoringTypes;
+  final List<String> difficulties;
+  final List<String> conservationZones;
+  final List<String> publicUseZones;
+  final String? selectedMonitoringType;
+  final String? selectedDifficulty;
+  final String? selectedConservationZone;
+  final String? selectedPublicUseZone;
+  final ValueChanged<String?> onMonitoringTypeChanged;
+  final ValueChanged<String?> onDifficultyChanged;
+  final ValueChanged<String?> onConservationZoneChanged;
+  final ValueChanged<String?> onPublicUseZoneChanged;
+
+  const _ClassificationSection({
+    required this.isDark,
+    required this.isWide,
+    required this.monitoringTypes,
+    required this.difficulties,
+    required this.conservationZones,
+    required this.publicUseZones,
+    required this.selectedMonitoringType,
+    required this.selectedDifficulty,
+    required this.selectedConservationZone,
+    required this.selectedPublicUseZone,
+    required this.onMonitoringTypeChanged,
+    required this.onDifficultyChanged,
+    required this.onConservationZoneChanged,
+    required this.onPublicUseZoneChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Monitoring type & Difficulty row
+        if (isWide)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildMonitoringTypeDropdown(context)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildDifficultyDropdown(context)),
+            ],
+          )
+        else ...[
+          _buildMonitoringTypeDropdown(context),
+          _buildDifficultyDropdown(context),
+        ],
+
+        // Conservation zone & Public use zone row
+        if (isWide)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(child: _buildConservationZoneDropdown(context)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildPublicUseZoneDropdown(context)),
+            ],
+          )
+        else ...[
+          _buildConservationZoneDropdown(context),
+          _buildPublicUseZoneDropdown(context),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildMonitoringTypeDropdown(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: _selectedMonitoringType,
+        value: selectedMonitoringType,
         decoration: InputDecoration(
           labelText: 'Tipo de Monitoreo',
           border: const OutlineInputBorder(),
@@ -453,24 +568,21 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
             value: null,
             child: Text('Sin especificar', style: TextStyle(color: isDark ? Colors.white54 : Colors.grey[600])),
           ),
-          ..._monitoringTypes.map((t) => DropdownMenuItem(
+          ...monitoringTypes.map((t) => DropdownMenuItem(
             value: t,
             child: Text(t, style: TextStyle(color: isDark ? Colors.white : null)),
           )),
         ],
-        onChanged: (v) => setState(() {
-          _selectedMonitoringType = v;
-          if (_initialized) _hasUnsavedChanges = true;
-        }),
+        onChanged: onMonitoringTypeChanged,
       ),
     );
   }
 
-  Widget _buildDifficultyDropdown(bool isDark) {
+  Widget _buildDifficultyDropdown(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: _selectedDifficulty,
+        value: selectedDifficulty,
         decoration: InputDecoration(
           labelText: 'Dificultad',
           border: const OutlineInputBorder(),
@@ -486,24 +598,21 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
             value: null,
             child: Text('Sin especificar', style: TextStyle(color: isDark ? Colors.white54 : Colors.grey[600])),
           ),
-          ..._difficulties.map((d) => DropdownMenuItem(
+          ...difficulties.map((d) => DropdownMenuItem(
             value: d,
             child: Text(d, style: TextStyle(color: isDark ? Colors.white : null)),
           )),
         ],
-        onChanged: (v) => setState(() {
-          _selectedDifficulty = v;
-          if (_initialized) _hasUnsavedChanges = true;
-        }),
+        onChanged: onDifficultyChanged,
       ),
     );
   }
 
-  Widget _buildConservationZoneDropdown(bool isDark) {
+  Widget _buildConservationZoneDropdown(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: _selectedConservationZone,
+        value: selectedConservationZone,
         decoration: InputDecoration(
           labelText: 'Zonificación',
           border: const OutlineInputBorder(),
@@ -520,24 +629,21 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
             value: null,
             child: Text('Sin especificar', style: TextStyle(color: isDark ? Colors.white54 : Colors.grey[600])),
           ),
-          ..._conservationZones.map((z) => DropdownMenuItem(
+          ...conservationZones.map((z) => DropdownMenuItem(
             value: z,
             child: Text(z, style: TextStyle(color: isDark ? Colors.white : null)),
           )),
         ],
-        onChanged: (v) => setState(() {
-          _selectedConservationZone = v;
-          if (_initialized) _hasUnsavedChanges = true;
-        }),
+        onChanged: onConservationZoneChanged,
       ),
     );
   }
 
-  Widget _buildPublicUseZoneDropdown(bool isDark) {
+  Widget _buildPublicUseZoneDropdown(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: _selectedPublicUseZone,
+        value: selectedPublicUseZone,
         decoration: InputDecoration(
           labelText: 'Zona Uso Público',
           border: const OutlineInputBorder(),
@@ -554,146 +660,55 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
             value: null,
             child: Text('Sin especificar', style: TextStyle(color: isDark ? Colors.white54 : Colors.grey[600])),
           ),
-          ..._publicUseZones.map((z) => DropdownMenuItem(
+          ...publicUseZones.map((z) => DropdownMenuItem(
             value: z,
             child: Text(z, style: TextStyle(color: isDark ? Colors.white : null)),
           )),
         ],
-        onChanged: (v) => setState(() {
-          _selectedPublicUseZone = v;
-          if (_initialized) _hasUnsavedChanges = true;
-        }),
+        onChanged: onPublicUseZoneChanged,
       ),
     );
   }
+}
 
-  // ── Catalog section builder (types, modalities, activities) ──────────────
+// ──────────────────────────────────────────────────────────────────────────────
+// Catalog Section (types, modalities, activities chip lists)
+// ──────────────────────────────────────────────────────────────────────────────
 
-  Widget _buildCatalogSection({
-    required BuildContext context,
-    required bool isDark,
-    required IconData icon,
-    required String title,
-    required AsyncValue<List<Map<String, dynamic>>> catalogAsync,
-    required AsyncValue<List<Map<String, dynamic>>> assignedAsync,
-    required String assignedIdKey,
-    required String catalogIdKey,
-    required String catalogNameKey,
-    required Future<void> Function(List<String> ids) onSet,
-  }) {
+class _CatalogSection extends StatelessWidget {
+  final bool isDark;
+  final IconData icon;
+  final String title;
+  final AsyncValue<List<Map<String, dynamic>>> catalogAsync;
+  final AsyncValue<List<Map<String, dynamic>>> assignedAsync;
+  final String assignedIdKey;
+  final String catalogIdKey;
+  final String catalogNameKey;
+  final Future<void> Function(List<String> ids) onSet;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Divider(color: isDark ? AppColors.darkBorder : Colors.grey[300]),
-        const SizedBox(height: 8),
-        // Section header
-        Row(
-          children: [
-            Icon(icon, color: isDark ? AppColors.primaryLight : AppColors.primary, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : null,
-              ),
-            ),
-            const Spacer(),
-            // Add button
-            TextButton.icon(
-              onPressed: () => _showCatalogDialog(
-                context: context,
-                isDark: isDark,
-                title: title,
-                catalogAsync: catalogAsync,
-                assignedAsync: assignedAsync,
-                assignedIdKey: assignedIdKey,
-                catalogIdKey: catalogIdKey,
-                catalogNameKey: catalogNameKey,
-                onSet: onSet,
-              ),
-              icon: const Icon(Icons.add, size: 16),
-              label: const Text('Agregar'),
-              style: TextButton.styleFrom(
-                foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        // Chips for assigned items
-        assignedAsync.when(
-          loading: () => const SizedBox(height: 32, child: LinearProgressIndicator()),
-          error: (e, _) => Text('Error: $e', style: TextStyle(color: AppColors.error)),
-          data: (assigned) {
-            if (assigned.isEmpty) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  'Ninguno asignado',
-                  style: TextStyle(
-                    color: isDark ? Colors.white38 : Colors.grey[500],
-                    fontStyle: FontStyle.italic,
-                    fontSize: 13,
-                  ),
-                ),
-              );
-            }
-            return Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: assigned.map((item) {
-                // Nested catalog data may come as a Map or be null
-                final catalogData = item[_catalogTableKey(assignedIdKey)] as Map<String, dynamic>?;
-                final name = catalogData?[catalogNameKey] as String? ?? item[assignedIdKey]?.toString() ?? '';
-                final itemId = item[assignedIdKey]?.toString() ?? '';
-                return Chip(
-                  label: Text(name, style: const TextStyle(fontSize: 12)),
-                  backgroundColor: isDark
-                      ? AppColors.primary.withValues(alpha: 0.25)
-                      : AppColors.primaryLight.withValues(alpha: 0.15),
-                  labelStyle: TextStyle(color: isDark ? AppColors.primaryLight : AppColors.primary),
-                  deleteIcon: Icon(Icons.close, size: 14, color: isDark ? Colors.white54 : Colors.grey[600]),
-                  onDeleted: () async {
-                    // Remove this item by rebuilding list without it
-                    final remaining = assigned
-                        .where((a) => a[assignedIdKey]?.toString() != itemId)
-                        .map((a) => a[assignedIdKey]?.toString() ?? '')
-                        .where((id) => id.isNotEmpty)
-                        .toList();
-                    await onSet(remaining);
-                  },
-                );
-              }).toList(),
-            );
-          },
-        ),
-        const SizedBox(height: 4),
-      ],
-    );
-  }
+  const _CatalogSection({
+    required this.isDark,
+    required this.icon,
+    required this.title,
+    required this.catalogAsync,
+    required this.assignedAsync,
+    required this.assignedIdKey,
+    required this.catalogIdKey,
+    required this.catalogNameKey,
+    required this.onSet,
+  });
 
-  // Maps the assigned junction key to the nested catalog table key returned by Supabase
-  String _catalogTableKey(String assignedIdKey) {
-    switch (assignedIdKey) {
+  String _catalogTableKey(String key) {
+    switch (key) {
       case 'type_id': return 'site_type_catalog';
       case 'modality_id': return 'site_modality_catalog';
       case 'activity_id': return 'site_activity_catalog';
-      default: return assignedIdKey;
+      default: return key;
     }
   }
 
   Future<void> _showCatalogDialog({
     required BuildContext context,
-    required bool isDark,
-    required String title,
-    required AsyncValue<List<Map<String, dynamic>>> catalogAsync,
-    required AsyncValue<List<Map<String, dynamic>>> assignedAsync,
-    required String assignedIdKey,
-    required String catalogIdKey,
-    required String catalogNameKey,
-    required Future<void> Function(List<String> ids) onSet,
   }) async {
     final catalog = catalogAsync.asData?.value ?? [];
     final assigned = assignedAsync.asData?.value ?? [];
@@ -763,14 +778,119 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
     );
   }
 
-  // ── Species Section ──────────────────────────────────────────────────────
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(color: isDark ? AppColors.darkBorder : Colors.grey[300]),
+        const SizedBox(height: 8),
+        // Section header
+        Row(
+          children: [
+            Icon(icon, color: isDark ? AppColors.primaryLight : AppColors.primary, size: 20),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : null,
+              ),
+            ),
+            const Spacer(),
+            // Add button
+            TextButton.icon(
+              onPressed: () => _showCatalogDialog(
+                context: context,
+              ),
+              icon: const Icon(Icons.add, size: 16),
+              label: const Text('Agregar'),
+              style: TextButton.styleFrom(
+                foregroundColor: isDark ? AppColors.primaryLight : AppColors.primary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        // Chips for assigned items
+        assignedAsync.when(
+          loading: () => const SizedBox(height: 32, child: LinearProgressIndicator()),
+          error: (e, _) => Text('Error: $e', style: TextStyle(color: AppColors.error)),
+          data: (assigned) {
+            if (assigned.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  'Ninguno asignado',
+                  style: TextStyle(
+                    color: isDark ? Colors.white38 : Colors.grey[500],
+                    fontStyle: FontStyle.italic,
+                    fontSize: 13,
+                  ),
+                ),
+              );
+            }
+            return Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: assigned.map((item) {
+                // Nested catalog data may come as a Map or be null
+                final catalogData = item[_catalogTableKey(assignedIdKey)] as Map<String, dynamic>?;
+                final name = catalogData?[catalogNameKey] as String? ?? item[assignedIdKey]?.toString() ?? '';
+                final itemId = item[assignedIdKey]?.toString() ?? '';
+                return Chip(
+                  label: Text(name, style: const TextStyle(fontSize: 12)),
+                  backgroundColor: isDark
+                      ? AppColors.primary.withValues(alpha: 0.25)
+                      : AppColors.primaryLight.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(color: isDark ? AppColors.primaryLight : AppColors.primary),
+                  deleteIcon: Icon(Icons.close, size: 14, color: isDark ? Colors.white54 : Colors.grey[600]),
+                  onDeleted: () async {
+                    // Remove this item by rebuilding list without it
+                    final remaining = assigned
+                        .where((a) => a[assignedIdKey]?.toString() != itemId)
+                        .map((a) => a[assignedIdKey]?.toString() ?? '')
+                        .where((id) => id.isNotEmpty)
+                        .toList();
+                    await onSet(remaining);
+                  },
+                );
+              }).toList(),
+            );
+          },
+        ),
+        const SizedBox(height: 4),
+      ],
+    );
+  }
+}
 
-  Widget _buildSpeciesSection(BuildContext context, bool isDark) {
+// ──────────────────────────────────────────────────────────────────────────────
+// Species Section
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _SpeciesSection extends ConsumerWidget {
+  final int? siteId;
+  final bool isDark;
+  final Future<void> Function(int speciesId, int visitSiteId, String speciesName)? onDeleteSpeciesSite;
+  final VoidCallback? onSpeciesAdded;
+
+  const _SpeciesSection({
+    required this.siteId,
+    required this.isDark,
+    required this.onDeleteSpeciesSite,
+    required this.onSpeciesAdded,
+  });
+
+  bool get isEditing => siteId != null;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     if (!isEditing) {
-      return _buildSpeciesPlaceholder(isDark);
+      return _buildPlaceholder(context);
     }
 
-    final speciesSitesAsync = ref.watch(speciesSitesByVisitSiteProvider(widget.siteId!));
+    final speciesSitesAsync = ref.watch(speciesSitesByVisitSiteProvider(siteId!));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -779,9 +899,9 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
         const SizedBox(height: 8),
 
         speciesSitesAsync.when(
-          loading: () => _buildSpeciesSectionHeader(isDark, null),
-          error: (_, _) => _buildSpeciesSectionHeader(isDark, null),
-          data: (items) => _buildSpeciesSectionHeader(isDark, items.length),
+          loading: () => _SpeciesSectionHeader(isDark: isDark, count: null),
+          error: (_, _) => _SpeciesSectionHeader(isDark: isDark, count: null),
+          data: (items) => _SpeciesSectionHeader(isDark: isDark, count: items.length),
         ),
         const SizedBox(height: 12),
 
@@ -811,7 +931,11 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                   ),
                 )
               else
-                ...speciesSites.map((rel) => _buildSpeciesCard(rel, isDark)),
+                ...speciesSites.map((rel) => _SpeciesCard(
+                  rel: rel,
+                  isDark: isDark,
+                  onDelete: onDeleteSpeciesSite,
+                )),
             ],
           ),
         ),
@@ -819,23 +943,21 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
         const SizedBox(height: 12),
 
         _InlineAddSpeciesForm(
-          siteId: widget.siteId!,
+          siteId: siteId!,
           isDark: isDark,
-          onAdded: () {
-            ref.invalidate(speciesSitesByVisitSiteProvider(widget.siteId!));
-          },
+          onAdded: onSpeciesAdded ?? () {},
         ),
       ],
     );
   }
 
-  Widget _buildSpeciesPlaceholder(bool isDark) {
+  Widget _buildPlaceholder(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Divider(color: isDark ? AppColors.darkBorder : Colors.grey[300]),
         const SizedBox(height: 8),
-        _buildSpeciesSectionHeader(isDark, null),
+        _SpeciesSectionHeader(isDark: isDark, count: null),
         const SizedBox(height: 12),
         Container(
           width: double.infinity,
@@ -871,8 +993,20 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
       ],
     );
   }
+}
 
-  Widget _buildSpeciesSectionHeader(bool isDark, int? count) {
+// ──────────────────────────────────────────────────────────────────────────────
+// Species Section Header
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _SpeciesSectionHeader extends StatelessWidget {
+  final bool isDark;
+  final int? count;
+
+  const _SpeciesSectionHeader({required this.isDark, required this.count});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
         Icon(
@@ -911,8 +1045,25 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
       ],
     );
   }
+}
 
-  Widget _buildSpeciesCard(Map<String, dynamic> rel, bool isDark) {
+// ──────────────────────────────────────────────────────────────────────────────
+// Species Card
+// ──────────────────────────────────────────────────────────────────────────────
+
+class _SpeciesCard extends StatelessWidget {
+  final Map<String, dynamic> rel;
+  final bool isDark;
+  final Future<void> Function(int speciesId, int visitSiteId, String speciesName)? onDelete;
+
+  const _SpeciesCard({
+    required this.rel,
+    required this.isDark,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final species = rel['species'] as Map<String, dynamic>?;
     final speciesId = (species?['id'] ?? rel['species_id']) as int;
     final commonNameEs = species?['common_name_es'] as String? ?? '';
@@ -1011,7 +1162,9 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
             const SizedBox(width: 4),
             IconButton(
               icon: Icon(Icons.delete_outline, size: 20, color: AppColors.error),
-              onPressed: () => _deleteSpeciesSite(speciesId, visitSiteId, displayName),
+              onPressed: onDelete != null
+                  ? () => onDelete!(speciesId, visitSiteId, displayName)
+                  : null,
               tooltip: context.t.common.delete,
               visualDensity: VisualDensity.compact,
             ),
@@ -1019,44 +1172,6 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
         ),
       ),
     );
-  }
-
-  Future<void> _deleteSpeciesSite(int speciesId, int visitSiteId, String speciesName) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(context.t.admin.deleteSpeciesFromSite),
-        content: Text(context.t.admin.confirmDeleteSpeciesFromSite(name: speciesName)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(context.t.common.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: Text(context.t.common.delete),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    try {
-      final service = ref.read(adminSupabaseServiceProvider);
-      await service.deleteSpeciesSite(speciesId, visitSiteId);
-      ref.invalidate(speciesSitesByVisitSiteProvider(widget.siteId!));
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.t.admin.speciesRemovedFromSite)),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ErrorHandler.showError(context, e);
-      }
-    }
   }
 }
 
