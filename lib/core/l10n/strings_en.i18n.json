@@ -480,7 +480,11 @@
     "uploadUploading": "Uploading image...",
     "uploadGeneratingThumbnail": "Generating thumbnail...",
     "uploadDone": "Image uploaded!",
-    "uploadError": "Error uploading image"
+    "uploadError": "Error uploading image",
+    "siteCatalogs": "Classifications",
+    "manageCatalogs": "Types, modalities & activities",
+    "users": "Users",
+    "manageUsers": "Manage access and roles"
   },
   "badges": {
     "title": "Achievements",

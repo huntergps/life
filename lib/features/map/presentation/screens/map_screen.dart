@@ -2826,7 +2826,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         return;
       }
 
-      final coords = service.parseTrailCoordinates(trail.coordinates);
+      final coords = parseTrailCoordinates(trail.coordinates);
 
       if (coords.isEmpty) {
         _showSnackBar('❌ Trail has no coordinates');

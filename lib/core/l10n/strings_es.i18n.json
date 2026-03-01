@@ -480,7 +480,11 @@
     "uploadUploading": "Subiendo imagen...",
     "uploadGeneratingThumbnail": "Generando miniatura...",
     "uploadDone": "¡Imagen subida!",
-    "uploadError": "Error al subir imagen"
+    "uploadError": "Error al subir imagen",
+    "siteCatalogs": "Clasificaciones",
+    "manageCatalogs": "Tipos, modalidades y actividades",
+    "users": "Usuarios",
+    "manageUsers": "Gestionar acceso y roles"
   },
   "badges": {
     "title": "Logros",

@@ -1529,6 +1529,18 @@ class TranslationsAdminEn {
 
 	/// en: 'Error uploading image'
 	String get uploadError => 'Error uploading image';
+
+	/// en: 'Classifications'
+	String get siteCatalogs => 'Classifications';
+
+	/// en: 'Types, modalities & activities'
+	String get manageCatalogs => 'Types, modalities & activities';
+
+	/// en: 'Users'
+	String get users => 'Users';
+
+	/// en: 'Manage access and roles'
+	String get manageUsers => 'Manage access and roles';
 }
 
 // Path: badges
@@ -2532,6 +2544,10 @@ extension on Translations {
 			'admin.uploadGeneratingThumbnail' => 'Generating thumbnail...',
 			'admin.uploadDone' => 'Image uploaded!',
 			'admin.uploadError' => 'Error uploading image',
+			'admin.siteCatalogs' => 'Classifications',
+			'admin.manageCatalogs' => 'Types, modalities & activities',
+			'admin.users' => 'Users',
+			'admin.manageUsers' => 'Manage access and roles',
 			'badges.title' => 'Achievements',
 			'badges.empty' => 'No badges yet',
 			'badges.emptySubtitle' => 'Start exploring to earn badges!',
@@ -2581,12 +2597,12 @@ extension on Translations {
 			'offline.pending' => 'Pending',
 			'offline.allSynced' => 'All synced',
 			'offline.syncNow' => 'Sync Now',
+			_ => null,
+		} ?? switch (path) {
 			'common.loading' => 'Loading...',
 			'common.error' => 'Something went wrong',
 			'common.retry' => 'Retry',
 			'common.cancel' => 'Cancel',
-			_ => null,
-		} ?? switch (path) {
 			'common.confirm' => 'Confirm',
 			'common.delete' => 'Delete',
 			'common.save' => 'Save',

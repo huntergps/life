@@ -615,6 +615,10 @@ class _TranslationsAdminEs implements TranslationsAdminEn {
 	@override String get uploadGeneratingThumbnail => 'Generando miniatura...';
 	@override String get uploadDone => '¡Imagen subida!';
 	@override String get uploadError => 'Error al subir imagen';
+	@override String get siteCatalogs => 'Clasificaciones';
+	@override String get manageCatalogs => 'Tipos, modalidades y actividades';
+	@override String get users => 'Usuarios';
+	@override String get manageUsers => 'Gestionar acceso y roles';
 }
 
 // Path: badges
@@ -1340,6 +1344,10 @@ extension on TranslationsEs {
 			'admin.uploadGeneratingThumbnail' => 'Generando miniatura...',
 			'admin.uploadDone' => '¡Imagen subida!',
 			'admin.uploadError' => 'Error al subir imagen',
+			'admin.siteCatalogs' => 'Clasificaciones',
+			'admin.manageCatalogs' => 'Tipos, modalidades y actividades',
+			'admin.users' => 'Usuarios',
+			'admin.manageUsers' => 'Gestionar acceso y roles',
 			'badges.title' => 'Logros',
 			'badges.empty' => 'Sin logros aún',
 			'badges.emptySubtitle' => '¡Empieza a explorar para ganar logros!',
@@ -1389,12 +1397,12 @@ extension on TranslationsEs {
 			'offline.pending' => 'Pendientes',
 			'offline.allSynced' => 'Todo sincronizado',
 			'offline.syncNow' => 'Sincronizar Ahora',
+			_ => null,
+		} ?? switch (path) {
 			'common.loading' => 'Cargando...',
 			'common.error' => 'Algo salió mal',
 			'common.retry' => 'Reintentar',
 			'common.cancel' => 'Cancelar',
-			_ => null,
-		} ?? switch (path) {
 			'common.confirm' => 'Confirmar',
 			'common.delete' => 'Eliminar',
 			'common.save' => 'Guardar',

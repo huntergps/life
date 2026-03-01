@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:galapagos_wildlife/core/services/location/location_permission_service.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
@@ -78,7 +79,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
 
     setState(() => _isLoadingLocation = true);
     try {
-      if (!await Geolocator.isLocationServiceEnabled()) {
+      if (!await LocationPermissionService.isServiceEnabled()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(context.t.location.servicesDisabled)),
@@ -87,18 +88,13 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
         return;
       }
 
-      var permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied ||
-            permission == LocationPermission.deniedForever) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(context.t.location.permissionDenied)),
-            );
-          }
-          return;
+      if (!await LocationPermissionService.ensurePermission()) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.location.permissionDenied)),
+          );
         }
+        return;
       }
 
       final position = await Geolocator.getCurrentPosition(

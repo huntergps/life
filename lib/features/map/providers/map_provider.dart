@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:galapagos_wildlife/core/services/location/location_permission_service.dart';
 import 'package:galapagos_wildlife/brick/models/island.model.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
@@ -109,17 +110,7 @@ final siteClassificationsProvider = FutureProvider.family<Map<String, List<Strin
 final userLocationProvider = FutureProvider<Position?>((ref) async {
   if (kIsWeb) return null;
 
-  if (!await Geolocator.isLocationServiceEnabled()) return null;
-
-  var permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      return null;
-    }
-  }
-  if (permission == LocationPermission.deniedForever) return null;
+  if (!await LocationPermissionService.ensurePermission()) return null;
 
   return Geolocator.getCurrentPosition(
     locationSettings: const LocationSettings(

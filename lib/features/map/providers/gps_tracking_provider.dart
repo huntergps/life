@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/services/location/location_permission_service.dart';
 import 'field_edit_provider.dart';
 
 /// Manages background GPS tracking independently of any widget lifecycle.
@@ -43,14 +44,7 @@ class GpsTrackingNotifier extends StateNotifier<bool> {
     if (kIsWeb) return; // GPS background tracking not supported on web
 
     // Verify permission
-    var permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      return;
-    }
+    if (!await LocationPermissionService.ensurePermission()) return;
 
     final profile = _ref.read(fieldEditProvider).trackingProfile;
     final distFilter = profile.distanceFilterMeters;
