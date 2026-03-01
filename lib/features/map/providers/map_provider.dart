@@ -9,6 +9,7 @@ import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
 import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
+import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 
 final islandsProvider = FutureProvider<List<Island>>((ref) async {
@@ -99,7 +100,8 @@ final siteClassificationsProvider = FutureProvider.family<Map<String, List<Strin
         'modalities': names(results[1] as List, 'site_modality_catalog'),
         'activities': names(results[2] as List, 'site_activity_catalog'),
       };
-    } catch (_) {
+    } catch (e) {
+      AppLogger.warning('siteClassificationsProvider: offline or error', e);
       return {'types': [], 'modalities': [], 'activities': []};
     }
   },

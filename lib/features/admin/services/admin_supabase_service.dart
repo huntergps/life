@@ -14,7 +14,8 @@ class AdminSupabaseService {
         .from('categories')
         .select()
         .isFilter('deleted_at', null)
-        .order('sort_order');
+        .order('sort_order')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -38,7 +39,8 @@ class AdminSupabaseService {
         .from('categories')
         .select()
         .not('deleted_at', 'is', null)
-        .order('deleted_at', ascending: false);
+        .order('deleted_at', ascending: false)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -59,7 +61,8 @@ class AdminSupabaseService {
         .from('islands')
         .select()
         .isFilter('deleted_at', null)
-        .order('name_en');
+        .order('name_en')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -83,7 +86,8 @@ class AdminSupabaseService {
         .from('islands')
         .select()
         .not('deleted_at', 'is', null)
-        .order('deleted_at', ascending: false);
+        .order('deleted_at', ascending: false)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -105,7 +109,8 @@ class AdminSupabaseService {
         .select()
         .eq('island_id', islandId)
         .isFilter('deleted_at', null)
-        .order('name_es');
+        .order('name_es')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -114,7 +119,8 @@ class AdminSupabaseService {
         .from('visit_sites')
         .select()
         .isFilter('deleted_at', null)
-        .order('name_es');
+        .order('name_es')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -138,7 +144,8 @@ class AdminSupabaseService {
         .from('visit_sites')
         .select()
         .not('deleted_at', 'is', null)
-        .order('deleted_at', ascending: false);
+        .order('deleted_at', ascending: false)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -159,7 +166,8 @@ class AdminSupabaseService {
         .from('species')
         .select('*, categories(name_en)')
         .isFilter('deleted_at', null)
-        .order('common_name_en');
+        .order('common_name_en')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -187,7 +195,8 @@ class AdminSupabaseService {
         .from('species')
         .select('*, categories(name_en)')
         .not('deleted_at', 'is', null)
-        .order('deleted_at', ascending: false);
+        .order('deleted_at', ascending: false)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -208,7 +217,8 @@ class AdminSupabaseService {
         .from('species_images')
         .select()
         .eq('species_id', speciesId)
-        .order('sort_order');
+        .order('sort_order')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -245,7 +255,8 @@ class AdminSupabaseService {
         .from('species_sites')
         .select('*, species(id, common_name_es, common_name_en, scientific_name, thumbnail_url)')
         .eq('visit_site_id', visitSiteId)
-        .order('species_id');
+        .order('species_id')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -256,7 +267,7 @@ class AdminSupabaseService {
     if (speciesId != null) {
       query = query.eq('species_id', speciesId);
     }
-    final response = await query.order('species_id');
+    final response = await query.order('species_id').limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -346,7 +357,8 @@ class AdminSupabaseService {
     final response = await _client
         .from('site_type_catalog')
         .select()
-        .order('name');
+        .order('name')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -354,7 +366,8 @@ class AdminSupabaseService {
     final response = await _client
         .from('site_modality_catalog')
         .select()
-        .order('name');
+        .order('name')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -362,7 +375,8 @@ class AdminSupabaseService {
     final response = await _client
         .from('site_activity_catalog')
         .select()
-        .order('name');
+        .order('name')
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -386,7 +400,8 @@ class AdminSupabaseService {
     final response = await _client
         .from('visit_site_types')
         .select('type_id, site_type_catalog(id, name)')
-        .eq('visit_site_id', siteId);
+        .eq('visit_site_id', siteId)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -394,7 +409,8 @@ class AdminSupabaseService {
     final response = await _client
         .from('visit_site_modalities')
         .select('modality_id, site_modality_catalog(id, name)')
-        .eq('visit_site_id', siteId);
+        .eq('visit_site_id', siteId)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
@@ -402,7 +418,8 @@ class AdminSupabaseService {
     final response = await _client
         .from('visit_site_activities')
         .select('activity_id, capacity, site_activity_catalog(id, name, abbreviation)')
-        .eq('visit_site_id', siteId);
+        .eq('visit_site_id', siteId)
+        .limit(500);
     return List<Map<String, dynamic>>.from(response);
   }
 
