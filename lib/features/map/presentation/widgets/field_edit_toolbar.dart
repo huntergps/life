@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../admin/providers/admin_auth_provider.dart';
@@ -47,13 +48,16 @@ class FieldEditToolbar extends ConsumerWidget {
     bool isDark,
     FieldEditNotifier editNotifier,
   ) {
+    final t = context.t;
     return Positioned(
       left: 16,
       bottom: 90,
       child: FloatingActionButton.extended(
+        heroTag: 'field_edit_mode_fab',
         onPressed: () => _showEditModeMenu(context, editNotifier),
         icon: const Icon(Icons.edit_location_alt),
-        label: const Text('Field Edit'),
+        label: Text(t.fieldEdit.title),
+        tooltip: t.fieldEdit.mode,
         backgroundColor: Colors.orange,
         foregroundColor: Colors.white,
         elevation: 4,
@@ -63,6 +67,7 @@ class FieldEditToolbar extends ConsumerWidget {
 
   /// Show menu to choose edit mode
   void _showEditModeMenu(BuildContext context, FieldEditNotifier editNotifier) {
+    final t = context.t;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -70,15 +75,15 @@ class FieldEditToolbar extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 16),
-            const Text(
-              'Field Editing Mode',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              t.fieldEdit.mode,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.location_on, color: Colors.blue),
-              title: const Text('Move Visit Site'),
-              subtitle: const Text('Correct site location'),
+              title: Text(t.fieldEdit.moveVisitSite),
+              subtitle: Text(t.fieldEdit.correctSiteLocation),
               onTap: () {
                 Navigator.pop(context);
                 _showMoveSiteOptions(context, editNotifier);
@@ -86,8 +91,8 @@ class FieldEditToolbar extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.edit_road, color: Colors.purple),
-              title: const Text('Edit Trail'),
-              subtitle: const Text('Correct trail path'),
+              title: Text(t.fieldEdit.editTrail),
+              subtitle: Text(t.fieldEdit.correctTrailPath),
               onTap: () {
                 Navigator.pop(context);
                 _showEditTrailOptions(context, editNotifier);
@@ -95,8 +100,8 @@ class FieldEditToolbar extends ConsumerWidget {
             ),
             ListTile(
               leading: const Icon(Icons.add_location_alt, color: Colors.green),
-              title: const Text('Create New Trail'),
-              subtitle: const Text('Draw on map or GPS tracking'),
+              title: Text(t.fieldEdit.createNewTrail),
+              subtitle: Text(t.fieldEdit.drawOnMapOrGps),
               onTap: () {
                 Navigator.pop(context);
                 _showCreateTrailOptions(context, editNotifier);
@@ -111,6 +116,7 @@ class FieldEditToolbar extends ConsumerWidget {
 
   /// Show options for moving a site
   void _showMoveSiteOptions(BuildContext context, FieldEditNotifier editNotifier) {
+    final t = context.t;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -118,28 +124,28 @@ class FieldEditToolbar extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 16),
-            const Text(
-              'How to Move Site?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              t.fieldEdit.howToMoveSite,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.open_with, color: Colors.blue),
-              title: const Text('Drag on Map'),
-              subtitle: const Text('All markers become draggable — drag any to its correct position'),
+              title: Text(t.fieldEdit.dragOnMap),
+              subtitle: Text(t.fieldEdit.dragOnMapDesc),
               onTap: () {
                 Navigator.pop(context);
                 editNotifier.startMovingSitesDrag();
-                _showToast(context, 'Drag any site marker to move it');
+                _showToast(context, t.fieldEdit.dragAnySiteToMove);
               },
             ),
             ListTile(
               leading: const Icon(Icons.my_location, color: Colors.green),
-              title: const Text('Use Current GPS Location'),
-              subtitle: const Text('Tap a site marker to move it to your current position'),
+              title: Text(t.fieldEdit.useCurrentGps),
+              subtitle: Text(t.fieldEdit.useCurrentGpsDesc),
               onTap: () {
                 Navigator.pop(context);
-                _showToast(context, 'Tap a site marker to move it to your current location');
+                _showToast(context, t.fieldEdit.tapSiteToMoveToCurrentLocation);
                 // Mode will be activated when user taps a marker
               },
             ),
@@ -152,6 +158,7 @@ class FieldEditToolbar extends ConsumerWidget {
 
   /// Show options for editing a trail
   void _showEditTrailOptions(BuildContext context, FieldEditNotifier editNotifier) {
+    final t = context.t;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -159,28 +166,28 @@ class FieldEditToolbar extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 16),
-            const Text(
-              'How to Edit Trail?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              t.fieldEdit.howToEditTrail,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.edit, color: Colors.purple),
-              title: const Text('Edit on Map'),
-              subtitle: const Text('Tap a trail, then add/remove points'),
+              title: Text(t.fieldEdit.editOnMap),
+              subtitle: Text(t.fieldEdit.editOnMapDesc),
               onTap: () {
                 Navigator.pop(context);
                 editNotifier.startSelectingTrailForEdit();
-                _showToast(context, 'Tap a trail to start editing');
+                _showToast(context, t.fieldEdit.tapTrailToStartEditing);
               },
             ),
             ListTile(
               leading: const Icon(Icons.directions_walk, color: Colors.orange),
-              title: const Text('Walk & Record GPS'),
-              subtitle: const Text('Re-record trail by walking the route'),
+              title: Text(t.fieldEdit.walkRecordGps),
+              subtitle: Text(t.fieldEdit.walkRecordGpsDesc),
               onTap: () {
                 Navigator.pop(context);
-                _showToast(context, 'Tap a trail, then start walking to re-record');
+                _showToast(context, t.fieldEdit.tapTrailThenWalk);
                 // Mode will be activated when user taps a trail
               },
             ),
@@ -193,6 +200,7 @@ class FieldEditToolbar extends ConsumerWidget {
 
   /// Show options for creating a new trail
   void _showCreateTrailOptions(BuildContext context, FieldEditNotifier editNotifier) {
+    final t = context.t;
     showModalBottomSheet(
       context: context,
       builder: (context) => SafeArea(
@@ -200,29 +208,29 @@ class FieldEditToolbar extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 16),
-            const Text(
-              'How to Create Trail?',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              t.fieldEdit.howToCreateTrail,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.touch_app, color: Colors.blue),
-              title: const Text('Draw on Map'),
-              subtitle: const Text('Tap map to add points, drag to adjust'),
+              title: Text(t.fieldEdit.drawOnMap),
+              subtitle: Text(t.fieldEdit.drawOnMapDesc),
               onTap: () {
                 Navigator.pop(context);
                 editNotifier.startCreatingManual();
-                _showToast(context, 'Tap on map to add trail points');
+                _showToast(context, t.fieldEdit.tapMapToAddPoints);
               },
             ),
             ListTile(
               leading: const Icon(Icons.directions_walk, color: Colors.green),
-              title: const Text('Walk & Record GPS'),
-              subtitle: const Text('GPS tracking while walking the route'),
+              title: Text(t.fieldEdit.walkRecordGps),
+              subtitle: Text(t.fieldEdit.walkRecordGpsNewDesc),
               onTap: () {
                 Navigator.pop(context);
                 editNotifier.startRecordingGPS();
-                _showToast(context, '🚶 Start walking - GPS will track your path');
+                _showToast(context, t.fieldEdit.tapMapToAddPoints);
               },
             ),
             const SizedBox(height: 16),
@@ -240,6 +248,7 @@ class FieldEditToolbar extends ConsumerWidget {
     FieldEditState state,
     FieldEditNotifier editNotifier,
   ) {
+    final t = context.t;
     final isTrailMode = state.mode == FieldEditMode.editTrailManual ||
         state.mode == FieldEditMode.createTrailManual ||
         state.mode == FieldEditMode.editTrailGPS ||
@@ -271,7 +280,7 @@ class FieldEditToolbar extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          _getModeTitle(state.mode),
+                          _getModeTitle(context, state.mode),
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                         if (isTrailMode && state.recordingPoints.isNotEmpty)
@@ -294,7 +303,9 @@ class FieldEditToolbar extends ConsumerWidget {
                           : editNotifier.resumeRecording(),
                       color: Colors.orange,
                       iconSize: 22,
-                      tooltip: state.isRecording ? 'Pause' : 'Resume',
+                      tooltip: state.isRecording
+                          ? t.fieldEdit.pauseRecording
+                          : t.fieldEdit.resumeRecording,
                     ),
                     IconButton(
                       icon: const Icon(Icons.stop),
@@ -307,7 +318,7 @@ class FieldEditToolbar extends ConsumerWidget {
                       },
                       color: Colors.green,
                       iconSize: 22,
-                      tooltip: 'Stop & Save',
+                      tooltip: t.fieldEdit.stopAndSave,
                     ),
                   ],
                   // Edit trail info (name, description, difficulty)
@@ -319,7 +330,7 @@ class FieldEditToolbar extends ConsumerWidget {
                           context, ref, state.selectedTrailId!),
                       color: Colors.blue,
                       iconSize: 22,
-                      tooltip: 'Edit info',
+                      tooltip: t.fieldEdit.editTrailInfo,
                     ),
                   // Undo
                   if (state.undoStack.isNotEmpty)
@@ -328,7 +339,7 @@ class FieldEditToolbar extends ConsumerWidget {
                       onPressed: () => editNotifier.undo(),
                       color: Colors.orange,
                       iconSize: 22,
-                      tooltip: 'Undo',
+                      tooltip: t.fieldEdit.undo,
                     ),
                   // Cancel
                   IconButton(
@@ -336,7 +347,7 @@ class FieldEditToolbar extends ConsumerWidget {
                     onPressed: () => _confirmCancel(context, state, editNotifier),
                     color: Colors.red,
                     iconSize: 22,
-                    tooltip: 'Cancel',
+                    tooltip: t.fieldEdit.cancel,
                   ),
                   // Save button visibility:
                   // • editTrailManual → always show when trail is loaded
@@ -355,7 +366,7 @@ class FieldEditToolbar extends ConsumerWidget {
                       onPressed: () => _confirmSave(context, ref, state, editNotifier),
                       color: Colors.green,
                       iconSize: 22,
-                      tooltip: 'Save',
+                      tooltip: t.fieldEdit.save,
                     ),
                 ],
               ),
@@ -367,21 +378,21 @@ class FieldEditToolbar extends ConsumerWidget {
                   children: [
                     _SubModeButton(
                       icon: Icons.grain,
-                      label: 'Points',
+                      label: t.fieldEdit.subModePoints,
                       active: state.trailEditSubMode == TrailEditSubMode.points,
                       onTap: () => editNotifier.setTrailEditSubMode(TrailEditSubMode.points),
                     ),
                     const SizedBox(width: 8),
                     _SubModeButton(
                       icon: Icons.open_with,
-                      label: 'Move',
+                      label: t.fieldEdit.subModeMove,
                       active: state.trailEditSubMode == TrailEditSubMode.move,
                       onTap: () => editNotifier.setTrailEditSubMode(TrailEditSubMode.move),
                     ),
                     const SizedBox(width: 8),
                     _SubModeButton(
                       icon: Icons.rotate_right,
-                      label: 'Rotate',
+                      label: t.fieldEdit.subModeRotate,
                       active: state.trailEditSubMode == TrailEditSubMode.rotate,
                       onTap: () => editNotifier.setTrailEditSubMode(TrailEditSubMode.rotate),
                     ),
@@ -404,8 +415,8 @@ class FieldEditToolbar extends ConsumerWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   state.selectedEditPoints.length == 1
-                                      ? 'Borrar punto ${state.selectedEditPoints.first + 1}'
-                                      : 'Borrar ${state.selectedEditPoints.length} puntos',
+                                      ? t.fieldEdit.deletePoint(number: state.selectedEditPoints.first + 1)
+                                      : t.fieldEdit.deletePoints(count: state.selectedEditPoints.length),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 11,
@@ -418,7 +429,7 @@ class FieldEditToolbar extends ConsumerWidget {
                         ),
                       ] else ...[
                         Text(
-                          'Toca punto(s) • arrastrar mueve selección',
+                          t.fieldEdit.tapPointsDragToMove,
                           style: TextStyle(fontSize: 10, color: Colors.grey[500]),
                         ),
                       ],
@@ -453,26 +464,27 @@ class FieldEditToolbar extends ConsumerWidget {
     }
   }
 
-  String _getModeTitle(FieldEditMode mode) {
+  String _getModeTitle(BuildContext context, FieldEditMode mode) {
+    final t = context.t;
     switch (mode) {
       case FieldEditMode.moveSitesDrag:
-        return 'Moving Sites — drag any marker';
+        return t.fieldEdit.movingSitesDrag;
       case FieldEditMode.moveSiteManual:
-        return 'Moving Site (Drag)';
+        return t.fieldEdit.movingSiteManual;
       case FieldEditMode.moveSiteGPS:
-        return 'Moving Site (GPS)';
+        return t.fieldEdit.movingSiteGps;
       case FieldEditMode.selectTrailForEdit:
-        return 'Tap a trail to edit';
+        return t.fieldEdit.tapTrailToEdit;
       case FieldEditMode.editTrailManual:
-        return 'Editing Trail';
+        return t.fieldEdit.editingTrail;
       case FieldEditMode.editTrailGPS:
-        return 'Recording Trail (GPS)';
+        return t.fieldEdit.recordingTrailGps;
       case FieldEditMode.createTrailManual:
-        return 'Creating Trail';
+        return t.fieldEdit.creatingTrail;
       case FieldEditMode.createTrailGPS:
-        return 'Recording New Trail (GPS)';
+        return t.fieldEdit.recordingNewTrailGps;
       case FieldEditMode.none:
-        return 'Field Edit';
+        return t.fieldEdit.title;
     }
   }
 
@@ -492,15 +504,16 @@ class FieldEditToolbar extends ConsumerWidget {
       return;
     }
 
+    final t = context.t;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Discard Changes?'),
-        content: const Text('You have unsaved changes. Discard them?'),
+        title: Text(t.fieldEdit.discardChanges),
+        content: Text(t.fieldEdit.discardChangesMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Keep Editing'),
+            child: Text(t.fieldEdit.keepEditing),
           ),
           TextButton(
             onPressed: () {
@@ -508,7 +521,7 @@ class FieldEditToolbar extends ConsumerWidget {
               editNotifier.cancel();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Discard'),
+            child: Text(t.fieldEdit.discard),
           ),
         ],
       ),
@@ -532,22 +545,23 @@ class FieldEditToolbar extends ConsumerWidget {
       return;
     }
     // Site modes: saves happen immediately on drag end — just exit
+    final t = context.t;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Done Editing?'),
-        content: const Text('Site positions have been saved to the server.'),
+        title: Text(t.fieldEdit.doneEditing),
+        content: Text(t.fieldEdit.sitesSaved),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Keep Editing'),
+            child: Text(t.fieldEdit.keepEditing),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(context);
               editNotifier.exitEditMode();
             },
-            child: const Text('Done'),
+            child: Text(t.common.save),
           ),
         ],
       ),
@@ -560,8 +574,9 @@ class FieldEditToolbar extends ConsumerWidget {
     FieldEditState state,
     FieldEditNotifier editNotifier,
   ) {
+    final t = context.t;
     if (state.recordingPoints.length < 2) {
-      _showToast(context, 'Need at least 2 points to save trail');
+      _showToast(context, t.fieldEdit.needTwoPoints);
       return;
     }
 
@@ -576,23 +591,23 @@ class FieldEditToolbar extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Save New Trail'),
+        title: Text(t.fieldEdit.saveNewTrail),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameEnController,
-              decoration: const InputDecoration(
-                labelText: 'Trail Name (English)',
-                hintText: 'e.g., Tortuga Bay Trail',
+              decoration: InputDecoration(
+                labelText: t.fieldEdit.trailNameEn,
+                hintText: t.fieldEdit.trailNameEnHint,
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: nameEsController,
-              decoration: const InputDecoration(
-                labelText: 'Trail Name (Spanish)',
-                hintText: 'e.g., Sendero Bahía Tortuga',
+              decoration: InputDecoration(
+                labelText: t.fieldEdit.trailNameEs,
+                hintText: t.fieldEdit.trailNameEsHint,
               ),
             ),
             const SizedBox(height: 16),
@@ -610,14 +625,14 @@ class FieldEditToolbar extends ConsumerWidget {
               Navigator.pop(context);
               editNotifier.resumeRecording();
             },
-            child: const Text('Continue Recording'),
+            child: Text(t.fieldEdit.continueRecording),
           ),
           FilledButton(
             onPressed: () async {
               final nameEn = nameEnController.text.trim();
               final nameEs = nameEsController.text.trim();
               if (nameEn.isEmpty || nameEs.isEmpty) {
-                _showToast(context, 'Please enter trail names in both languages');
+                _showToast(context, t.fieldEdit.enterBothTrailNames);
                 return;
               }
 
@@ -643,7 +658,7 @@ class FieldEditToolbar extends ConsumerWidget {
                 _showToast(context, '❌ Failed to save trail — check connection');
               }
             },
-            child: const Text('Save'),
+            child: Text(t.fieldEdit.saveTrail),
           ),
         ],
       ),
@@ -713,7 +728,7 @@ class FieldEditToolbar extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: difficulty,
+                  initialValue: difficulty,
                   decoration: const InputDecoration(
                     labelText: 'Dificultad',
                     border: OutlineInputBorder(),
@@ -789,8 +804,9 @@ class FieldEditToolbar extends ConsumerWidget {
     FieldEditState state,
     FieldEditNotifier editNotifier,
   ) {
+    final t = context.t;
     if (state.recordingPoints.length < 2) {
-      _showToast(context, 'Need at least 2 points to save trail');
+      _showToast(context, t.fieldEdit.needTwoPoints);
       return;
     }
 
@@ -804,13 +820,11 @@ class FieldEditToolbar extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Save Trail Changes'),
+        title: Text(t.fieldEdit.saveTrailChanges),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'This will replace the existing trail path with the edited coordinates.',
-            ),
+            Text(t.fieldEdit.saveTrailChangesDesc),
             const SizedBox(height: 16),
             Text(
               'Points: ${points.length}\n'
@@ -825,7 +839,7 @@ class FieldEditToolbar extends ConsumerWidget {
               Navigator.pop(context);
               editNotifier.resumeRecording();
             },
-            child: const Text('Continue Editing'),
+            child: Text(t.fieldEdit.continueEditing),
           ),
           FilledButton(
             onPressed: () async {
@@ -851,7 +865,7 @@ class FieldEditToolbar extends ConsumerWidget {
                 _showToast(context, '❌ Failed to update trail — check connection');
               }
             },
-            child: const Text('Save Changes'),
+            child: Text(t.fieldEdit.saveChanges),
           ),
         ],
       ),

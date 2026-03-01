@@ -60,6 +60,7 @@ class TranslationsEs with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _TranslationsShareEs share = _TranslationsShareEs._(_root);
 	@override late final _TranslationsCelebrationsEs celebrations = _TranslationsCelebrationsEs._(_root);
 	@override late final _TranslationsErrorsEs errors = _TranslationsErrorsEs._(_root);
+	@override late final _TranslationsFieldEditEs fieldEdit = _TranslationsFieldEditEs._(_root);
 }
 
 // Path: app
@@ -910,6 +911,82 @@ class _TranslationsErrorsEs implements TranslationsErrorsEn {
 	@override String get tryAgain => 'Reintentar';
 }
 
+// Path: fieldEdit
+class _TranslationsFieldEditEs implements TranslationsFieldEditEn {
+	_TranslationsFieldEditEs._(this._root);
+
+	final TranslationsEs _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Edición de Campo';
+	@override String get mode => 'Modo de Edición de Campo';
+	@override String get moveVisitSite => 'Mover Sitio de Visita';
+	@override String get editTrail => 'Editar Sendero';
+	@override String get createNewTrail => 'Crear Nuevo Sendero';
+	@override String get howToMoveSite => '¿Cómo mover el sitio?';
+	@override String get dragOnMap => 'Arrastrar en el Mapa';
+	@override String get dragOnMapDesc => 'Todos los marcadores se vuelven arrastrables — arrastra cualquiera a su posición correcta';
+	@override String get useCurrentGps => 'Usar Ubicación GPS Actual';
+	@override String get useCurrentGpsDesc => 'Toca un marcador de sitio para moverlo a tu posición actual';
+	@override String get howToEditTrail => '¿Cómo editar el sendero?';
+	@override String get editOnMap => 'Editar en el Mapa';
+	@override String get editOnMapDesc => 'Toca un sendero, luego agrega/elimina puntos';
+	@override String get walkRecordGps => 'Caminar y Grabar GPS';
+	@override String get walkRecordGpsDesc => 'Re-grabar el sendero caminando la ruta';
+	@override String get howToCreateTrail => '¿Cómo crear el sendero?';
+	@override String get drawOnMap => 'Dibujar en el Mapa';
+	@override String get drawOnMapDesc => 'Toca el mapa para agregar puntos, arrastra para ajustar';
+	@override String get walkRecordGpsNewDesc => 'Seguimiento GPS mientras caminas la ruta';
+	@override String get correctSiteLocation => 'Corregir ubicación del sitio';
+	@override String get correctTrailPath => 'Corregir trazado del sendero';
+	@override String get drawOnMapOrGps => 'Dibujar en mapa o seguimiento GPS';
+	@override String get dragAnySiteToMove => 'Arrastra cualquier marcador de sitio para moverlo';
+	@override String get tapSiteToMoveToCurrentLocation => 'Toca un marcador de sitio para moverlo a tu ubicación actual';
+	@override String get tapTrailToStartEditing => 'Toca un sendero para empezar a editarlo';
+	@override String get tapTrailThenWalk => 'Toca un sendero, luego camina para re-grabar';
+	@override String get tapMapToAddPoints => 'Toca el mapa para agregar puntos al sendero';
+	@override String get discardChanges => '¿Descartar cambios?';
+	@override String get discardChangesMessage => 'Tienes cambios sin guardar. ¿Descartarlos?';
+	@override String get keepEditing => 'Seguir editando';
+	@override String get discard => 'Descartar';
+	@override String get doneEditing => '¿Finalizar edición?';
+	@override String get sitesSaved => 'Las posiciones de los sitios han sido guardadas en el servidor.';
+	@override String get saveNewTrail => 'Guardar Nuevo Sendero';
+	@override String get trailNameEn => 'Nombre del Sendero (Inglés)';
+	@override String get trailNameEnHint => 'ej., Tortuga Bay Trail';
+	@override String get trailNameEs => 'Nombre del Sendero (Español)';
+	@override String get trailNameEsHint => 'ej., Sendero Bahía Tortuga';
+	@override String get continueRecording => 'Continuar Grabando';
+	@override String get saveTrail => 'Guardar';
+	@override String get needTwoPoints => 'Se necesitan al menos 2 puntos para guardar el sendero';
+	@override String get enterBothTrailNames => 'Por favor ingresa los nombres del sendero en ambos idiomas';
+	@override String get saveTrailChanges => 'Guardar Cambios del Sendero';
+	@override String get saveTrailChangesDesc => 'Esto reemplazará el trazado existente del sendero con las coordenadas editadas.';
+	@override String get continueEditing => 'Continuar Editando';
+	@override String get saveChanges => 'Guardar Cambios';
+	@override String get movingSitesDrag => 'Moviendo Sitios — arrastra cualquier marcador';
+	@override String get movingSiteManual => 'Moviendo Sitio (Arrastrar)';
+	@override String get movingSiteGps => 'Moviendo Sitio (GPS)';
+	@override String get tapTrailToEdit => 'Toca un sendero para editar';
+	@override String get editingTrail => 'Editando Sendero';
+	@override String get recordingTrailGps => 'Grabando Sendero (GPS)';
+	@override String get creatingTrail => 'Creando Sendero';
+	@override String get recordingNewTrailGps => 'Grabando Nuevo Sendero (GPS)';
+	@override String get pauseRecording => 'Pausar';
+	@override String get resumeRecording => 'Reanudar';
+	@override String get stopAndSave => 'Detener y Guardar';
+	@override String get editTrailInfo => 'Editar información';
+	@override String get undo => 'Deshacer';
+	@override String get cancel => 'Cancelar';
+	@override String get save => 'Guardar';
+	@override String deletePoint({required Object number}) => 'Borrar punto ${number}';
+	@override String deletePoints({required Object count}) => 'Borrar ${count} puntos';
+	@override String get tapPointsDragToMove => 'Toca punto(s) • arrastrar mueve selección';
+	@override String get subModePoints => 'Puntos';
+	@override String get subModeMove => 'Mover';
+	@override String get subModeRotate => 'Rotar';
+}
+
 // Path: species.frequency
 class _TranslationsSpeciesFrequencyEs implements TranslationsSpeciesFrequencyEn {
 	_TranslationsSpeciesFrequencyEs._(this._root);
@@ -1577,6 +1654,73 @@ extension on TranslationsEs {
 			'errors.validation' => 'Revisa los datos ingresados.',
 			'errors.unknown' => 'Ocurrió un error inesperado.',
 			'errors.tryAgain' => 'Reintentar',
+			'fieldEdit.title' => 'Edición de Campo',
+			'fieldEdit.mode' => 'Modo de Edición de Campo',
+			'fieldEdit.moveVisitSite' => 'Mover Sitio de Visita',
+			'fieldEdit.editTrail' => 'Editar Sendero',
+			'fieldEdit.createNewTrail' => 'Crear Nuevo Sendero',
+			'fieldEdit.howToMoveSite' => '¿Cómo mover el sitio?',
+			'fieldEdit.dragOnMap' => 'Arrastrar en el Mapa',
+			'fieldEdit.dragOnMapDesc' => 'Todos los marcadores se vuelven arrastrables — arrastra cualquiera a su posición correcta',
+			'fieldEdit.useCurrentGps' => 'Usar Ubicación GPS Actual',
+			'fieldEdit.useCurrentGpsDesc' => 'Toca un marcador de sitio para moverlo a tu posición actual',
+			'fieldEdit.howToEditTrail' => '¿Cómo editar el sendero?',
+			'fieldEdit.editOnMap' => 'Editar en el Mapa',
+			'fieldEdit.editOnMapDesc' => 'Toca un sendero, luego agrega/elimina puntos',
+			'fieldEdit.walkRecordGps' => 'Caminar y Grabar GPS',
+			'fieldEdit.walkRecordGpsDesc' => 'Re-grabar el sendero caminando la ruta',
+			'fieldEdit.howToCreateTrail' => '¿Cómo crear el sendero?',
+			'fieldEdit.drawOnMap' => 'Dibujar en el Mapa',
+			'fieldEdit.drawOnMapDesc' => 'Toca el mapa para agregar puntos, arrastra para ajustar',
+			'fieldEdit.walkRecordGpsNewDesc' => 'Seguimiento GPS mientras caminas la ruta',
+			'fieldEdit.correctSiteLocation' => 'Corregir ubicación del sitio',
+			'fieldEdit.correctTrailPath' => 'Corregir trazado del sendero',
+			'fieldEdit.drawOnMapOrGps' => 'Dibujar en mapa o seguimiento GPS',
+			'fieldEdit.dragAnySiteToMove' => 'Arrastra cualquier marcador de sitio para moverlo',
+			'fieldEdit.tapSiteToMoveToCurrentLocation' => 'Toca un marcador de sitio para moverlo a tu ubicación actual',
+			'fieldEdit.tapTrailToStartEditing' => 'Toca un sendero para empezar a editarlo',
+			'fieldEdit.tapTrailThenWalk' => 'Toca un sendero, luego camina para re-grabar',
+			'fieldEdit.tapMapToAddPoints' => 'Toca el mapa para agregar puntos al sendero',
+			'fieldEdit.discardChanges' => '¿Descartar cambios?',
+			'fieldEdit.discardChangesMessage' => 'Tienes cambios sin guardar. ¿Descartarlos?',
+			'fieldEdit.keepEditing' => 'Seguir editando',
+			'fieldEdit.discard' => 'Descartar',
+			'fieldEdit.doneEditing' => '¿Finalizar edición?',
+			'fieldEdit.sitesSaved' => 'Las posiciones de los sitios han sido guardadas en el servidor.',
+			'fieldEdit.saveNewTrail' => 'Guardar Nuevo Sendero',
+			'fieldEdit.trailNameEn' => 'Nombre del Sendero (Inglés)',
+			'fieldEdit.trailNameEnHint' => 'ej., Tortuga Bay Trail',
+			'fieldEdit.trailNameEs' => 'Nombre del Sendero (Español)',
+			'fieldEdit.trailNameEsHint' => 'ej., Sendero Bahía Tortuga',
+			'fieldEdit.continueRecording' => 'Continuar Grabando',
+			'fieldEdit.saveTrail' => 'Guardar',
+			'fieldEdit.needTwoPoints' => 'Se necesitan al menos 2 puntos para guardar el sendero',
+			'fieldEdit.enterBothTrailNames' => 'Por favor ingresa los nombres del sendero en ambos idiomas',
+			'fieldEdit.saveTrailChanges' => 'Guardar Cambios del Sendero',
+			'fieldEdit.saveTrailChangesDesc' => 'Esto reemplazará el trazado existente del sendero con las coordenadas editadas.',
+			'fieldEdit.continueEditing' => 'Continuar Editando',
+			'fieldEdit.saveChanges' => 'Guardar Cambios',
+			'fieldEdit.movingSitesDrag' => 'Moviendo Sitios — arrastra cualquier marcador',
+			'fieldEdit.movingSiteManual' => 'Moviendo Sitio (Arrastrar)',
+			'fieldEdit.movingSiteGps' => 'Moviendo Sitio (GPS)',
+			'fieldEdit.tapTrailToEdit' => 'Toca un sendero para editar',
+			'fieldEdit.editingTrail' => 'Editando Sendero',
+			'fieldEdit.recordingTrailGps' => 'Grabando Sendero (GPS)',
+			'fieldEdit.creatingTrail' => 'Creando Sendero',
+			'fieldEdit.recordingNewTrailGps' => 'Grabando Nuevo Sendero (GPS)',
+			'fieldEdit.pauseRecording' => 'Pausar',
+			'fieldEdit.resumeRecording' => 'Reanudar',
+			'fieldEdit.stopAndSave' => 'Detener y Guardar',
+			'fieldEdit.editTrailInfo' => 'Editar información',
+			'fieldEdit.undo' => 'Deshacer',
+			'fieldEdit.cancel' => 'Cancelar',
+			'fieldEdit.save' => 'Guardar',
+			'fieldEdit.deletePoint' => ({required Object number}) => 'Borrar punto ${number}',
+			'fieldEdit.deletePoints' => ({required Object count}) => 'Borrar ${count} puntos',
+			'fieldEdit.tapPointsDragToMove' => 'Toca punto(s) • arrastrar mueve selección',
+			'fieldEdit.subModePoints' => 'Puntos',
+			'fieldEdit.subModeMove' => 'Mover',
+			'fieldEdit.subModeRotate' => 'Rotar',
 			_ => null,
 		};
 	}
