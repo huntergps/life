@@ -4,6 +4,7 @@ import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import 'package:galapagos_wildlife/core/widgets/empty_state.dart';
+import 'package:galapagos_wildlife/core/widgets/responsive_grid.dart';
 import 'package:galapagos_wildlife/features/badges/models/badge_definition.dart';
 import 'package:galapagos_wildlife/features/badges/providers/badges_provider.dart';
 
@@ -14,7 +15,6 @@ class BadgesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final progressAsync = ref.watch(badgeProgressProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final crossAxisCount = AdaptiveLayout.gridColumns(context);
     final padding = AdaptiveLayout.responsivePadding(context);
 
     return Scaffold(
@@ -49,18 +49,15 @@ class BadgesScreen extends ConsumerWidget {
                     isDark: isDark,
                   ),
                   const SizedBox(height: 8),
-                  GridView.builder(
+                  ResponsiveGrid<BadgeProgress>(
+                    items: unlocked,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      childAspectRatio: 0.85,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                    ),
-                    itemCount: unlocked.length,
-                    itemBuilder: (context, index) => _BadgeCard(
-                      progress: unlocked[index],
+                    childAspectRatio: 0.85,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    itemBuilder: (context, progress, index) => _BadgeCard(
+                      progress: progress,
                       isDark: isDark,
                     ),
                   ),
@@ -72,18 +69,15 @@ class BadgesScreen extends ConsumerWidget {
                     isDark: isDark,
                   ),
                   const SizedBox(height: 8),
-                  GridView.builder(
+                  ResponsiveGrid<BadgeProgress>(
+                    items: locked,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: crossAxisCount,
-                      childAspectRatio: 0.85,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                    ),
-                    itemCount: locked.length,
-                    itemBuilder: (context, index) => _BadgeCard(
-                      progress: locked[index],
+                    childAspectRatio: 0.85,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    itemBuilder: (context, progress, index) => _BadgeCard(
+                      progress: progress,
                       isDark: isDark,
                     ),
                   ),
