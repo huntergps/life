@@ -231,7 +231,12 @@
     "withPhotos": "With Photos",
     "calendarView": "Calendar",
     "listView": "List",
-    "noSightingsInMonth": "No sightings this month"
+    "noSightingsInMonth": "No sightings this month",
+    "photosOnly": "With photos",
+    "favoritesOnly": "Favorites only",
+    "searchNotes": "Search notes...",
+    "activeFilters": "Active filters",
+    "allSites": "All Sites"
   },
   "auth": {
     "signIn": "Sign In",

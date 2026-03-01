@@ -773,6 +773,21 @@ class TranslationsSightingsEn {
 
 	/// en: 'No sightings this month'
 	String get noSightingsInMonth => 'No sightings this month';
+
+	/// en: 'With photos'
+	String get photosOnly => 'With photos';
+
+	/// en: 'Favorites only'
+	String get favoritesOnly => 'Favorites only';
+
+	/// en: 'Search notes...'
+	String get searchNotes => 'Search notes...';
+
+	/// en: 'Active filters'
+	String get activeFilters => 'Active filters';
+
+	/// en: 'All Sites'
+	String get allSites => 'All Sites';
 }
 
 // Path: auth
@@ -2439,6 +2454,11 @@ extension on Translations {
 			'sightings.calendarView' => 'Calendar',
 			'sightings.listView' => 'List',
 			'sightings.noSightingsInMonth' => 'No sightings this month',
+			'sightings.photosOnly' => 'With photos',
+			'sightings.favoritesOnly' => 'Favorites only',
+			'sightings.searchNotes' => 'Search notes...',
+			'sightings.activeFilters' => 'Active filters',
+			'sightings.allSites' => 'All Sites',
 			'auth.signIn' => 'Sign In',
 			'auth.signUp' => 'Sign Up',
 			'auth.signOut' => 'Sign Out',
@@ -2730,13 +2750,13 @@ extension on Translations {
 			'admin.geographicRanges' => 'Geographic Ranges',
 			'admin.altitudeMinM' => 'Altitude Min (m)',
 			'admin.altitudeMaxM' => 'Altitude Max (m)',
+			_ => null,
+		} ?? switch (path) {
 			'admin.depthMinM' => 'Depth Min (m)',
 			'admin.depthMaxM' => 'Depth Max (m)',
 			'badges.title' => 'Achievements',
 			'badges.empty' => 'No badges yet',
 			'badges.emptySubtitle' => 'Start exploring to earn badges!',
-			_ => null,
-		} ?? switch (path) {
 			'badges.unlocked' => 'Unlocked!',
 			'badges.locked' => 'Locked',
 			'badges.progress' => ({required Object current, required Object target}) => '${current} / ${target}',

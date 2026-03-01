@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
+import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 
 /// All sightings for the current user (deduplicated).
@@ -40,4 +41,16 @@ final speciesLookupProvider = FutureProvider<Map<int, Species>>((ref) async {
     return {for (final r in data as List) (r['id'] as int): speciesFromRow(r as Map<String, dynamic>)};
   }
   return fetchLookup<Species>(idSelector: (s) => s.id);
+});
+
+/// Lookup map: visitSiteId → VisitSite (used by the sightings visit-site filter chip).
+final visitSiteLookupProvider = FutureProvider<Map<int, VisitSite>>((ref) async {
+  if (kIsWeb) {
+    final data = await Supabase.instance.client.from('visit_sites').select();
+    return {
+      for (final r in data as List)
+        (r['id'] as int): visitSiteFromRow(r as Map<String, dynamic>)
+    };
+  }
+  return fetchLookup<VisitSite>(idSelector: (s) => s.id);
 });
