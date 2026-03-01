@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:geolocator/geolocator.dart';
@@ -40,6 +41,8 @@ class GpsTrackingNotifier extends StateNotifier<bool> {
   };
 
   Future<void> _startTracking() async {
+    if (kIsWeb) return; // GPS background tracking not supported on web
+
     // Verify permission
     var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
