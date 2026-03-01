@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
+import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import '../utils/route_utils.dart';
 
 // ---------------------------------------------------------------------------
@@ -122,7 +123,9 @@ class TrackingService {
       ),
     ).listen(
       _onPosition,
-      onError: (_) {},
+      onError: (e) {
+        AppLogger.warning('GPS stream error', e);
+      },
     );
   }
 

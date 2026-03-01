@@ -148,6 +148,47 @@ final taxonomyGenusCountProvider = FutureProvider<int>((ref) async {
   return response.count;
 });
 
+// ── Taxonomy Path (for auto-expanding the tree from a selected genus) ──
+
+/// Fetches the full ancestor path for a genus ID:
+/// genus → family → order → class with IDs and names for tree expansion.
+final taxonomyPathProvider =
+    FutureProvider.family<Map<String, dynamic>, int>((ref, genusId) async {
+  final genus = await _client
+      .from('taxonomy_genera')
+      .select()
+      .eq('id', genusId)
+      .single();
+  final familyId = genus['family_id'] as int;
+  final family = await _client
+      .from('taxonomy_families')
+      .select()
+      .eq('id', familyId)
+      .single();
+  final orderId = family['order_id'] as int;
+  final order = await _client
+      .from('taxonomy_orders')
+      .select()
+      .eq('id', orderId)
+      .single();
+  final classId = order['class_id'] as int;
+  final taxClass = await _client
+      .from('taxonomy_classes')
+      .select()
+      .eq('id', classId)
+      .single();
+
+  return {
+    'genus': genus,
+    'family': family,
+    'order': order,
+    'class': taxClass,
+    'familyId': familyId,
+    'orderId': orderId,
+    'classId': classId,
+  };
+});
+
 /// Resolves genus_id → full taxonomy text fields for backward compatibility.
 Future<Map<String, String?>> resolveTaxonomyFromGenusId(int genusId) async {
   final genus = await _client.from('taxonomy_genera').select().eq('id', genusId).single();

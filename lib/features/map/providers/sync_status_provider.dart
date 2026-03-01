@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../bootstrap.dart';
+import '../../../core/services/app_logger.dart';
 
 /// Model for a pending change
 class PendingChange {
@@ -96,7 +97,7 @@ class SyncStatusNotifier extends StateNotifier<SyncStatus> {
 
       state = state.copyWith(pendingChanges: changes);
     } catch (e) {
-      print('Error loading pending changes: $e');
+      AppLogger.error('Error loading pending changes', e);
       state = const SyncStatus();
     }
   }
@@ -110,7 +111,7 @@ class SyncStatusNotifier extends StateNotifier<SyncStatus> {
       );
       await prefs.setString(_prefKey, json);
     } catch (e) {
-      print('Error saving pending changes: $e');
+      AppLogger.warning('Error saving pending changes', e);
     }
   }
 

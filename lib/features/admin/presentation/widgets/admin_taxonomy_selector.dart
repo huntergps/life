@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
@@ -70,30 +69,14 @@ class AdminTaxonomySelectorState
   /// Resolve genus_id to its ancestor IDs so we can auto-expand the tree.
   Future<void> _resolveAndExpand(int genusId) async {
     try {
-      final client = Supabase.instance.client;
-      final genus = await client
-          .from('taxonomy_genera')
-          .select()
-          .eq('id', genusId)
-          .single();
-      final familyId = genus['family_id'] as int;
-      final family = await client
-          .from('taxonomy_families')
-          .select()
-          .eq('id', familyId)
-          .single();
-      final orderId = family['order_id'] as int;
-      final order = await client
-          .from('taxonomy_orders')
-          .select()
-          .eq('id', orderId)
-          .single();
-      final classId = order['class_id'] as int;
-      final taxClass = await client
-          .from('taxonomy_classes')
-          .select()
-          .eq('id', classId)
-          .single();
+      final path = await ref.read(taxonomyPathProvider(genusId).future);
+      final classId = path['classId'] as int;
+      final orderId = path['orderId'] as int;
+      final familyId = path['familyId'] as int;
+      final genus = path['genus'] as Map<String, dynamic>;
+      final family = path['family'] as Map<String, dynamic>;
+      final order = path['order'] as Map<String, dynamic>;
+      final taxClass = path['class'] as Map<String, dynamic>;
 
       if (mounted) {
         setState(() {
