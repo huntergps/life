@@ -20,6 +20,7 @@ import 'package:galapagos_wildlife/brick/models/trail.model.dart';
 import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import '../../providers/map_download_provider.dart';
+import '../../providers/map_filters_provider.dart';
 import '../../providers/map_provider.dart';
 import '../../providers/pmtiles_provider.dart';
 import '../../providers/trail_provider.dart';
@@ -79,14 +80,8 @@ class MapScreen extends ConsumerStatefulWidget {
 
 class _MapScreenState extends ConsumerState<MapScreen> {
   final MapController _mapController = MapController();
-  bool _showSites = true;
-  bool _showSightings = true;
-  bool _showTrails = true;
   bool _movedToUser = false;
   TrackingService? _trackingService;
-  String _searchQuery = '';
-  int? _selectedIslandId;
-  String? _selectedMonitoringType; // 'MARINO', 'TERRESTRE', or null = all
 
   // Cached vector tile themes (created once)
   vtr.Theme? _lightTheme;
@@ -304,7 +299,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Field editing toolbar (admin only)
         const FieldEditToolbar(),
         // Trail recording panel (GPS tracking)
-        TrailRecordingPanel(islandId: _selectedIslandId),
+        TrailRecordingPanel(islandId: ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId))),
       ],
     );
   }
@@ -321,7 +316,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     AsyncValue<List<VisitSite>> sitesAsync,
     AsyncValue<List<Island>> islandsAsync,
   ) {
-    final hasFilter = _selectedIslandId != null || _selectedMonitoringType != null;
+    final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
+    final selectedMonitoringType = ref.watch(mapFiltersProvider.select((f) => f.selectedMonitoringType));
+    final showTrails = ref.watch(mapFiltersProvider.select((f) => f.showTrails));
+    final showSites = ref.watch(mapFiltersProvider.select((f) => f.showSites));
+    final showSightings = ref.watch(mapFiltersProvider.select((f) => f.showSightings));
+    final hasFilter = selectedIslandId != null || selectedMonitoringType != null;
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -336,21 +336,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             // Map action icons inline with title
             _buildTileModeToggle(context),
             IconButton(
-              icon: Icon(_showTrails ? Icons.route : Icons.route_outlined),
-              onPressed: () => setState(() => _showTrails = !_showTrails),
+              icon: Icon(showTrails ? Icons.route : Icons.route_outlined),
+              onPressed: () => ref.read(mapFiltersProvider.notifier).toggleTrails(),
               tooltip: context.t.map.toggleTrails,
             ),
             IconButton(
-              icon: Icon(_showSites ? Icons.location_on : Icons.location_off),
-              onPressed: () => setState(() => _showSites = !_showSites),
+              icon: Icon(showSites ? Icons.location_on : Icons.location_off),
+              onPressed: () => ref.read(mapFiltersProvider.notifier).toggleSites(),
               tooltip: context.t.map.toggleSites,
             ),
             IconButton(
               icon: Icon(
-                _showSightings ? Icons.camera_alt : Icons.camera_alt_outlined,
-                color: _showSightings ? Colors.teal : null,
+                showSightings ? Icons.camera_alt : Icons.camera_alt_outlined,
+                color: showSightings ? Colors.teal : null,
               ),
-              onPressed: () => setState(() => _showSightings = !_showSightings),
+              onPressed: () => ref.read(mapFiltersProvider.notifier).toggleSightings(),
               tooltip: context.t.map.toggleSightings,
             ),
             // Filter button — orange when filters are active
@@ -383,23 +383,25 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     bool isDark,
     AsyncValue<List<VisitSite>> sitesAsync,
   ) {
+    final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
+    final selectedMonitoringType = ref.watch(mapFiltersProvider.select((f) => f.selectedMonitoringType));
     final allSites = sitesAsync.asData?.value ?? [];
     final count = allSites
         .where((s) => s.status == 'active' || s.status == null)
-        .where((s) => _selectedIslandId == null || s.islandId == _selectedIslandId)
-        .where((s) => _selectedMonitoringType == null || s.monitoringType == _selectedMonitoringType)
+        .where((s) => selectedIslandId == null || s.islandId == selectedIslandId)
+        .where((s) => selectedMonitoringType == null || s.monitoringType == selectedMonitoringType)
         .where((s) => s.latitude != null)
         .length;
 
     final islandsData = ref.read(islandsProvider).asData?.value ?? [];
     final isEs = LocaleSettings.currentLocale == AppLocale.es;
-    final islandName = _selectedIslandId != null
-        ? islandsData.where((i) => i.id == _selectedIslandId).map((i) => isEs ? i.nameEs : (i.nameEn ?? i.nameEs)).firstOrNull
+    final islandName = selectedIslandId != null
+        ? islandsData.where((i) => i.id == selectedIslandId).map((i) => isEs ? i.nameEs : (i.nameEn ?? i.nameEs)).firstOrNull
         : null;
 
     final parts = <String>[];
     if (islandName != null) parts.add(islandName);
-    if (_selectedMonitoringType != null) parts.add(_selectedMonitoringType!);
+    if (selectedMonitoringType != null) parts.add(selectedMonitoringType);
 
     return Container(
       color: isDark
@@ -421,10 +423,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
           GestureDetector(
-            onTap: () => setState(() {
-              _selectedIslandId = null;
-              _selectedMonitoringType = null;
-            }),
+            onTap: () {
+              ref.read(mapFiltersProvider.notifier).setSelectedIsland(null);
+              ref.read(mapFiltersProvider.notifier).setMonitoringType(null);
+            },
             child: Icon(Icons.close, size: 16, color: AppColors.accentOrange),
           ),
         ],
@@ -545,13 +547,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         style: Theme.of(ctx2).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
-                      if (_selectedIslandId != null || _selectedMonitoringType != null)
+                      if (ref.read(mapFiltersProvider).selectedIslandId != null || ref.read(mapFiltersProvider).selectedMonitoringType != null)
                         TextButton(
                           onPressed: () {
-                            setState(() {
-                              _selectedIslandId = null;
-                              _selectedMonitoringType = null;
-                            });
+                            ref.read(mapFiltersProvider.notifier).setSelectedIsland(null);
+                            ref.read(mapFiltersProvider.notifier).setMonitoringType(null);
                             setSheetState(() {});
                           },
                           child: Text(isEs ? 'Limpiar' : 'Clear'),
@@ -584,11 +584,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             Padding(
                               padding: const EdgeInsets.only(right: 8),
                               child: FilterChip(
-                                avatar: Icon(icon, size: 16, color: _selectedMonitoringType == value ? color : Colors.grey),
+                                avatar: Icon(icon, size: 16, color: ref.read(mapFiltersProvider).selectedMonitoringType == value ? color : Colors.grey),
                                 label: Text(label),
-                                selected: _selectedMonitoringType == value,
+                                selected: ref.read(mapFiltersProvider).selectedMonitoringType == value,
                                 onSelected: (_) {
-                                  setState(() => _selectedMonitoringType = value);
+                                  ref.read(mapFiltersProvider.notifier).setMonitoringType(value);
                                   setSheetState(() {});
                                 },
                                 selectedColor: (color as Color).withValues(alpha: isDark ? 0.3 : 0.18),
@@ -616,7 +616,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                       const Spacer(),
                       Text(
-                        '${filteredCount(_selectedIslandId, _selectedMonitoringType)} ${isEs ? 'sitios' : 'sites'}',
+                        '${filteredCount(ref.read(mapFiltersProvider).selectedIslandId, ref.read(mapFiltersProvider).selectedMonitoringType)} ${isEs ? 'sitios' : 'sites'}',
                         style: TextStyle(fontSize: 12, color: isDark ? Colors.white38 : Colors.grey),
                       ),
                     ],
@@ -633,30 +633,30 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       _islandTile(
                         ctx2,
                         name: isEs ? 'Todas las islas' : 'All islands',
-                        count: filteredCount(null, _selectedMonitoringType),
+                        count: filteredCount(null, ref.read(mapFiltersProvider).selectedMonitoringType),
                         icon: Icons.public,
-                        isSelected: _selectedIslandId == null,
+                        isSelected: ref.read(mapFiltersProvider).selectedIslandId == null,
                         isDark: isDark,
                         accentColor: accentColor,
                         onTap: () {
-                          setState(() => _selectedIslandId = null);
+                          ref.read(mapFiltersProvider.notifier).setSelectedIsland(null);
                           setSheetState(() {});
                         },
                       ),
                       // Per-island tiles
                       ...relevantIslands.map((island) {
                         final name = isEs ? island.nameEs : (island.nameEn ?? island.nameEs);
-                        final isSelected = _selectedIslandId == island.id;
+                        final isSelected = ref.read(mapFiltersProvider).selectedIslandId == island.id;
                         return _islandTile(
                           ctx2,
                           name: name,
-                          count: filteredCount(island.id, _selectedMonitoringType),
+                          count: filteredCount(island.id, ref.read(mapFiltersProvider).selectedMonitoringType),
                           icon: Icons.landscape,
                           isSelected: isSelected,
                           isDark: isDark,
                           accentColor: accentColor,
                           onTap: () {
-                            setState(() => _selectedIslandId = island.id);
+                            ref.read(mapFiltersProvider.notifier).setSelectedIsland(island.id);
                             // Center map on island and close sheet
                             if (island.latitude != null && island.longitude != null) {
                               _mapController.move(
@@ -687,8 +687,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         ),
                         child: Text(
                           isEs
-                              ? 'Ver ${filteredCount(_selectedIslandId, _selectedMonitoringType)} sitios'
-                              : 'Show ${filteredCount(_selectedIslandId, _selectedMonitoringType)} sites',
+                              ? 'Ver ${filteredCount(ref.read(mapFiltersProvider).selectedIslandId, ref.read(mapFiltersProvider).selectedMonitoringType)} sitios'
+                              : 'Show ${filteredCount(ref.read(mapFiltersProvider).selectedIslandId, ref.read(mapFiltersProvider).selectedMonitoringType)} sites',
                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                         ),
                       ),
@@ -760,21 +760,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             // Map action icons inline with title
             _buildTileModeToggle(context),
             IconButton(
-              icon: Icon(_showTrails ? Icons.route : Icons.route_outlined),
-              onPressed: () => setState(() => _showTrails = !_showTrails),
+              icon: Icon(ref.watch(mapFiltersProvider.select((f) => f.showTrails)) ? Icons.route : Icons.route_outlined),
+              onPressed: () => ref.read(mapFiltersProvider.notifier).toggleTrails(),
               tooltip: context.t.map.toggleTrails,
             ),
             IconButton(
-              icon: Icon(_showSites ? Icons.location_on : Icons.location_off),
-              onPressed: () => setState(() => _showSites = !_showSites),
+              icon: Icon(ref.watch(mapFiltersProvider.select((f) => f.showSites)) ? Icons.location_on : Icons.location_off),
+              onPressed: () => ref.read(mapFiltersProvider.notifier).toggleSites(),
               tooltip: context.t.map.toggleSites,
             ),
             IconButton(
               icon: Icon(
-                _showSightings ? Icons.camera_alt : Icons.camera_alt_outlined,
-                color: _showSightings ? Colors.teal : null,
+                ref.watch(mapFiltersProvider.select((f) => f.showSightings)) ? Icons.camera_alt : Icons.camera_alt_outlined,
+                color: ref.watch(mapFiltersProvider.select((f) => f.showSightings)) ? Colors.teal : null,
               ),
-              onPressed: () => setState(() => _showSightings = !_showSightings),
+              onPressed: () => ref.read(mapFiltersProvider.notifier).toggleSightings(),
               tooltip: context.t.map.toggleSightings,
             ),
           ],
@@ -785,7 +785,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         children: [
           // Left panel - islands, visit sites, and trails list (22%)
           SizedBox(
-            width: MediaQuery.sizeOf(context).width * 0.22,
+            width: MediaQuery.sizeOf(context).width * AppConstants.mapSidebarWidthFraction,
             child: Column(
               children: [
                 // Search filter
@@ -804,15 +804,16 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    onChanged: (value) => setState(() => _searchQuery = value),
+                    onChanged: (value) => ref.read(mapFiltersProvider.notifier).setSearchQuery(value),
                   ),
                 ),
                 // Selected island indicator
-                if (_selectedIslandId != null)
+                if (ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId)) != null)
                   islandsAsync.when(
                     data: (islands) {
+                      final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
                       final selectedIsland = islands.firstWhere(
-                        (Island i) => i.id == _selectedIslandId,
+                        (Island i) => i.id == selectedIslandId,
                         orElse: () => islands.first as Island,
                       );
                       final islandName = isEs
@@ -851,7 +852,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             ),
                             const SizedBox(width: 4),
                             InkWell(
-                              onTap: () => setState(() => _selectedIslandId = null),
+                              onTap: () => ref.read(mapFiltersProvider.notifier).setSelectedIsland(null),
                               child: Icon(
                                 Icons.close,
                                 size: 16,
@@ -887,13 +888,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ...islands
                           .where((Island i) => i.latitude != null && i.longitude != null)
                           .where((Island i) {
-                            if (_searchQuery.isEmpty) return true;
+                            final searchQuery = ref.watch(mapFiltersProvider.select((f) => f.searchQuery));
+                            if (searchQuery.isEmpty) return true;
                             final islandName = isEs ? (i.nameEs ?? i.nameEn) : i.nameEn;
-                            return islandName.toLowerCase().contains(_searchQuery.toLowerCase());
+                            return islandName.toLowerCase().contains(searchQuery.toLowerCase());
                           })
                           .map((island) {
                             final islandName = isEs ? (island.nameEs ?? island.nameEn) : island.nameEn;
-                            final isSelected = _selectedIslandId == island.id;
+                            final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
+                            final isSelected = selectedIslandId == island.id;
                             return ListTile(
                             dense: true,
                             selected: isSelected,
@@ -918,9 +921,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                                 ? Text('${island.areaKm2} km\u00B2', style: const TextStyle(fontSize: 12))
                                 : null,
                             onTap: () {
-                              setState(() {
-                                _selectedIslandId = isSelected ? null : island.id;
-                              });
+                              ref.read(mapFiltersProvider.notifier).setSelectedIsland(isSelected ? null : island.id);
                               _mapController.move(LatLng(island.latitude!, island.longitude!), 11);
                             },
                           );
@@ -935,18 +936,20 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
                 const Divider(),
                 // Visit sites - only show when an island is selected or when explicitly toggled
-                if (_showSites || _selectedIslandId != null)
+                if (ref.watch(mapFiltersProvider.select((f) => f.showSites)) || ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId)) != null)
                   sitesAsync.when(
                     data: (sites) {
+                      final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
+                      final selectedMonitoringType = ref.watch(mapFiltersProvider.select((f) => f.selectedMonitoringType));
                       // Filter to active tourist sites + island + monitoring type
                       final visibleSites = sites
                           .where((s) => s.status == 'active' || s.status == null)
-                          .where((s) => _selectedIslandId == null || s.islandId == _selectedIslandId)
-                          .where((s) => _selectedMonitoringType == null || s.monitoringType == _selectedMonitoringType)
+                          .where((s) => selectedIslandId == null || s.islandId == selectedIslandId)
+                          .where((s) => selectedMonitoringType == null || s.monitoringType == selectedMonitoringType)
                           .where((s) => s.latitude != null && s.longitude != null)
                           .toList();
 
-                      if (visibleSites.isEmpty && _selectedIslandId != null) {
+                      if (visibleSites.isEmpty && selectedIslandId != null) {
                         return const SizedBox.shrink();
                       }
 
@@ -956,9 +959,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
                             child: Text(
-                              _selectedIslandId != null
-                                  ? context.t.map.visitSites
-                                  : context.t.map.visitSites,
+                              context.t.map.visitSites,
                               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                                 color: isDark ? AppColors.accentOrange : Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -993,7 +994,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     error: (_, _) => const SizedBox.shrink(),
                   ),
                 // Trails section in tablet sidebar
-                if (_showTrails) ...[
+                if (ref.watch(mapFiltersProvider.select((f) => f.showTrails))) ...[
                   const Divider(),
                   _buildTrailsSidebarSection(isDark, isEs, trailsAsync, islandsAsync),
                 ],
@@ -1037,13 +1038,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   ) {
     return trailsAsync.when(
       data: (trails) {
+        final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
         // Filter trails by selected island if one is selected
-        final filteredTrails = _selectedIslandId != null
-            ? trails.where((t) => t.islandId == _selectedIslandId).toList()
+        final filteredTrails = selectedIslandId != null
+            ? trails.where((t) => t.islandId == selectedIslandId).toList()
             : trails;
 
         if (filteredTrails.isEmpty) {
-          if (_selectedIslandId != null) {
+          if (selectedIslandId != null) {
             return const SizedBox.shrink();
           }
           return Padding(
@@ -1095,7 +1097,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
             for (final islandId in sortedKeys) ...[
               // Only show island name header if not filtering by island
-              if (_selectedIslandId == null && islandId != null && islandNameMap.containsKey(islandId))
+              if (ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId)) == null && islandId != null && islandNameMap.containsKey(islandId))
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 8, 2),
                   child: Text(
@@ -1348,17 +1350,17 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         // Visit site markers — regular (non-drag) view
         // In moveSitesDrag mode the DragMarkers are rendered LAST so they
         // sit on top of trail and sighting markers and receive touches first.
-        if (_showSites)
+        if (ref.watch(mapFiltersProvider.select((f) => f.showSites)))
           _buildSiteMarkersLayer(sitesAsync, isEs, editState),
         // Trail polylines (after site markers, before sighting markers)
-        if (_showTrails)
+        if (ref.watch(mapFiltersProvider.select((f) => f.showTrails)))
           _buildTrailPolylinesLayer(trailsAsync),
         // Trail midpoint tap-target markers.
         // In selectTrailForEdit mode these are moved to the END of the
         // children list (below) so they sit above the sightings layer and
         // receive taps that would otherwise be intercepted by sighting markers.
         // Hide trail markers while a trail is being edited (not useful then)
-        if (_showTrails &&
+        if (ref.watch(mapFiltersProvider.select((f) => f.showTrails)) &&
             editState.mode != FieldEditMode.selectTrailForEdit &&
             editState.mode != FieldEditMode.editTrailManual)
           _buildTrailMarkers(trailsAsync, isEs),
@@ -1376,7 +1378,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ],
           ),
         // Sighting markers
-        if (_showSightings)
+        if (ref.watch(mapFiltersProvider.select((f) => f.showSightings)))
           _buildSightingsLayer(isEs, sightingsAsync, speciesLookupAsync),
 
         // Field editing layer (trail being created/edited)
@@ -1384,12 +1386,12 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         // In selectTrailForEdit mode trail markers are rendered here (LAST
         // before site drag layer) so they are above sightings and tappable.
-        if (_showTrails && editState.mode == FieldEditMode.selectTrailForEdit)
+        if (ref.watch(mapFiltersProvider.select((f) => f.showTrails)) && editState.mode == FieldEditMode.selectTrailForEdit)
           _buildTrailMarkers(trailsAsync, isEs),
 
         // Site DragMarkers rendered LAST so they are on top of all other
         // layers and receive touch events before trail / sighting markers do.
-        if (_showSites && editState.mode == FieldEditMode.moveSitesDrag)
+        if (ref.watch(mapFiltersProvider.select((f) => f.showSites)) && editState.mode == FieldEditMode.moveSitesDrag)
           _buildSiteDragMarkersLayer(sitesAsync, isEs),
       ],
     );
@@ -1796,11 +1798,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
         // ── Normal view ──────────────────────────────────────────────────────
         // Public app: only show tourist-active sites, apply island + type filter.
+        final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
+        final selectedMonitoringType = ref.watch(mapFiltersProvider.select((f) => f.selectedMonitoringType));
         return MarkerLayer(
           markers: sites
               .where((s) => s.status == 'active' || s.status == null)
-              .where((s) => _selectedIslandId == null || s.islandId == _selectedIslandId)
-              .where((s) => _selectedMonitoringType == null || s.monitoringType == _selectedMonitoringType)
+              .where((s) => selectedIslandId == null || s.islandId == selectedIslandId)
+              .where((s) => selectedMonitoringType == null || s.monitoringType == selectedMonitoringType)
               .where((s) => s.latitude != null && s.longitude != null)
               .where((s) => _isWithinViewport(s.latitude, s.longitude))
               .map((site) {

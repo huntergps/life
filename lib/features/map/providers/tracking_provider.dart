@@ -48,7 +48,7 @@ final gpsStreamProvider = StreamProvider<Position>((ref) {
     return const Stream<Position>.empty();
   }
 
-  const settings = LocationSettings(
+  final settings = LocationSettings(
     accuracy: LocationAccuracy.high,
     distanceFilter: AppConstants.gpsDistanceFilterMeters,
   );
@@ -116,7 +116,7 @@ class TrackingService {
     // issues with provider subscriptions).
     _gpsSub?.cancel();
     _gpsSub = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
+      locationSettings: LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: AppConstants.gpsDistanceFilterMeters,
       ),
