@@ -10,13 +10,24 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
 import 'package:galapagos_wildlife/brick/repository.dart';
+import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/admin/services/image_processing_service.dart';
 
-/// Fetches the current user's profile from Brick (offline-first)
+/// Fetches the current user's profile from Brick (offline-first) or Supabase (web)
 final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
+
+  if (kIsWeb) {
+    final data = await Supabase.instance.client
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .maybeSingle();
+    if (data == null) return null;
+    return userProfileFromRow(data as Map<String, dynamic>);
+  }
 
   final profiles = await Repository().get<UserProfile>(
     policy: OfflineFirstGetPolicy.awaitRemote,
@@ -36,6 +47,29 @@ Future<void> updateProfile({
   String? countryCode,
   String? avatarUrl,
 }) async {
+  if (kIsWeb) {
+    // Fetch existing to preserve unmodified fields
+    final existing = await Supabase.instance.client
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .maybeSingle();
+    final existingProfile =
+        existing != null ? userProfileFromRow(existing as Map<String, dynamic>) : null;
+
+    await Supabase.instance.client.from('profiles').upsert({
+      'id': userId,
+      'display_name': displayName ?? existingProfile?.displayName,
+      'bio': bio ?? existingProfile?.bio,
+      'birth_date': (birthDate ?? existingProfile?.birthDate)?.toIso8601String(),
+      'country': country ?? existingProfile?.country,
+      'country_code': countryCode ?? existingProfile?.countryCode,
+      'avatar_url': avatarUrl ?? existingProfile?.avatarUrl,
+      'updated_at': DateTime.now().toIso8601String(),
+    });
+    return;
+  }
+
   // Get existing profile first to preserve unmodified fields
   final existing = await Repository().get<UserProfile>(
     policy: OfflineFirstGetPolicy.localOnly,
@@ -61,18 +95,16 @@ Future<void> updateProfile({
 
 /// Picks, crops (1:1 square), compresses, and uploads avatar image.
 /// Returns the public URL of the uploaded avatar.
-///
-/// Note: Image cropper only works on iOS/Android. On macOS/Web, the image
-/// is automatically cropped to square using the image package.
 Future<String?> pickAndUploadAvatar(String userId) async {
   final picker = ImagePicker();
   final picked = await picker.pickImage(source: ImageSource.gallery);
   if (picked == null) return null;
 
-  String imagePath = picked.path;
+  final Uint8List bytes;
 
-  // Try to use ImageCropper on mobile platforms (iOS/Android)
-  if (Platform.isAndroid || Platform.isIOS) {
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    // Try ImageCropper on mobile
+    String imagePath = picked.path;
     try {
       final cropped = await ImageCropper().cropImage(
         sourcePath: picked.path,
@@ -96,22 +128,22 @@ Future<String?> pickAndUploadAvatar(String userId) async {
         imagePath = cropped.path;
       }
     } catch (e) {
-      // ImageCropper failed, continue with original image
-      print('ImageCropper not available: $e');
+      // ImageCropper not available, continue with original
     }
+    bytes = await File(imagePath).readAsBytes();
+  } else {
+    // Web or desktop: read bytes directly from XFile (works without dart:io File)
+    bytes = await picked.readAsBytes();
   }
 
-  // Read and process the image (crop to square if needed on macOS/Web)
-  final bytes = await File(imagePath).readAsBytes();
-
-  // Compress and crop to square 1:1 using ImageProcessingService
+  // Compress and crop to square using ImageProcessingService
   final compressed = ImageProcessingService.compressImage(
     bytes,
     maxWidth: 512,
     maxHeight: 512,
     initialQuality: 80,
     targetMaxBytes: 100 * 1024,
-    cropToSquare: true, // This will be handled by ImageProcessingService
+    cropToSquare: true,
   );
 
   final path = '$userId/avatar.jpg';

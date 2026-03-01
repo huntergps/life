@@ -9,6 +9,7 @@ import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/species_image.model.dart';
 import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
+import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
 import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/brick/repository.dart';
 
@@ -128,6 +129,24 @@ VisitSite visitSiteFromRow(Map<String, dynamic> r) => VisitSite(
       attractionEs: r['attraction_es'] as String?,
       abbreviation: r['abbreviation'] as String?,
       parkId: r['park_id'] as String?,
+    );
+
+UserProfile userProfileFromRow(Map<String, dynamic> r) => UserProfile(
+      id: r['id'] as String,
+      displayName: r['display_name'] as String?,
+      bio: r['bio'] as String?,
+      birthDate: r['birth_date'] != null
+          ? DateTime.tryParse(r['birth_date'] as String)
+          : null,
+      country: r['country'] as String?,
+      countryCode: r['country_code'] as String?,
+      avatarUrl: r['avatar_url'] as String?,
+      createdAt: r['created_at'] != null
+          ? DateTime.tryParse(r['created_at'] as String)
+          : null,
+      updatedAt: r['updated_at'] != null
+          ? DateTime.tryParse(r['updated_at'] as String)
+          : null,
     );
 
 Sighting sightingFromRow(Map<String, dynamic> r) => Sighting(
