@@ -115,31 +115,40 @@ class _AdminSpeciesFormScreenState
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
 
-    final allControllers = [
-      _nameEsController,
-      _nameEnController,
-      _scientificNameController,
-      _weightController,
-      _sizeController,
-      _populationController,
-      _lifespanController,
-      _descEsController,
-      _descEnController,
-      _habitatEsController,
-      _habitatEnController,
-      _distinguishingFeaturesEsController,
-      _distinguishingFeaturesEnController,
-      _primaryFoodSourcesController,
-      _breedingSeasonController,
-      _clutchSizeController,
-      _reproductiveFrequencyController,
-      _altitudeMinController,
-      _altitudeMaxController,
-      _depthMinController,
-      _depthMaxController,
-    ];
-    for (final c in allControllers) {
-      c.addListener(_markDirty);
+    // Map each controller to its provider field name so we can sync both
+    // the dirty-flag AND the provider state in a single listener per controller.
+    final controllerFieldMap = <TextEditingController, String>{
+      _nameEsController: 'nameEs',
+      _nameEnController: 'nameEn',
+      _scientificNameController: 'scientificName',
+      _weightController: 'weight',
+      _sizeController: 'size',
+      _populationController: 'population',
+      _lifespanController: 'lifespan',
+      _descEsController: 'descEs',
+      _descEnController: 'descEn',
+      _habitatEsController: 'habitatEs',
+      _habitatEnController: 'habitatEn',
+      _distinguishingFeaturesEsController: 'distinguishingFeaturesEs',
+      _distinguishingFeaturesEnController: 'distinguishingFeaturesEn',
+      _primaryFoodSourcesController: 'primaryFoodSources',
+      _breedingSeasonController: 'breedingSeason',
+      _clutchSizeController: 'clutchSize',
+      _reproductiveFrequencyController: 'reproductiveFrequency',
+      _altitudeMinController: 'altitudeMin',
+      _altitudeMaxController: 'altitudeMax',
+      _depthMinController: 'depthMin',
+      _depthMaxController: 'depthMax',
+    };
+
+    for (final entry in controllerFieldMap.entries) {
+      final controller = entry.key;
+      final fieldName = entry.value;
+      controller.addListener(() {
+        _markDirty();
+        // Keep provider state in sync so it can be read from outside the widget.
+        ref.read(speciesFormProvider.notifier).updateField(fieldName, controller.text);
+      });
     }
   }
 
@@ -147,6 +156,7 @@ class _AdminSpeciesFormScreenState
     if (_isPopulating) return;
     if (!_hasUnsavedChanges) {
       setState(() => _hasUnsavedChanges = true);
+      ref.read(speciesFormProvider.notifier).setUnsaved(true);
     }
   }
 
@@ -217,12 +227,8 @@ class _AdminSpeciesFormScreenState
     _dietType = data['diet_type'];
     _sexualDimorphism = data['sexual_dimorphism'] ?? false;
 
-    // Populate the SpeciesFormNotifier with genus id from data
-    final genusId = data['genus_id'] as int?;
-    ref.read(speciesFormProvider.notifier).loadFromSpecies(
-          genusId: genusId,
-          conservationStatus: data['conservation_status'],
-        );
+    // Populate the SpeciesFormNotifier — all fields including text values.
+    ref.read(speciesFormProvider.notifier).loadFromSpecies(data: data);
 
     _isPopulating = false;
   }
@@ -242,6 +248,7 @@ class _AdminSpeciesFormScreenState
       return;
     }
     setState(() => _isLoading = true);
+    ref.read(speciesFormProvider.notifier).setLoading(true);
 
     try {
       final service = ref.read(adminSupabaseServiceProvider);
@@ -324,6 +331,7 @@ class _AdminSpeciesFormScreenState
 
       if (mounted) {
         setState(() => _hasUnsavedChanges = false);
+        ref.read(speciesFormProvider.notifier).setUnsaved(false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
               content: Text(isEditing
@@ -337,7 +345,10 @@ class _AdminSpeciesFormScreenState
         ErrorHandler.showError(context, e);
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ref.read(speciesFormProvider.notifier).setLoading(false);
+      }
     }
   }
 
@@ -370,6 +381,7 @@ class _AdminSpeciesFormScreenState
             onPressed: () {
               Navigator.pop(ctx);
               setState(() => _hasUnsavedChanges = false);
+              ref.read(speciesFormProvider.notifier).setUnsaved(false);
               context.pop();
             },
             child: Text(context.t.admin.discard),
