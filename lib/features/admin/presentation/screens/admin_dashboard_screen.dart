@@ -21,6 +21,7 @@ final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
     service.getCount('site_type_catalog'),
     service.getCount('site_modality_catalog'),
     service.getCount('site_activity_catalog'),
+    service.getCount('profiles'),
   ]);
   return {
     'species': results[0],
@@ -30,6 +31,7 @@ final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
     'taxonomy': results[4],
     'species_sites': results[5],
     'site_catalogs': results[6] + results[7] + results[8],
+    'users': results[9],
   };
 });
 
@@ -171,6 +173,13 @@ class AdminDashboardScreen extends ConsumerWidget {
                         icon: Icons.label_outline,
                         count: counts['site_catalogs'],
                         onTap: () => context.go('/admin/site-catalogs'),
+                      ),
+                      AdminEntityTile(
+                        title: 'Usuarios',
+                        subtitle: 'Gestionar acceso y roles',
+                        icon: Icons.people_outline,
+                        count: counts['users'],
+                        onTap: () => context.go('/admin/users'),
                       ),
                     ],
                   ),

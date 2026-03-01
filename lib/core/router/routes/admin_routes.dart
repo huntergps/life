@@ -12,6 +12,7 @@ import '../../../features/admin/presentation/screens/visit_sites/admin_visit_sit
 import '../../../features/admin/presentation/screens/visit_sites/admin_visit_site_form_screen.dart';
 import '../../../features/admin/presentation/screens/taxonomy/admin_taxonomy_screen.dart';
 import '../../../features/admin/presentation/screens/site_catalogs/admin_site_catalogs_screen.dart';
+import '../../../features/admin/presentation/screens/users/admin_users_screen.dart';
 
 List<RouteBase> adminRoutes() => [
       GoRoute(
@@ -121,6 +122,11 @@ List<RouteBase> adminRoutes() => [
             path: 'site-catalogs',
             name: 'admin-site-catalogs',
             builder: (context, state) => const AdminSiteCatalogsScreen(),
+          ),
+          GoRoute(
+            path: 'users',
+            name: 'admin-users',
+            builder: (context, state) => const AdminUsersScreen(),
           ),
         ],
       ),
