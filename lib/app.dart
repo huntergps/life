@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'bootstrap.dart';
@@ -41,6 +42,14 @@ class _GalapagosWildlifeAppState extends ConsumerState<GalapagosWildlifeApp> {
   }
 
   Future<void> _checkSync() async {
+    // On web, Brick/SQLite is not used — always skip sync.
+    if (kIsWeb) {
+      setState(() {
+        _syncChecked = true;
+        _needsSync = false;
+      });
+      return;
+    }
     final syncService = InitialSyncService(Repository());
     final complete = await syncService.isSyncComplete();
     if (!mounted) return;
