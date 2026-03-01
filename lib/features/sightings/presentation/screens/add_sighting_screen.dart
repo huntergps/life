@@ -16,6 +16,7 @@ import 'package:galapagos_wildlife/core/utils/error_handler.dart';
 import 'package:galapagos_wildlife/features/admin/services/image_processing_service.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
+import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
 import '../widgets/species_picker_sheet.dart';
 import 'location_picker_screen.dart';
@@ -551,8 +552,21 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   }
 
   Widget _buildPhotoSection(bool isDark) {
+    final isEs = LocaleSettings.currentLocale == AppLocale.es;
+    // Look up category slug for photo tips
+    String? categorySlug;
+    if (_selectedSpecies != null) {
+      final categories = ref.read(categoriesProvider).asData?.value;
+      if (categories != null) {
+        final cat = categories.where((c) => c.id == _selectedSpecies!.categoryId).firstOrNull;
+        categorySlug = cat?.slug;
+      }
+    }
+
     return Column(
       children: [
+        // Photo coach tips
+        _PhotoCoachCard(categorySlug: categorySlug, locale: isEs ? 'es' : 'en'),
         // Preview: Image.memory works on ALL platforms (web, iOS, Android, macOS)
         if (_photoBytes != null) ...[
           ClipRRect(
@@ -602,6 +616,61 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
             )
           : const Icon(Icons.save),
       label: Text(context.t.sightings.save),
+    );
+  }
+}
+
+class _PhotoCoachCard extends StatelessWidget {
+  final String? categorySlug;
+  final String locale;
+
+  const _PhotoCoachCard({this.categorySlug, required this.locale});
+
+  @override
+  Widget build(BuildContext context) {
+    final isEs = locale == 'es';
+    String tip;
+
+    if (categorySlug?.contains('bird') == true || categorySlug?.contains('ave') == true) {
+      tip = isEs
+          ? 'Para aves: acercate despacio, usa el zoom y espera a que se pose antes de disparar.'
+          : 'For birds: approach slowly, use zoom, and wait for them to perch before shooting.';
+    } else if (categorySlug?.contains('reptil') == true || categorySlug?.contains('reptile') == true) {
+      tip = isEs
+          ? 'Para reptiles: fotografa a la altura del ojo del animal para mejores resultados.'
+          : 'For reptiles: shoot at the animal\'s eye level for best results.';
+    } else if (categorySlug?.contains('marin') == true || categorySlug?.contains('marine') == true) {
+      tip = isEs
+          ? 'Para fauna marina: usa modo rafaga y asegurate de buena iluminacion natural.'
+          : 'For marine life: use burst mode and ensure good natural lighting.';
+    } else {
+      tip = isEs
+          ? 'Consejo: asegurate de tener buena iluminacion y encuadra bien al animal.'
+          : 'Tip: make sure you have good lighting and frame the animal well.';
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.blue.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.camera_enhance, size: 20, color: Colors.blue),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              tip,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Colors.blue.shade700,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

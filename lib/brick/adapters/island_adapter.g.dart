@@ -10,10 +10,10 @@ Future<Island> _$IslandFromSupabase(
     id: data['id'] as int,
     nameEs: data['name_es'] as String,
     nameEn: data['name_en'] as String,
-    latitude: data['latitude'] == null ? null : (data['latitude'] as num).toDouble(),
-    longitude: data['longitude'] == null ? null : (data['longitude'] as num).toDouble(),
-    areaKm2: data['area_km2'] == null ? null : (data['area_km2'] as num).toDouble(),
-    areaHa: data['area_ha'] == null ? null : (data['area_ha'] as num).toDouble(),
+    latitude: data['latitude'] == null ? null : data['latitude'] as double?,
+    longitude: data['longitude'] == null ? null : data['longitude'] as double?,
+    areaKm2: data['area_km2'] == null ? null : data['area_km2'] as double?,
+    areaHa: data['area_ha'] == null ? null : data['area_ha'] as double?,
     descriptionEs: data['description_es'] == null
         ? null
         : data['description_es'] as String?,
@@ -64,10 +64,10 @@ Future<Island> _$IslandFromSqlite(
     id: data['id'] as int,
     nameEs: data['name_es'] as String,
     nameEn: data['name_en'] as String,
-    latitude: data['latitude'] == null ? null : (data['latitude'] as num).toDouble(),
-    longitude: data['longitude'] == null ? null : (data['longitude'] as num).toDouble(),
-    areaKm2: data['area_km2'] == null ? null : (data['area_km2'] as num).toDouble(),
-    areaHa: data['area_ha'] == null ? null : (data['area_ha'] as num).toDouble(),
+    latitude: data['latitude'] == null ? null : data['latitude'] as double?,
+    longitude: data['longitude'] == null ? null : data['longitude'] as double?,
+    areaKm2: data['area_km2'] == null ? null : data['area_km2'] as double?,
+    areaHa: data['area_ha'] == null ? null : data['area_ha'] as double?,
     descriptionEs: data['description_es'] == null
         ? null
         : data['description_es'] as String?,

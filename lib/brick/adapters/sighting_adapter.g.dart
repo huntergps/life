@@ -19,8 +19,8 @@ Future<Sighting> _$SightingFromSupabase(
         ? null
         : DateTime.tryParse(data['observed_at'] as String),
     notes: data['notes'] == null ? null : data['notes'] as String?,
-    latitude: data['latitude'] == null ? null : (data['latitude'] as num).toDouble(),
-    longitude: data['longitude'] == null ? null : (data['longitude'] as num).toDouble(),
+    latitude: data['latitude'] == null ? null : data['latitude'] as double?,
+    longitude: data['longitude'] == null ? null : data['longitude'] as double?,
     photoUrl: data['photo_url'] == null ? null : data['photo_url'] as String?,
   );
 }
@@ -61,8 +61,8 @@ Future<Sighting> _$SightingFromSqlite(
         ? null
         : DateTime.tryParse(data['observed_at'] as String),
     notes: data['notes'] == null ? null : data['notes'] as String?,
-    latitude: data['latitude'] == null ? null : (data['latitude'] as num).toDouble(),
-    longitude: data['longitude'] == null ? null : (data['longitude'] as num).toDouble(),
+    latitude: data['latitude'] == null ? null : data['latitude'] as double?,
+    longitude: data['longitude'] == null ? null : data['longitude'] as double?,
     photoUrl: data['photo_url'] == null ? null : data['photo_url'] as String?,
   )..primaryKey = data['_brick_id'] as int;
 }

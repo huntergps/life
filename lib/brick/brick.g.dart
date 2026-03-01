@@ -29,6 +29,8 @@ import '../brick/models/species_threat.model.dart';
 import '../brick/models/trail.model.dart';
 import '../brick/models/user_favorite.model.dart';
 import '../brick/models/user_profile.model.dart';
+import '../brick/models/user_site_wishlist.model.dart';
+import '../brick/models/user_species_checklist.model.dart';
 import '../brick/models/visit_site.model.dart';
 
 part 'adapters/category_adapter.g.dart';
@@ -43,6 +45,8 @@ part 'adapters/species_threat_adapter.g.dart';
 part 'adapters/trail_adapter.g.dart';
 part 'adapters/user_favorite_adapter.g.dart';
 part 'adapters/user_profile_adapter.g.dart';
+part 'adapters/user_site_wishlist_adapter.g.dart';
+part 'adapters/user_species_checklist_adapter.g.dart';
 part 'adapters/visit_site_adapter.g.dart';
 
 /// Supabase mappings should only be used when initializing a [SupabaseProvider]
@@ -59,6 +63,8 @@ final Map<Type, SupabaseAdapter<SupabaseModel>> supabaseMappings = {
   Trail: TrailAdapter(),
   UserFavorite: UserFavoriteAdapter(),
   UserProfile: UserProfileAdapter(),
+  UserSiteWishlist: UserSiteWishlistAdapter(),
+  UserSpeciesChecklist: UserSpeciesChecklistAdapter(),
   VisitSite: VisitSiteAdapter()
 };
 final supabaseModelDictionary = SupabaseModelDictionary(supabaseMappings);
@@ -77,6 +83,8 @@ final Map<Type, SqliteAdapter<SqliteModel>> sqliteMappings = {
   Trail: TrailAdapter(),
   UserFavorite: UserFavoriteAdapter(),
   UserProfile: UserProfileAdapter(),
+  UserSiteWishlist: UserSiteWishlistAdapter(),
+  UserSpeciesChecklist: UserSpeciesChecklistAdapter(),
   VisitSite: VisitSiteAdapter()
 };
 final sqliteModelDictionary = SqliteModelDictionary(sqliteMappings);

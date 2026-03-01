@@ -84,7 +84,15 @@
     "citation": "Citation",
     "bestTimeToVisit": "Best Time to Visit",
     "breedingSeason": "Breeding Season",
-    "activityPattern": "Activity Pattern"
+    "activityPattern": "Activity Pattern",
+    "sounds": "Sounds",
+    "soundType": "Sound Type",
+    "recordedBy": "Recorded by",
+    "playSound": "Play sound",
+    "pauseSound": "Pause sound",
+    "markAsSeen": "Mark as Seen",
+    "markAsNotSeen": "Mark as Not Seen",
+    "seen": "Seen"
   },
   "conservation": {
     "EX": "Extinct",
@@ -184,7 +192,15 @@
     "modeHybridDesc": "Satellite imagery with labels",
     "loginRequiredForSatellite": "Login required for satellite view",
     "filterSites": "Filter sites",
-    "filterVisitSites": "Filter visit sites"
+    "filterVisitSites": "Filter visit sites",
+    "communitySightings": "Community sightings",
+    "sightingsCount": "${count} sighting(s)",
+    "wildlifeNow": "Wildlife Now",
+    "recentlySeenHere": "Recently seen here",
+    "addToWishlist": "Add to wishlist",
+    "removeFromWishlist": "Remove from wishlist",
+    "wishlist": "Wishlist",
+    "myWishlist": "My Wishlist"
   },
   "favorites": {
     "title": "Favorites",
@@ -244,7 +260,12 @@
     "favoritesOnly": "Favorites only",
     "searchNotes": "Search notes...",
     "activeFilters": "Active filters",
-    "allSites": "All Sites"
+    "allSites": "All Sites",
+    "photoTip": "Photo tip",
+    "photoTipBirds": "For birds: approach slowly and use zoom",
+    "photoTipReptiles": "For reptiles: shoot at eye level",
+    "photoTipMarine": "For marine life: use burst mode with natural light",
+    "photoPossiblyBlurry": "Photo may be blurry — try again?"
   },
   "auth": {
     "signIn": "Sign In",
@@ -287,7 +308,11 @@
     "tapToChangePhoto": "Tap to change photo",
     "happyBirthday": "Happy Birthday!",
     "happyBirthdayMessage": "Wishing you an amazing day exploring the Galápagos!",
-    "signUpPrompt": "Don't have an account? Sign up"
+    "signUpPrompt": "Don't have an account? Sign up",
+    "visitSummary": "Visit Summary",
+    "shareVisit": "Share Visit",
+    "generateSummary": "Generate Summary",
+    "speciesChecklist": "Checklist"
   },
   "settings": {
     "title": "Settings",

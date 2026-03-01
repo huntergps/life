@@ -14,10 +14,13 @@ import 'package:galapagos_wildlife/features/settings/providers/settings_provider
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
+import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
 import '../../providers/species_detail_provider.dart';
+import '../../providers/species_sounds_provider.dart';
 import '../widgets/quick_facts_row.dart';
 import '../widgets/taxonomy_tree.dart';
 import '../widgets/gallery_carousel.dart';
+import '../widgets/species_sound_player.dart';
 
 class SpeciesDetailScreen extends ConsumerWidget {
   final int speciesId;
@@ -136,6 +139,19 @@ class _PhoneDetail extends StatelessWidget {
           actions: [
             _ShareButton(species: species, locale: locale),
             FavoriteHeartButton(speciesId: speciesId, iconSize: 32, showBackground: false, compact: false),
+            Consumer(builder: (context, ref, _) {
+              final isSeen = ref.watch(isSpeciesSeenProvider(speciesId));
+              final isLoggedIn = ref.watch(isAuthenticatedProvider);
+              if (!isLoggedIn) return const SizedBox.shrink();
+              return IconButton(
+                icon: Icon(
+                  isSeen ? Icons.check_circle : Icons.check_circle_outline,
+                  color: isSeen ? Colors.green : null,
+                ),
+                tooltip: isSeen ? context.t.species.markAsNotSeen : context.t.species.markAsSeen,
+                onPressed: () => toggleSpeciesSeen(ref, speciesId),
+              );
+            }),
           ],
         ),
         // Gallery carousel below hero
@@ -174,6 +190,7 @@ class _DetailContent extends ConsumerWidget {
     final isLoggedIn = ref.watch(isAuthenticatedProvider);
     final threatsAsync = ref.watch(speciesThreatsProvider(species.id));
     final referencesAsync = ref.watch(speciesReferencesProvider(species.id));
+    final soundsAsync = ref.watch(speciesSoundsProvider(species.id));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +272,18 @@ class _DetailContent extends ConsumerWidget {
         ),
 
         // Extended information (only for logged-in users)
-        if (isLoggedIn) ..._buildExtendedInfo(context, isDark, threatsAsync, referencesAsync)
+        if (isLoggedIn) ...[
+          ..._buildExtendedInfo(context, isDark, threatsAsync, referencesAsync),
+          // Sounds section (after extended info)
+          if ((soundsAsync.asData?.value ?? []).isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: SpeciesSoundPlayer(
+                sounds: soundsAsync.asData!.value,
+                locale: locale,
+              ),
+            ),
+        ]
         else ..._buildLoginPrompt(context, isDark),
       ],
     );
@@ -580,6 +608,19 @@ class _TabletDetail extends StatelessWidget {
               actions: [
                 _ShareButton(species: species, locale: locale),
                 FavoriteHeartButton(speciesId: speciesId, iconSize: 32, showBackground: false, compact: false),
+                Consumer(builder: (context, ref, _) {
+                  final isSeen = ref.watch(isSpeciesSeenProvider(speciesId));
+                  final isLoggedIn = ref.watch(isAuthenticatedProvider);
+                  if (!isLoggedIn) return const SizedBox.shrink();
+                  return IconButton(
+                    icon: Icon(
+                      isSeen ? Icons.check_circle : Icons.check_circle_outline,
+                      color: isSeen ? Colors.green : null,
+                    ),
+                    tooltip: isSeen ? context.t.species.markAsNotSeen : context.t.species.markAsSeen,
+                    onPressed: () => toggleSpeciesSeen(ref, speciesId),
+                  );
+                }),
               ],
             ),
             body: ListView(

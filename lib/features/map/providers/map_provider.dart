@@ -11,6 +11,7 @@ import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 
 final islandsProvider = FutureProvider<List<Island>>((ref) async {
   if (kIsWeb) {
@@ -120,6 +121,54 @@ final userLocationProvider = FutureProvider<Position?>((ref) async {
       timeLimit: Duration(seconds: 10),
     ),
   );
+});
+
+/// Returns a map of visitSiteId → total sighting count across all users.
+/// Uses Supabase directly since we need aggregate counts across users.
+/// Returns empty map when offline or on error.
+final siteSightingCountsProvider = FutureProvider<Map<int, int>>((ref) async {
+  try {
+    final data = await Supabase.instance.client
+        .from('sightings')
+        .select('visit_site_id')
+        .not('visit_site_id', 'is', null);
+    final counts = <int, int>{};
+    for (final row in data as List) {
+      final siteId = row['visit_site_id'] as int?;
+      if (siteId != null) {
+        counts[siteId] = (counts[siteId] ?? 0) + 1;
+      }
+    }
+    return counts;
+  } catch (_) {
+    return {};
+  }
+});
+
+/// Returns sites with sightings in the last 48 hours, with the list of recent sightings.
+/// Requires auth. Returns empty map when not authenticated or on error.
+final recentSightingsBySiteProvider = FutureProvider<Map<int, List<Map<String, dynamic>>>>((ref) async {
+  final isLoggedIn = ref.watch(isAuthenticatedProvider);
+  if (!isLoggedIn) return {};
+  try {
+    final cutoff = DateTime.now().subtract(const Duration(hours: 48));
+    final data = await Supabase.instance.client
+        .from('sightings')
+        .select('id, species_id, visit_site_id, observed_at, notes, photo_url')
+        .not('visit_site_id', 'is', null)
+        .gte('observed_at', cutoff.toIso8601String())
+        .order('observed_at', ascending: false);
+
+    final result = <int, List<Map<String, dynamic>>>{};
+    for (final row in data as List) {
+      final siteId = row['visit_site_id'] as int?;
+      if (siteId == null) continue;
+      result.putIfAbsent(siteId, () => []).add(row as Map<String, dynamic>);
+    }
+    return result;
+  } catch (_) {
+    return {};
+  }
 });
 
 /// Whether the given position is within the Galápagos bounding box.

@@ -199,8 +199,8 @@ Future<Species> _$SpeciesFromSqlite(
     conservationStatus: data['conservation_status'] == null
         ? null
         : data['conservation_status'] as String?,
-    weightKg: data['weight_kg'] == null ? null : (data['weight_kg'] as num).toDouble(),
-    sizeCm: data['size_cm'] == null ? null : (data['size_cm'] as num).toDouble(),
+    weightKg: data['weight_kg'] == null ? null : data['weight_kg'] as double?,
+    sizeCm: data['size_cm'] == null ? null : data['size_cm'] as double?,
     populationEstimate: data['population_estimate'] == null
         ? null
         : data['population_estimate'] as int?,

@@ -20,6 +20,8 @@ import 'package:galapagos_wildlife/features/profile/presentation/widgets/recent_
 import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
+import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
+import 'package:galapagos_wildlife/features/profile/presentation/screens/visit_summary_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -112,6 +114,7 @@ class _AuthenticatedProfile extends ConsumerWidget {
     final isTablet = AdaptiveLayout.isTablet(context);
 
     final statsAsync = ref.watch(profileStatsProvider);
+    final checklistCount = ref.watch(speciesSeenCountProvider);
 
     return statsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
@@ -138,6 +141,7 @@ class _AuthenticatedProfile extends ConsumerWidget {
             speciesSeen: stats.uniqueSpecies,
             islandsVisited: stats.uniqueSites,
             photosTaken: stats.photosCount,
+            checklistCount: checklistCount,
             profile: profile,
             badgeProgress: badgeProgress,
             recentSightings: recent,
@@ -165,6 +169,7 @@ class _AuthenticatedProfile extends ConsumerWidget {
               speciesSeen: stats.uniqueSpecies,
               islandsVisited: stats.uniqueSites,
               photosTaken: stats.photosCount,
+              checklistCount: checklistCount,
             ),
             const SizedBox(height: 16),
             BadgeProgressSection(
@@ -177,6 +182,25 @@ class _AuthenticatedProfile extends ConsumerWidget {
               sightings: recent,
               speciesMap: speciesMap,
               isEs: isEs,
+            ),
+            const SizedBox(height: 16),
+            // Visit Summary button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: OutlinedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => VisitSummaryScreen(
+                      speciesSeen: stats.uniqueSpecies,
+                      totalSightings: stats.totalSightings,
+                      displayName: profile?.displayName,
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.summarize_outlined),
+                label: Text(isEs ? 'Resumen de Visita' : 'Visit Summary'),
+              ),
             ),
           ],
         );
@@ -261,6 +285,7 @@ class _TabletLayout extends StatelessWidget {
     required this.speciesSeen,
     required this.islandsVisited,
     required this.photosTaken,
+    required this.checklistCount,
     required this.profile,
     required this.badgeProgress,
     required this.recentSightings,
@@ -276,6 +301,7 @@ class _TabletLayout extends StatelessWidget {
   final int speciesSeen;
   final int islandsVisited;
   final int photosTaken;
+  final int checklistCount;
   final UserProfile? profile;
   final List<BadgeProgress> badgeProgress;
   final List<Sighting> recentSightings;
@@ -311,6 +337,22 @@ class _TabletLayout extends StatelessWidget {
                   speciesSeen: speciesSeen,
                   islandsVisited: islandsVisited,
                   photosTaken: photosTaken,
+                  checklistCount: checklistCount,
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => VisitSummaryScreen(
+                        speciesSeen: speciesSeen,
+                        totalSightings: totalSightings,
+                        displayName: profile?.displayName,
+                      ),
+                    ),
+                  ),
+                  icon: const Icon(Icons.summarize_outlined),
+                  label: Text(isEs ? 'Resumen de Visita' : 'Visit Summary'),
                 ),
               ],
             ),
@@ -492,6 +534,7 @@ class _StatsGrid extends StatelessWidget {
     required this.speciesSeen,
     required this.islandsVisited,
     required this.photosTaken,
+    required this.checklistCount,
   });
 
   final bool isDark;
@@ -499,6 +542,7 @@ class _StatsGrid extends StatelessWidget {
   final int speciesSeen;
   final int islandsVisited;
   final int photosTaken;
+  final int checklistCount;
 
   @override
   Widget build(BuildContext context) {
@@ -541,6 +585,20 @@ class _StatsGrid extends StatelessWidget {
               label: context.t.auth.photosTaken,
               value: '$photosTaken',
             ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            _StatChip(
+              isDark: isDark,
+              icon: Icons.check_circle,
+              iconColor: Colors.green,
+              label: context.t.auth.speciesChecklist,
+              value: '$checklistCount / 110',
+            ),
+            const SizedBox(width: 8),
+            const Expanded(child: SizedBox.shrink()),
           ],
         ),
       ],
@@ -748,6 +806,7 @@ class _StatsRow extends StatelessWidget {
     required this.speciesSeen,
     required this.islandsVisited,
     required this.photosTaken,
+    required this.checklistCount,
   });
 
   final bool isDark;
@@ -755,43 +814,62 @@ class _StatsRow extends StatelessWidget {
   final int speciesSeen;
   final int islandsVisited;
   final int photosTaken;
+  final int checklistCount;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
+      child: Column(
         children: [
-          _StatChip(
-            isDark: isDark,
-            icon: Icons.visibility,
-            iconColor: AppColors.primary,
-            label: context.t.sightings.totalSightings,
-            value: '$totalSightings',
+          Row(
+            children: [
+              _StatChip(
+                isDark: isDark,
+                icon: Icons.visibility,
+                iconColor: AppColors.primary,
+                label: context.t.sightings.totalSightings,
+                value: '$totalSightings',
+              ),
+              const SizedBox(width: 8),
+              _StatChip(
+                isDark: isDark,
+                icon: Icons.pets,
+                iconColor: Colors.teal,
+                label: context.t.auth.speciesSeen,
+                value: '$speciesSeen',
+              ),
+              const SizedBox(width: 8),
+              _StatChip(
+                isDark: isDark,
+                icon: Icons.sailing,
+                iconColor: Colors.cyan,
+                label: context.t.auth.islandsVisited,
+                value: '$islandsVisited',
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          _StatChip(
-            isDark: isDark,
-            icon: Icons.pets,
-            iconColor: Colors.teal,
-            label: context.t.auth.speciesSeen,
-            value: '$speciesSeen',
-          ),
-          const SizedBox(width: 8),
-          _StatChip(
-            isDark: isDark,
-            icon: Icons.sailing,
-            iconColor: Colors.cyan,
-            label: context.t.auth.islandsVisited,
-            value: '$islandsVisited',
-          ),
-          const SizedBox(width: 8),
-          _StatChip(
-            isDark: isDark,
-            icon: Icons.photo_camera,
-            iconColor: Colors.orange,
-            label: context.t.auth.photosTaken,
-            value: '$photosTaken',
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _StatChip(
+                isDark: isDark,
+                icon: Icons.photo_camera,
+                iconColor: Colors.orange,
+                label: context.t.auth.photosTaken,
+                value: '$photosTaken',
+              ),
+              const SizedBox(width: 8),
+              _StatChip(
+                isDark: isDark,
+                icon: Icons.check_circle,
+                iconColor: Colors.green,
+                label: context.t.auth.speciesChecklist,
+                value: '$checklistCount / 110',
+              ),
+              const SizedBox(width: 8),
+              const Expanded(child: SizedBox.shrink()),
+            ],
           ),
         ],
       ),

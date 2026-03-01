@@ -11,8 +11,8 @@ Future<VisitSite> _$VisitSiteFromSupabase(
     islandId: data['island_id'] == null ? null : data['island_id'] as int?,
     nameEs: data['name_es'] as String,
     nameEn: data['name_en'] == null ? null : data['name_en'] as String?,
-    latitude: data['latitude'] == null ? null : (data['latitude'] as num).toDouble(),
-    longitude: data['longitude'] == null ? null : (data['longitude'] as num).toDouble(),
+    latitude: data['latitude'] == null ? null : data['latitude'] as double?,
+    longitude: data['longitude'] == null ? null : data['longitude'] as double?,
     descriptionEs: data['description_es'] == null
         ? null
         : data['description_es'] as String?,
@@ -79,8 +79,8 @@ Future<VisitSite> _$VisitSiteFromSqlite(
     islandId: data['island_id'] == null ? null : data['island_id'] as int?,
     nameEs: data['name_es'] as String,
     nameEn: data['name_en'] == null ? null : data['name_en'] as String?,
-    latitude: data['latitude'] == null ? null : (data['latitude'] as num).toDouble(),
-    longitude: data['longitude'] == null ? null : (data['longitude'] as num).toDouble(),
+    latitude: data['latitude'] == null ? null : data['latitude'] as double?,
+    longitude: data['longitude'] == null ? null : data['longitude'] as double?,
     descriptionEs: data['description_es'] == null
         ? null
         : data['description_es'] as String?,

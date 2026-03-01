@@ -84,7 +84,15 @@
     "citation": "Citación",
     "bestTimeToVisit": "Mejor Época para Visitar",
     "breedingSeason": "Temporada de Cría",
-    "activityPattern": "Patrón de Actividad"
+    "activityPattern": "Patrón de Actividad",
+    "sounds": "Sonidos",
+    "soundType": "Tipo de Sonido",
+    "recordedBy": "Grabado por",
+    "playSound": "Reproducir sonido",
+    "pauseSound": "Pausar sonido",
+    "markAsSeen": "Marcar como Vista",
+    "markAsNotSeen": "Desmarcar como Vista",
+    "seen": "Vista"
   },
   "conservation": {
     "EX": "Extinta",
@@ -184,7 +192,15 @@
     "modeHybridDesc": "Imágenes satelitales con etiquetas",
     "loginRequiredForSatellite": "Requiere iniciar sesión para vista satelital",
     "filterSites": "Filtrar sitios",
-    "filterVisitSites": "Filtrar sitios de visita"
+    "filterVisitSites": "Filtrar sitios de visita",
+    "communitySightings": "Avistamientos de la comunidad",
+    "sightingsCount": "${count} avistamiento(s)",
+    "wildlifeNow": "Wildlife Ahora",
+    "recentlySeenHere": "Visto recientemente aquí",
+    "addToWishlist": "Agregar a lista de deseos",
+    "removeFromWishlist": "Quitar de lista de deseos",
+    "wishlist": "Lista de deseos",
+    "myWishlist": "Mi lista de deseos"
   },
   "favorites": {
     "title": "Favoritos",
@@ -244,7 +260,12 @@
     "favoritesOnly": "Solo favoritos",
     "searchNotes": "Buscar en notas...",
     "activeFilters": "Filtros activos",
-    "allSites": "Todos los Sitios"
+    "allSites": "Todos los Sitios",
+    "photoTip": "Consejo de foto",
+    "photoTipBirds": "Para aves: acercate despacio y usa el zoom",
+    "photoTipReptiles": "Para reptiles: fotografa a la altura del ojo",
+    "photoTipMarine": "Para fauna marina: usa modo rafaga con luz natural",
+    "photoPossiblyBlurry": "La foto puede estar borrosa, intentar de nuevo?"
   },
   "auth": {
     "signIn": "Iniciar Sesión",
@@ -287,7 +308,11 @@
     "tapToChangePhoto": "Toca para cambiar foto",
     "happyBirthday": "¡Feliz Cumpleaños!",
     "happyBirthdayMessage": "¡Te deseamos un increíble día explorando Galápagos!",
-    "signUpPrompt": "¿No tienes cuenta? Regístrate"
+    "signUpPrompt": "¿No tienes cuenta? Regístrate",
+    "speciesChecklist": "Lista de Vistas",
+    "visitSummary": "Resumen de Visita",
+    "shareVisit": "Compartir Visita",
+    "generateSummary": "Generar Resumen"
   },
   "settings": {
     "title": "Configuración",

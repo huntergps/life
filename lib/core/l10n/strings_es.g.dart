@@ -171,6 +171,14 @@ class _TranslationsSpeciesEs implements TranslationsSpeciesEn {
 	@override String get bestTimeToVisit => 'Mejor Época para Visitar';
 	@override String get breedingSeason => 'Temporada de Cría';
 	@override String get activityPattern => 'Patrón de Actividad';
+	@override String get sounds => 'Sonidos';
+	@override String get soundType => 'Tipo de Sonido';
+	@override String get recordedBy => 'Grabado por';
+	@override String get playSound => 'Reproducir sonido';
+	@override String get pauseSound => 'Pausar sonido';
+	@override String get markAsSeen => 'Marcar como Vista';
+	@override String get markAsNotSeen => 'Desmarcar como Vista';
+	@override String get seen => 'Vista';
 }
 
 // Path: conservation
@@ -285,6 +293,14 @@ class _TranslationsMapEs implements TranslationsMapEn {
 	@override String get loginRequiredForSatellite => 'Requiere iniciar sesión para vista satelital';
 	@override String get filterSites => 'Filtrar sitios';
 	@override String get filterVisitSites => 'Filtrar sitios de visita';
+	@override String get communitySightings => 'Avistamientos de la comunidad';
+	@override String sightingsCount({required Object count}) => '${count} avistamiento(s)';
+	@override String get wildlifeNow => 'Wildlife Ahora';
+	@override String get recentlySeenHere => 'Visto recientemente aquí';
+	@override String get addToWishlist => 'Agregar a lista de deseos';
+	@override String get removeFromWishlist => 'Quitar de lista de deseos';
+	@override String get wishlist => 'Lista de deseos';
+	@override String get myWishlist => 'Mi lista de deseos';
 }
 
 // Path: favorites
@@ -359,6 +375,11 @@ class _TranslationsSightingsEs implements TranslationsSightingsEn {
 	@override String get searchNotes => 'Buscar en notas...';
 	@override String get activeFilters => 'Filtros activos';
 	@override String get allSites => 'Todos los Sitios';
+	@override String get photoTip => 'Consejo de foto';
+	@override String get photoTipBirds => 'Para aves: acercate despacio y usa el zoom';
+	@override String get photoTipReptiles => 'Para reptiles: fotografa a la altura del ojo';
+	@override String get photoTipMarine => 'Para fauna marina: usa modo rafaga con luz natural';
+	@override String get photoPossiblyBlurry => 'La foto puede estar borrosa, intentar de nuevo?';
 }
 
 // Path: auth
@@ -409,6 +430,10 @@ class _TranslationsAuthEs implements TranslationsAuthEn {
 	@override String get happyBirthday => '¡Feliz Cumpleaños!';
 	@override String get happyBirthdayMessage => '¡Te deseamos un increíble día explorando Galápagos!';
 	@override String get signUpPrompt => '¿No tienes cuenta? Regístrate';
+	@override String get speciesChecklist => 'Lista de Vistas';
+	@override String get visitSummary => 'Resumen de Visita';
+	@override String get shareVisit => 'Compartir Visita';
+	@override String get generateSummary => 'Generar Resumen';
 }
 
 // Path: settings
@@ -1099,6 +1124,14 @@ extension on TranslationsEs {
 			'species.bestTimeToVisit' => 'Mejor Época para Visitar',
 			'species.breedingSeason' => 'Temporada de Cría',
 			'species.activityPattern' => 'Patrón de Actividad',
+			'species.sounds' => 'Sonidos',
+			'species.soundType' => 'Tipo de Sonido',
+			'species.recordedBy' => 'Grabado por',
+			'species.playSound' => 'Reproducir sonido',
+			'species.pauseSound' => 'Pausar sonido',
+			'species.markAsSeen' => 'Marcar como Vista',
+			'species.markAsNotSeen' => 'Desmarcar como Vista',
+			'species.seen' => 'Vista',
 			'conservation.EX' => 'Extinta',
 			'conservation.EW' => 'Extinta en Estado Silvestre',
 			'conservation.CR' => 'En Peligro Crítico',
@@ -1195,6 +1228,14 @@ extension on TranslationsEs {
 			'map.loginRequiredForSatellite' => 'Requiere iniciar sesión para vista satelital',
 			'map.filterSites' => 'Filtrar sitios',
 			'map.filterVisitSites' => 'Filtrar sitios de visita',
+			'map.communitySightings' => 'Avistamientos de la comunidad',
+			'map.sightingsCount' => ({required Object count}) => '${count} avistamiento(s)',
+			'map.wildlifeNow' => 'Wildlife Ahora',
+			'map.recentlySeenHere' => 'Visto recientemente aquí',
+			'map.addToWishlist' => 'Agregar a lista de deseos',
+			'map.removeFromWishlist' => 'Quitar de lista de deseos',
+			'map.wishlist' => 'Lista de deseos',
+			'map.myWishlist' => 'Mi lista de deseos',
 			'favorites.title' => 'Favoritos',
 			'favorites.empty' => 'Sin favoritos aún',
 			'favorites.emptySubtitle' => 'Toca el corazón en cualquier especie para agregarla aquí',
@@ -1251,6 +1292,11 @@ extension on TranslationsEs {
 			'sightings.searchNotes' => 'Buscar en notas...',
 			'sightings.activeFilters' => 'Filtros activos',
 			'sightings.allSites' => 'Todos los Sitios',
+			'sightings.photoTip' => 'Consejo de foto',
+			'sightings.photoTipBirds' => 'Para aves: acercate despacio y usa el zoom',
+			'sightings.photoTipReptiles' => 'Para reptiles: fotografa a la altura del ojo',
+			'sightings.photoTipMarine' => 'Para fauna marina: usa modo rafaga con luz natural',
+			'sightings.photoPossiblyBlurry' => 'La foto puede estar borrosa, intentar de nuevo?',
 			'auth.signIn' => 'Iniciar Sesión',
 			'auth.signUp' => 'Registrarse',
 			'auth.signOut' => 'Cerrar Sesión',
@@ -1292,6 +1338,10 @@ extension on TranslationsEs {
 			'auth.happyBirthday' => '¡Feliz Cumpleaños!',
 			'auth.happyBirthdayMessage' => '¡Te deseamos un increíble día explorando Galápagos!',
 			'auth.signUpPrompt' => '¿No tienes cuenta? Regístrate',
+			'auth.speciesChecklist' => 'Lista de Vistas',
+			'auth.visitSummary' => 'Resumen de Visita',
+			'auth.shareVisit' => 'Compartir Visita',
+			'auth.generateSummary' => 'Generar Resumen',
 			'settings.title' => 'Configuración',
 			'settings.language' => 'Idioma',
 			'settings.english' => 'English',
@@ -1509,6 +1559,8 @@ extension on TranslationsEs {
 			'admin.native' => 'Nativa',
 			'admin.introduced' => 'Introducida',
 			'admin.endemismLevel' => 'Nivel de Endemismo',
+			_ => null,
+		} ?? switch (path) {
 			'admin.endemismArchipelago' => 'Endémica del Archipiélago',
 			'admin.endemismIslandSpecific' => 'Endémica de Isla Específica',
 			'admin.behavior' => 'Comportamiento',
@@ -1534,8 +1586,6 @@ extension on TranslationsEs {
 			'admin.reproduction' => 'Reproducción',
 			'admin.breedingSeason' => 'Temporada de Cría',
 			'admin.clutchSize' => 'Tamaño de Postura',
-			_ => null,
-		} ?? switch (path) {
 			'admin.reproductiveFrequency' => 'Frecuencia Reproductiva',
 			'admin.distinguishingFeatures' => 'Características Distintivas',
 			'admin.distinguishingFeaturesEs' => 'Características Distintivas (ES)',

@@ -7,7 +7,9 @@ import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/cached_species_image.dart';
+import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import '../../providers/map_provider.dart';
+import '../../providers/site_wishlist_provider.dart';
 
 // ---------------------------------------------------------------------------
 // SiteInfoSheet — ficha completa de un sitio de visita
@@ -31,6 +33,8 @@ class SiteInfoSheet extends ConsumerWidget {
 
     final speciesAsync = ref.watch(siteSpeciesProvider(site.id));
     final classAsync = ref.watch(siteClassificationsProvider(site.id));
+    final sightingCountsAsync = ref.watch(siteSightingCountsProvider);
+    final recentSightingsAsync = ref.watch(recentSightingsBySiteProvider);
 
     final name = isEs ? site.nameEs : (site.nameEn ?? site.nameEs);
     final description = isEs
@@ -69,7 +73,7 @@ class SiteInfoSheet extends ConsumerWidget {
               controller: scrollController,
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
               children: [
-                // ── Name + monitoring type ──
+                // ── Name + monitoring type + wishlist ──
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -80,6 +84,22 @@ class SiteInfoSheet extends ConsumerWidget {
                       const SizedBox(width: 8),
                       _MonitoringChip(type: site.monitoringType!, isDark: isDark),
                     ],
+                    // Wishlist bookmark button (auth required)
+                    Consumer(builder: (ctx, ref, _) {
+                      final isLoggedIn = ref.watch(isAuthenticatedProvider);
+                      if (!isLoggedIn) return const SizedBox.shrink();
+                      final isInWishlist = ref.watch(isSiteInWishlistProvider(site.id));
+                      return IconButton(
+                        icon: Icon(
+                          isInWishlist ? Icons.bookmark : Icons.bookmark_border,
+                          color: isInWishlist ? Theme.of(ctx).colorScheme.primary : null,
+                        ),
+                        tooltip: isInWishlist
+                            ? (isEs ? 'Quitar de lista de deseos' : 'Remove from wishlist')
+                            : (isEs ? 'Agregar a lista de deseos' : 'Add to wishlist'),
+                        onPressed: () => toggleSiteWishlist(ref, site.id),
+                      );
+                    }),
                   ],
                 ),
 
@@ -116,6 +136,56 @@ class SiteInfoSheet extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(description, style: tt.bodyMedium),
                 ],
+
+                // ── Wildlife Now — recent sightings (last 48h) ──
+                Builder(builder: (context) {
+                  final recentBySite = recentSightingsAsync.asData?.value ?? {};
+                  final recent = recentBySite[site.id] ?? [];
+                  if (recent.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    margin: const EdgeInsets.only(top: 16),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.visibility, size: 16, color: Colors.green),
+                            const SizedBox(width: 6),
+                            Text(
+                              isEs ? 'Visto recientemente aqui' : 'Recently seen here',
+                              style: tt.bodyMedium?.copyWith(
+                                color: Colors.green.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ...recent.take(3).map((sighting) {
+                          final observedAt = sighting['observed_at'] != null
+                              ? DateTime.tryParse(sighting['observed_at'] as String)
+                              : null;
+                          final timeAgo = observedAt != null
+                              ? _timeAgo(observedAt, isEs)
+                              : '';
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              '${isEs ? 'Especie' : 'Species'} #${sighting['species_id']}  $timeAgo',
+                              style: tt.bodySmall,
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                }),
 
                 // ── Atractivo principal ──
                 if (site.attractionEs != null && site.attractionEs!.isNotEmpty) ...[
@@ -187,6 +257,31 @@ class SiteInfoSheet extends ConsumerWidget {
                     );
                   },
                 ),
+
+                // ── Community sightings count ──
+                Builder(builder: (context) {
+                  final counts = sightingCountsAsync.asData?.value ?? {};
+                  final count = counts[site.id] ?? 0;
+                  if (count == 0) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 4, bottom: 12),
+                    child: Row(
+                      children: [
+                        Icon(Icons.people_outline, size: 16, color: AppColors.primary),
+                        const SizedBox(width: 6),
+                        Text(
+                          isEs
+                              ? '$count avistamiento${count == 1 ? '' : 's'} de la comunidad'
+                              : '$count community sighting${count == 1 ? '' : 's'}',
+                          style: tt.bodySmall?.copyWith(
+                            color: isDark ? Colors.white70 : Colors.black54,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
 
                 // ── Especies en este sitio ──
                 const SizedBox(height: 20),
@@ -477,5 +572,16 @@ class _TagWrap extends StatelessWidget {
         );
       }).toList(),
     );
+  }
+}
+
+String _timeAgo(DateTime dt, bool isEs) {
+  final diff = DateTime.now().difference(dt);
+  if (diff.inHours < 1) {
+    return isEs ? 'hace menos de 1 hora' : 'less than 1 hour ago';
+  } else if (diff.inHours < 24) {
+    return isEs ? 'hace ${diff.inHours}h' : '${diff.inHours}h ago';
+  } else {
+    return isEs ? 'hace ${diff.inDays}d' : '${diff.inDays}d ago';
   }
 }

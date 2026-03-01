@@ -38,6 +38,9 @@ dependencies:
   flutter_map_tile_caching: ^10.1.1
   latlong2: ^0.9.1
 
+  # Audio
+  just_audio: ^0.9.41
+
   # Images & UI
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.16
@@ -70,6 +73,7 @@ dependencies:
   flutter_cache_manager: ^3.4.1
   background_downloader: ^8.5.7
   flutter_watch_os_connectivity: ^1.0.0
+  screenshot: ^3.0.0
 
 dev_dependencies:
   flutter_test:

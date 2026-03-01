@@ -321,6 +321,30 @@ class TranslationsSpeciesEn {
 
 	/// en: 'Activity Pattern'
 	String get activityPattern => 'Activity Pattern';
+
+	/// en: 'Sounds'
+	String get sounds => 'Sounds';
+
+	/// en: 'Sound Type'
+	String get soundType => 'Sound Type';
+
+	/// en: 'Recorded by'
+	String get recordedBy => 'Recorded by';
+
+	/// en: 'Play sound'
+	String get playSound => 'Play sound';
+
+	/// en: 'Pause sound'
+	String get pauseSound => 'Pause sound';
+
+	/// en: 'Mark as Seen'
+	String get markAsSeen => 'Mark as Seen';
+
+	/// en: 'Mark as Not Seen'
+	String get markAsNotSeen => 'Mark as Not Seen';
+
+	/// en: 'Seen'
+	String get seen => 'Seen';
 }
 
 // Path: conservation
@@ -627,6 +651,30 @@ class TranslationsMapEn {
 
 	/// en: 'Filter visit sites'
 	String get filterVisitSites => 'Filter visit sites';
+
+	/// en: 'Community sightings'
+	String get communitySightings => 'Community sightings';
+
+	/// en: '${count} sighting(s)'
+	String sightingsCount({required Object count}) => '${count} sighting(s)';
+
+	/// en: 'Wildlife Now'
+	String get wildlifeNow => 'Wildlife Now';
+
+	/// en: 'Recently seen here'
+	String get recentlySeenHere => 'Recently seen here';
+
+	/// en: 'Add to wishlist'
+	String get addToWishlist => 'Add to wishlist';
+
+	/// en: 'Remove from wishlist'
+	String get removeFromWishlist => 'Remove from wishlist';
+
+	/// en: 'Wishlist'
+	String get wishlist => 'Wishlist';
+
+	/// en: 'My Wishlist'
+	String get myWishlist => 'My Wishlist';
 }
 
 // Path: favorites
@@ -813,6 +861,21 @@ class TranslationsSightingsEn {
 
 	/// en: 'All Sites'
 	String get allSites => 'All Sites';
+
+	/// en: 'Photo tip'
+	String get photoTip => 'Photo tip';
+
+	/// en: 'For birds: approach slowly and use zoom'
+	String get photoTipBirds => 'For birds: approach slowly and use zoom';
+
+	/// en: 'For reptiles: shoot at eye level'
+	String get photoTipReptiles => 'For reptiles: shoot at eye level';
+
+	/// en: 'For marine life: use burst mode with natural light'
+	String get photoTipMarine => 'For marine life: use burst mode with natural light';
+
+	/// en: 'Photo may be blurry — try again?'
+	String get photoPossiblyBlurry => 'Photo may be blurry — try again?';
 }
 
 // Path: auth
@@ -945,6 +1008,18 @@ class TranslationsAuthEn {
 
 	/// en: 'Don't have an account? Sign up'
 	String get signUpPrompt => 'Don\'t have an account? Sign up';
+
+	/// en: 'Visit Summary'
+	String get visitSummary => 'Visit Summary';
+
+	/// en: 'Share Visit'
+	String get shareVisit => 'Share Visit';
+
+	/// en: 'Generate Summary'
+	String get generateSummary => 'Generate Summary';
+
+	/// en: 'Checklist'
+	String get speciesChecklist => 'Checklist';
 }
 
 // Path: settings
@@ -2553,6 +2628,14 @@ extension on Translations {
 			'species.bestTimeToVisit' => 'Best Time to Visit',
 			'species.breedingSeason' => 'Breeding Season',
 			'species.activityPattern' => 'Activity Pattern',
+			'species.sounds' => 'Sounds',
+			'species.soundType' => 'Sound Type',
+			'species.recordedBy' => 'Recorded by',
+			'species.playSound' => 'Play sound',
+			'species.pauseSound' => 'Pause sound',
+			'species.markAsSeen' => 'Mark as Seen',
+			'species.markAsNotSeen' => 'Mark as Not Seen',
+			'species.seen' => 'Seen',
 			'conservation.EX' => 'Extinct',
 			'conservation.EW' => 'Extinct in Wild',
 			'conservation.CR' => 'Critically Endangered',
@@ -2649,6 +2732,14 @@ extension on Translations {
 			'map.loginRequiredForSatellite' => 'Login required for satellite view',
 			'map.filterSites' => 'Filter sites',
 			'map.filterVisitSites' => 'Filter visit sites',
+			'map.communitySightings' => 'Community sightings',
+			'map.sightingsCount' => ({required Object count}) => '${count} sighting(s)',
+			'map.wildlifeNow' => 'Wildlife Now',
+			'map.recentlySeenHere' => 'Recently seen here',
+			'map.addToWishlist' => 'Add to wishlist',
+			'map.removeFromWishlist' => 'Remove from wishlist',
+			'map.wishlist' => 'Wishlist',
+			'map.myWishlist' => 'My Wishlist',
 			'favorites.title' => 'Favorites',
 			'favorites.empty' => 'No favorites yet',
 			'favorites.emptySubtitle' => 'Tap the heart icon on any species to add it here',
@@ -2705,6 +2796,11 @@ extension on Translations {
 			'sightings.searchNotes' => 'Search notes...',
 			'sightings.activeFilters' => 'Active filters',
 			'sightings.allSites' => 'All Sites',
+			'sightings.photoTip' => 'Photo tip',
+			'sightings.photoTipBirds' => 'For birds: approach slowly and use zoom',
+			'sightings.photoTipReptiles' => 'For reptiles: shoot at eye level',
+			'sightings.photoTipMarine' => 'For marine life: use burst mode with natural light',
+			'sightings.photoPossiblyBlurry' => 'Photo may be blurry — try again?',
 			'auth.signIn' => 'Sign In',
 			'auth.signUp' => 'Sign Up',
 			'auth.signOut' => 'Sign Out',
@@ -2746,6 +2842,10 @@ extension on Translations {
 			'auth.happyBirthday' => 'Happy Birthday!',
 			'auth.happyBirthdayMessage' => 'Wishing you an amazing day exploring the Galápagos!',
 			'auth.signUpPrompt' => 'Don\'t have an account? Sign up',
+			'auth.visitSummary' => 'Visit Summary',
+			'auth.shareVisit' => 'Share Visit',
+			'auth.generateSummary' => 'Generate Summary',
+			'auth.speciesChecklist' => 'Checklist',
 			'settings.title' => 'Settings',
 			'settings.language' => 'Language',
 			'settings.english' => 'English',
@@ -2963,6 +3063,8 @@ extension on Translations {
 			'admin.native' => 'Native',
 			'admin.introduced' => 'Introduced',
 			'admin.endemismLevel' => 'Endemism Level',
+			_ => null,
+		} ?? switch (path) {
 			'admin.endemismArchipelago' => 'Archipelago Endemic',
 			'admin.endemismIslandSpecific' => 'Island-Specific Endemic',
 			'admin.behavior' => 'Behavior',
@@ -2988,8 +3090,6 @@ extension on Translations {
 			'admin.reproduction' => 'Reproduction',
 			'admin.breedingSeason' => 'Breeding Season',
 			'admin.clutchSize' => 'Clutch Size',
-			_ => null,
-		} ?? switch (path) {
 			'admin.reproductiveFrequency' => 'Reproductive Frequency',
 			'admin.distinguishingFeatures' => 'Distinguishing Features',
 			'admin.distinguishingFeaturesEs' => 'Distinguishing Features (ES)',

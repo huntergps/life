@@ -131,6 +131,26 @@ class SpeciesListCard extends ConsumerWidget {
     }
   }
 
+  Widget _buildIucnBadge() {
+    final color = _statusColor(conservationStatus!);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        conservationStatus!,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          color: Colors.white,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
   // ── Image + name overlay ──────────────────────────────────────────────────
   Widget _buildImageStack() {
     return Stack(
@@ -159,6 +179,13 @@ class SpeciesListCard extends ConsumerWidget {
             ),
           ),
         ),
+        // IUCN conservation badge (top-left)
+        if (conservationStatus != null)
+          Positioned(
+            top: 6,
+            left: 6,
+            child: _buildIucnBadge(),
+          ),
         // Name + endemic badge
         Positioned(
           left: 10,

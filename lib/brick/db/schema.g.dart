@@ -1,7 +1,8 @@
 // GENERATED CODE DO NOT EDIT
 // This file should be version controlled
 import 'package:brick_sqlite/db.dart';
-part '20260224031718.migration.dart';
+part '20260301221322.migration.dart';
+part '20260301221322.migration.dart';
 part '20260211025650.migration.dart';
 part '20260212070549.migration.dart';
 part '20260212075533.migration.dart';
@@ -12,11 +13,13 @@ part '20260216070245.migration.dart';
 part '20260218143342.migration.dart';
 part '20260223183752.migration.dart';
 part '20260223201904.migration.dart';
+part '20260224031718.migration.dart';
 part '20260224040000.migration.dart';
 
 /// All intelligently-generated migrations from all `@Migratable` classes on disk
 final migrations = <Migration>{
-  const Migration20260224031718(),
+  const Migration20260301221322(),
+  const Migration20260301221322(),
   const Migration20260211025650(),
   const Migration20260212070549(),
   const Migration20260212075533(),
@@ -27,12 +30,13 @@ final migrations = <Migration>{
   const Migration20260218143342(),
   const Migration20260223183752(),
   const Migration20260223201904(),
+  const Migration20260224031718(),
   const Migration20260224040000(),
 };
 
 /// A consumable database structure including the latest generated migration.
 final schema = Schema(
-  20260223201904,
+  20260224040000,
   generatorVersion: 1,
   tables: <SchemaTable>{
     SchemaTable(
@@ -321,6 +325,40 @@ final schema = Schema(
         SchemaColumn('avatar_url', Column.varchar),
         SchemaColumn('created_at', Column.datetime),
         SchemaColumn('updated_at', Column.datetime),
+      },
+      indices: <SchemaIndex>{},
+    ),
+    SchemaTable(
+      'UserSiteWishlist',
+      columns: <SchemaColumn>{
+        SchemaColumn(
+          '_brick_id',
+          Column.integer,
+          autoincrement: true,
+          nullable: false,
+          isPrimaryKey: true,
+        ),
+        SchemaColumn('id', Column.integer),
+        SchemaColumn('user_id', Column.varchar),
+        SchemaColumn('visit_site_id', Column.integer),
+        SchemaColumn('created_at', Column.datetime),
+      },
+      indices: <SchemaIndex>{},
+    ),
+    SchemaTable(
+      'UserSpeciesChecklist',
+      columns: <SchemaColumn>{
+        SchemaColumn(
+          '_brick_id',
+          Column.integer,
+          autoincrement: true,
+          nullable: false,
+          isPrimaryKey: true,
+        ),
+        SchemaColumn('id', Column.integer),
+        SchemaColumn('user_id', Column.varchar),
+        SchemaColumn('species_id', Column.integer),
+        SchemaColumn('seen_at', Column.datetime),
       },
       indices: <SchemaIndex>{},
     ),
