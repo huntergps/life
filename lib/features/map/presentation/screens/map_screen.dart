@@ -29,6 +29,7 @@ import '../../providers/field_edit_provider.dart';
 import '../../providers/gps_tracking_provider.dart';
 import '../../services/field_edit_service.dart';
 import '../../themes/protomaps_theme.dart';
+import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import '../../utils/route_utils.dart';
 import '../widgets/map_download_sheet.dart';
 import '../widgets/map_layer_builders.dart';
@@ -340,7 +341,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 Icons.tune,
                 color: hasFilter ? AppColors.accentOrange : null,
               ),
-              tooltip: 'Filtrar sitios',
+              tooltip: context.t.map.filterSites,
               onPressed: () => _showSiteFilterSheet(context, sitesAsync, islandsAsync),
             ),
           ],
@@ -524,7 +525,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   child: Row(
                     children: [
                       Text(
-                        isEs ? 'Filtrar sitios de visita' : 'Filter visit sites',
+                        ctx2.t.map.filterVisitSites,
                         style: Theme.of(ctx2).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       const Spacer(),
@@ -1199,7 +1200,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             },
             errorTileCallback: (tile, error, stackTrace) {
               // Debug: log tile errors
-              print('Tile error at ${tile.coordinates}: $error');
+              AppLogger.warning('Tile error at ${tile.coordinates}: $error');
             },
           )
         else if (tileMode == MapTileMode.hybrid) ...[
@@ -1214,7 +1215,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             retinaMode: false,
             tileProvider: _tileProvider('satelliteCache'),
             errorTileCallback: (tile, error, stackTrace) {
-              print('ESRI tile error at ${tile.coordinates}: $error');
+              AppLogger.warning('ESRI tile error at ${tile.coordinates}: $error');
             },
           ),
           // CartoDB labels overlay (FREE)
@@ -1228,7 +1229,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             retinaMode: false,
             tileProvider: _tileProvider('labelsCache'),
             errorTileCallback: (tile, error, stackTrace) {
-              print('CartoDB tile error at ${tile.coordinates}: $error');
+              AppLogger.warning('CartoDB tile error at ${tile.coordinates}: $error');
             },
           ),
         ] else ...[
@@ -1399,7 +1400,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       _mapController.camera.center,
                       (zoom + 1).clamp(6, 19),
                     );
-                  } catch (_) {}
+                  } catch (_) {
+                    AppLogger.warning('Zoom in failed: map controller not ready', _);
+                  }
                 },
               ),
               const SizedBox(height: 8),
@@ -1413,7 +1416,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       _mapController.camera.center,
                       (zoom - 1).clamp(6, 19),
                     );
-                  } catch (_) {}
+                  } catch (_) {
+                    AppLogger.warning('Zoom out failed: map controller not ready', _);
+                  }
                 },
               ),
             ],
@@ -1544,7 +1549,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                             LatLng(userPos.latitude, userPos.longitude),
                             14,
                           );
-                        } catch (_) {}
+                        } catch (_) {
+                          AppLogger.warning('Go to my location failed: map controller not ready', _);
+                        }
                       } else {
                         // Refresh location provider
                         ref.invalidate(userLocationProvider);

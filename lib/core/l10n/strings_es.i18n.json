@@ -174,7 +174,9 @@
     "modeSatelliteDesc": "Imágenes satelitales de alta resolución (ESRI)",
     "modeHybrid": "Híbrido",
     "modeHybridDesc": "Imágenes satelitales con etiquetas",
-    "loginRequiredForSatellite": "Requiere iniciar sesión para vista satelital"
+    "loginRequiredForSatellite": "Requiere iniciar sesión para vista satelital",
+    "filterSites": "Filtrar sitios",
+    "filterVisitSites": "Filtrar sitios de visita"
   },
   "favorites": {
     "title": "Favoritos",
