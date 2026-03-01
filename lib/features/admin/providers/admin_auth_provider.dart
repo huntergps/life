@@ -27,8 +27,20 @@ final _adminCheckProvider = FutureProvider<bool>((ref) async {
 
 /// Keeps the last known value so UI never flickers.
 /// Initialized from SharedPreferences for offline persistence.
+/// Cache expires after 30 minutes to force a re-check with the server.
 final _adminCacheProvider = StateProvider<bool?>((ref) {
-  return Bootstrap.prefs.getBool('is_admin');
+  final prefs = Bootstrap.prefs;
+  final cachedAt = prefs.getInt('admin_status_timestamp');
+  if (cachedAt != null) {
+    final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
+    if (age > 30 * 60 * 1000) {
+      // Cache expired — remove stale data so we re-fetch from server.
+      prefs.remove('is_admin');
+      prefs.remove('admin_status_timestamp');
+      return null;
+    }
+  }
+  return prefs.getBool('is_admin');
 });
 
 final isAdminProvider = Provider<AsyncValue<bool>>((ref) {
@@ -37,10 +49,14 @@ final isAdminProvider = Provider<AsyncValue<bool>>((ref) {
 
   return asyncResult.when(
     data: (value) {
-      // Update cache in memory + SharedPreferences
+      // Update cache in memory + SharedPreferences (with timestamp).
       Future.microtask(() {
         ref.read(_adminCacheProvider.notifier).state = value;
         Bootstrap.prefs.setBool('is_admin', value);
+        Bootstrap.prefs.setInt(
+          'admin_status_timestamp',
+          DateTime.now().millisecondsSinceEpoch,
+        );
       });
       return AsyncValue.data(value);
     },

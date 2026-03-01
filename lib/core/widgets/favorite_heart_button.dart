@@ -77,9 +77,12 @@ class _FavoriteHeartButtonState extends ConsumerState<FavoriteHeartButton>
       children: [
         ScaleTransition(
           scale: _scaleAnim,
-          child: GestureDetector(
-            onTap: () => _onTap(isFavorite),
-            child: widget.showBackground
+          child: Semantics(
+            button: true,
+            label: isFavorite ? 'Remove from favorites' : 'Add to favorites',
+            child: GestureDetector(
+              onTap: () => _onTap(isFavorite),
+              child: widget.showBackground
                 ? Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
@@ -92,6 +95,7 @@ class _FavoriteHeartButtonState extends ConsumerState<FavoriteHeartButton>
                     padding: const EdgeInsets.all(8),
                     child: heartIcon,
                   ),
+            ),
           ),
         ),
         if (_showHearts)
