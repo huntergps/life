@@ -1923,6 +1923,9 @@ class TranslationsCommonEn {
 	/// en: 'Offline Mode'
 	String get offlineMode => 'Offline Mode';
 
+	/// en: 'Working with cached data'
+	String get offlineMessage => 'Working with cached data';
+
 	/// en: 'Technical Details'
 	String get details => 'Technical Details';
 }
@@ -2806,6 +2809,7 @@ extension on Translations {
 			'common.offline' => 'You are offline',
 			'common.offlineSubtitle' => 'Some features may be limited',
 			'common.offlineMode' => 'Offline Mode',
+			'common.offlineMessage' => 'Working with cached data',
 			'common.details' => 'Technical Details',
 			'error.network' => 'No Internet Connection',
 			'error.networkDesc' => 'Please check your internet connection and try again.',

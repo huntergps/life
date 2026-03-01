@@ -24,7 +24,7 @@ class OfflineBanner extends StatelessWidget {
           const SizedBox(width: 6),
           Expanded(
             child: Text(
-              '${t.common.offline} · ${t.common.offlineSubtitle}',
+              '${t.common.offline} · ${t.common.offlineMessage}',
               style: const TextStyle(
                 fontSize: 11,
                 color: Colors.white70,

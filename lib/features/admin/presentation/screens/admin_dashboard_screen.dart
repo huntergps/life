@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
+import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import '../../providers/admin_category_provider.dart';
 import '../widgets/admin_entity_tile.dart';
 
@@ -86,23 +87,12 @@ class AdminDashboardScreen extends ConsumerWidget {
       ),
       body: countsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, size: 48, color: AppColors.error),
-              const SizedBox(height: 16),
-              Text('${context.t.common.error}: $e'),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () {
-                  ref.invalidate(_dashboardCountsProvider);
-                  ref.invalidate(_dashboardStatsProvider);
-                },
-                child: Text(context.t.common.retry),
-              ),
-            ],
-          ),
+        error: (e, _) => ErrorStateWidget(
+          error: e,
+          onRetry: () {
+            ref.invalidate(_dashboardCountsProvider);
+            ref.invalidate(_dashboardStatsProvider);
+          },
         ),
         data: (counts) {
           final crossAxisCount = AdaptiveLayout.gridColumns(context);

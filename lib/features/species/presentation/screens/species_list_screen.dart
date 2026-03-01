@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import '../../providers/species_list_provider.dart';
 import 'package:galapagos_wildlife/core/widgets/species_list_card.dart';
 import 'package:galapagos_wildlife/core/widgets/search_bar_widget.dart';
@@ -345,18 +346,9 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(context.t.common.error),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () => ref.invalidate(allSpeciesProvider),
-                          child: Text(context.t.common.retry),
-                        ),
-                      ],
-                    ),
+                  error: (e, _) => ErrorStateWidget(
+                    error: e,
+                    onRetry: () => ref.invalidate(allSpeciesProvider),
                   ),
                 ),
               ),

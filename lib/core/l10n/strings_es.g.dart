@@ -764,6 +764,7 @@ class _TranslationsCommonEs implements TranslationsCommonEn {
 	@override String get offline => 'Estás sin conexión';
 	@override String get offlineSubtitle => 'Algunas funciones pueden estar limitadas';
 	@override String get offlineMode => 'Modo Sin Conexión';
+	@override String get offlineMessage => 'Trabajando con datos en caché';
 	@override String get details => 'Detalles Técnicos';
 }
 
@@ -1514,6 +1515,7 @@ extension on TranslationsEs {
 			'common.offline' => 'Estás sin conexión',
 			'common.offlineSubtitle' => 'Algunas funciones pueden estar limitadas',
 			'common.offlineMode' => 'Modo Sin Conexión',
+			'common.offlineMessage' => 'Trabajando con datos en caché',
 			'common.details' => 'Detalles Técnicos',
 			'error.network' => 'Sin Conexión a Internet',
 			'error.networkDesc' => 'Por favor verifica tu conexión a internet e intenta nuevamente.',

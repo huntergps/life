@@ -125,7 +125,7 @@ class ErrorStateWidget extends StatelessWidget {
                   OutlinedButton.icon(
                     onPressed: onOfflineMode,
                     icon: const Icon(Icons.cloud_off, size: 20),
-                    label: Text(context.t.common.offlineMode ?? 'Offline Mode'),
+                    label: Text(context.t.common.offlineMode),
                   ),
               ],
             ),
@@ -134,7 +134,7 @@ class ErrorStateWidget extends StatelessWidget {
             if (errorType == ErrorType.unknown || errorType == ErrorType.parsing)
               ExpansionTile(
                 title: Text(
-                  context.t.common.details ?? 'Technical Details',
+                  context.t.common.details,
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
                 children: [
@@ -186,17 +186,17 @@ class ErrorStateWidget extends StatelessWidget {
   String _getErrorTitle(BuildContext context, ErrorType type) {
     switch (type) {
       case ErrorType.network:
-        return context.t.error.network ?? 'No Internet Connection';
+        return context.t.error.network;
       case ErrorType.timeout:
-        return context.t.error.timeout ?? 'Request Timed Out';
+        return context.t.error.timeout;
       case ErrorType.parsing:
-        return context.t.error.parsing ?? 'Data Error';
+        return context.t.error.parsing;
       case ErrorType.authentication:
-        return context.t.error.authentication ?? 'Authentication Error';
+        return context.t.error.authentication;
       case ErrorType.notFound:
-        return context.t.error.notFound ?? 'Not Found';
+        return context.t.error.notFound;
       case ErrorType.serverError:
-        return context.t.error.serverError ?? 'Server Error';
+        return context.t.error.serverError;
       case ErrorType.unknown:
         return context.t.common.error;
     }
@@ -205,26 +205,19 @@ class ErrorStateWidget extends StatelessWidget {
   String _getErrorDescription(BuildContext context, ErrorType type) {
     switch (type) {
       case ErrorType.network:
-        return context.t.error.networkDesc ??
-            'Please check your internet connection and try again.';
+        return context.t.error.networkDesc;
       case ErrorType.timeout:
-        return context.t.error.timeoutDesc ??
-            'The request took too long. Please try again later.';
+        return context.t.error.timeoutDesc;
       case ErrorType.parsing:
-        return context.t.error.parsingDesc ??
-            'Unable to process the data. Please try again or contact support.';
+        return context.t.error.parsingDesc;
       case ErrorType.authentication:
-        return context.t.error.authenticationDesc ??
-            'Your session has expired. Please sign in again.';
+        return context.t.error.authenticationDesc;
       case ErrorType.notFound:
-        return context.t.error.notFoundDesc ??
-            'The requested resource was not found.';
+        return context.t.error.notFoundDesc;
       case ErrorType.serverError:
-        return context.t.error.serverErrorDesc ??
-            'The server is experiencing issues. Please try again later.';
+        return context.t.error.serverErrorDesc;
       case ErrorType.unknown:
-        return context.t.error.unknownDesc ??
-            'An unexpected error occurred. Please try again.';
+        return context.t.error.unknownDesc;
     }
   }
 }

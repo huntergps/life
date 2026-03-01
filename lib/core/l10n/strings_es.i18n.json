@@ -609,6 +609,7 @@
     "offline": "Estás sin conexión",
     "offlineSubtitle": "Algunas funciones pueden estar limitadas",
     "offlineMode": "Modo Sin Conexión",
+    "offlineMessage": "Trabajando con datos en caché",
     "details": "Detalles Técnicos"
   },
   "error": {
