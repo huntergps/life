@@ -1541,6 +1541,138 @@ class TranslationsAdminEn {
 
 	/// en: 'Manage access and roles'
 	String get manageUsers => 'Manage access and roles';
+
+	/// en: 'Details'
+	String get tabDetails => 'Details';
+
+	/// en: 'Population Trend'
+	String get populationTrend => 'Population Trend';
+
+	/// en: 'Increasing'
+	String get trendIncreasing => 'Increasing';
+
+	/// en: 'Stable'
+	String get trendStable => 'Stable';
+
+	/// en: 'Decreasing'
+	String get trendDecreasing => 'Decreasing';
+
+	/// en: 'Unknown'
+	String get trendUnknown => 'Unknown';
+
+	/// en: 'Native'
+	String get native => 'Native';
+
+	/// en: 'Introduced'
+	String get introduced => 'Introduced';
+
+	/// en: 'Endemism Level'
+	String get endemismLevel => 'Endemism Level';
+
+	/// en: 'Archipelago Endemic'
+	String get endemismArchipelago => 'Archipelago Endemic';
+
+	/// en: 'Island-Specific Endemic'
+	String get endemismIslandSpecific => 'Island-Specific Endemic';
+
+	/// en: 'Behavior'
+	String get behavior => 'Behavior';
+
+	/// en: 'Social Structure'
+	String get socialStructure => 'Social Structure';
+
+	/// en: 'Solitary'
+	String get socialSolitary => 'Solitary';
+
+	/// en: 'Pair'
+	String get socialPair => 'Pair';
+
+	/// en: 'Small Group'
+	String get socialSmallGroup => 'Small Group';
+
+	/// en: 'Colony'
+	String get socialColony => 'Colony';
+
+	/// en: 'Harem'
+	String get socialHarem => 'Harem';
+
+	/// en: 'Activity Pattern'
+	String get activityPattern => 'Activity Pattern';
+
+	/// en: 'Diurnal'
+	String get activityDiurnal => 'Diurnal';
+
+	/// en: 'Nocturnal'
+	String get activityNocturnal => 'Nocturnal';
+
+	/// en: 'Crepuscular'
+	String get activityCrepuscular => 'Crepuscular';
+
+	/// en: 'Diet Type'
+	String get dietType => 'Diet Type';
+
+	/// en: 'Carnivore'
+	String get dietCarnivore => 'Carnivore';
+
+	/// en: 'Herbivore'
+	String get dietHerbivore => 'Herbivore';
+
+	/// en: 'Omnivore'
+	String get dietOmnivore => 'Omnivore';
+
+	/// en: 'Insectivore'
+	String get dietInsectivore => 'Insectivore';
+
+	/// en: 'Piscivore'
+	String get dietPiscivore => 'Piscivore';
+
+	/// en: 'Frugivore'
+	String get dietFrugivore => 'Frugivore';
+
+	/// en: 'Nectarivore'
+	String get dietNectarivore => 'Nectarivore';
+
+	/// en: 'Primary Food Sources'
+	String get primaryFoodSources => 'Primary Food Sources';
+
+	/// en: 'Reproduction'
+	String get reproduction => 'Reproduction';
+
+	/// en: 'Breeding Season'
+	String get breedingSeason => 'Breeding Season';
+
+	/// en: 'Clutch Size'
+	String get clutchSize => 'Clutch Size';
+
+	/// en: 'Reproductive Frequency'
+	String get reproductiveFrequency => 'Reproductive Frequency';
+
+	/// en: 'Distinguishing Features'
+	String get distinguishingFeatures => 'Distinguishing Features';
+
+	/// en: 'Distinguishing Features (ES)'
+	String get distinguishingFeaturesEs => 'Distinguishing Features (ES)';
+
+	/// en: 'Distinguishing Features (EN)'
+	String get distinguishingFeaturesEn => 'Distinguishing Features (EN)';
+
+	/// en: 'Sexual Dimorphism'
+	String get sexualDimorphism => 'Sexual Dimorphism';
+
+	/// en: 'Geographic Ranges'
+	String get geographicRanges => 'Geographic Ranges';
+
+	/// en: 'Altitude Min (m)'
+	String get altitudeMinM => 'Altitude Min (m)';
+
+	/// en: 'Altitude Max (m)'
+	String get altitudeMaxM => 'Altitude Max (m)';
+
+	/// en: 'Depth Min (m)'
+	String get depthMinM => 'Depth Min (m)';
+
+	/// en: 'Depth Max (m)'
+	String get depthMaxM => 'Depth Max (m)';
 }
 
 // Path: badges
@@ -2548,11 +2680,57 @@ extension on Translations {
 			'admin.manageCatalogs' => 'Types, modalities & activities',
 			'admin.users' => 'Users',
 			'admin.manageUsers' => 'Manage access and roles',
+			'admin.tabDetails' => 'Details',
+			'admin.populationTrend' => 'Population Trend',
+			'admin.trendIncreasing' => 'Increasing',
+			'admin.trendStable' => 'Stable',
+			'admin.trendDecreasing' => 'Decreasing',
+			'admin.trendUnknown' => 'Unknown',
+			'admin.native' => 'Native',
+			'admin.introduced' => 'Introduced',
+			'admin.endemismLevel' => 'Endemism Level',
+			'admin.endemismArchipelago' => 'Archipelago Endemic',
+			'admin.endemismIslandSpecific' => 'Island-Specific Endemic',
+			'admin.behavior' => 'Behavior',
+			'admin.socialStructure' => 'Social Structure',
+			'admin.socialSolitary' => 'Solitary',
+			'admin.socialPair' => 'Pair',
+			'admin.socialSmallGroup' => 'Small Group',
+			'admin.socialColony' => 'Colony',
+			'admin.socialHarem' => 'Harem',
+			'admin.activityPattern' => 'Activity Pattern',
+			'admin.activityDiurnal' => 'Diurnal',
+			'admin.activityNocturnal' => 'Nocturnal',
+			'admin.activityCrepuscular' => 'Crepuscular',
+			'admin.dietType' => 'Diet Type',
+			'admin.dietCarnivore' => 'Carnivore',
+			'admin.dietHerbivore' => 'Herbivore',
+			'admin.dietOmnivore' => 'Omnivore',
+			'admin.dietInsectivore' => 'Insectivore',
+			'admin.dietPiscivore' => 'Piscivore',
+			'admin.dietFrugivore' => 'Frugivore',
+			'admin.dietNectarivore' => 'Nectarivore',
+			'admin.primaryFoodSources' => 'Primary Food Sources',
+			'admin.reproduction' => 'Reproduction',
+			'admin.breedingSeason' => 'Breeding Season',
+			'admin.clutchSize' => 'Clutch Size',
+			'admin.reproductiveFrequency' => 'Reproductive Frequency',
+			'admin.distinguishingFeatures' => 'Distinguishing Features',
+			'admin.distinguishingFeaturesEs' => 'Distinguishing Features (ES)',
+			'admin.distinguishingFeaturesEn' => 'Distinguishing Features (EN)',
+			'admin.sexualDimorphism' => 'Sexual Dimorphism',
+			'admin.geographicRanges' => 'Geographic Ranges',
+			'admin.altitudeMinM' => 'Altitude Min (m)',
+			'admin.altitudeMaxM' => 'Altitude Max (m)',
+			'admin.depthMinM' => 'Depth Min (m)',
+			'admin.depthMaxM' => 'Depth Max (m)',
 			'badges.title' => 'Achievements',
 			'badges.empty' => 'No badges yet',
 			'badges.emptySubtitle' => 'Start exploring to earn badges!',
 			'badges.unlocked' => 'Unlocked!',
 			'badges.locked' => 'Locked',
+			_ => null,
+		} ?? switch (path) {
 			'badges.progress' => ({required Object current, required Object target}) => '${current} / ${target}',
 			'badges.firstSighting' => 'First Sighting',
 			'badges.firstSightingDesc' => 'Record your first wildlife sighting',
@@ -2597,8 +2775,6 @@ extension on Translations {
 			'offline.pending' => 'Pending',
 			'offline.allSynced' => 'All synced',
 			'offline.syncNow' => 'Sync Now',
-			_ => null,
-		} ?? switch (path) {
 			'common.loading' => 'Loading...',
 			'common.error' => 'Something went wrong',
 			'common.retry' => 'Retry',
