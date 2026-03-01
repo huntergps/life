@@ -16,6 +16,9 @@ import 'package:galapagos_wildlife/features/sightings/services/sightings_service
 import 'package:galapagos_wildlife/features/sightings/services/sightings_csv_export.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:galapagos_wildlife/features/sightings/presentation/widgets/sighting_detail.dart';
+import 'package:galapagos_wildlife/features/sightings/presentation/widgets/sightings_filter_bar.dart';
+import 'package:galapagos_wildlife/features/sightings/utils/sightings_grouping.dart';
 
 /// Tracks the selected sighting index for master-detail on tablet.
 final _selectedSightingIndexProvider = StateProvider<int?>((ref) => null);
@@ -159,7 +162,7 @@ class _PhoneSightings extends ConsumerWidget {
         child: Column(
           children: [
             // Filter bar
-            _AnimatedFilterBar(
+            AnimatedSightingsFilterBar(
               show: showFilters,
               speciesMap: speciesMap,
               isDark: isDark,
@@ -314,7 +317,7 @@ class _TabletSightings extends StatelessWidget {
       body: Column(
         children: [
           // Filter bar
-          _AnimatedFilterBar(
+          AnimatedSightingsFilterBar(
             show: showFilters,
             speciesMap: speciesMap,
             isDark: isDark,
@@ -426,7 +429,7 @@ class _TabletSightings extends StatelessWidget {
                     Expanded(
                       child: selectedIndex != null &&
                               selectedIndex < sightings.length
-                          ? _SightingDetail(
+                          ? SightingDetail(
                               sighting: sightings[selectedIndex],
                               species: speciesMap[
                                   sightings[selectedIndex].speciesId],
@@ -501,23 +504,9 @@ class _CalendarGroupedView extends StatelessWidget {
     this.selectedSighting,
   });
 
-  /// Groups sightings by "yyyy-MM" key, ordered newest first.
-  Map<String, List<Sighting>> _groupByMonth(List<Sighting> sightings) {
-    final grouped = <String, List<Sighting>>{};
-    for (final s in sightings) {
-      final date = s.observedAt ?? DateTime(1970);
-      final key = '${date.year}-${date.month.toString().padLeft(2, '0')}';
-      grouped.putIfAbsent(key, () => []).add(s);
-    }
-    // Sort keys newest first
-    final sortedKeys = grouped.keys.toList()
-      ..sort((a, b) => b.compareTo(a));
-    return {for (final k in sortedKeys) k: grouped[k]!};
-  }
-
   @override
   Widget build(BuildContext context) {
-    final grouped = _groupByMonth(sightings);
+    final grouped = groupSightingsByMonth(sightings);
     final locale = isEs ? 'es' : 'en';
     final monthFormat = DateFormat.yMMMM(locale);
 
@@ -525,8 +514,7 @@ class _CalendarGroupedView extends StatelessWidget {
     final items = <_CalendarListItem>[];
     for (final entry in grouped.entries) {
       // Parse the key back to a DateTime for formatting
-      final parts = entry.key.split('-');
-      final headerDate = DateTime(int.parse(parts[0]), int.parse(parts[1]));
+      final headerDate = monthKeyToDateTime(entry.key);
       items.add(_CalendarListItem.header(monthFormat.format(headerDate)));
       for (final s in entry.value) {
         items.add(_CalendarListItem.sighting(s));
@@ -785,266 +773,6 @@ class _CalendarSightingTile extends StatelessWidget {
   }
 }
 
-// ── Filter bar ──
-
-class _AnimatedFilterBar extends ConsumerWidget {
-  final bool show;
-  final Map<int, Species> speciesMap;
-  final bool isDark;
-  final bool isEs;
-
-  const _AnimatedFilterBar({
-    required this.show,
-    required this.speciesMap,
-    required this.isDark,
-    required this.isEs,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-      child: show
-          ? _FilterBar(
-              speciesMap: speciesMap,
-              isDark: isDark,
-              isEs: isEs,
-            )
-          : const SizedBox.shrink(),
-    );
-  }
-}
-
-class _FilterBar extends ConsumerWidget {
-  final Map<int, Species> speciesMap;
-  final bool isDark;
-  final bool isEs;
-
-  const _FilterBar({
-    required this.speciesMap,
-    required this.isDark,
-    required this.isEs,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final speciesFilter = ref.watch(sightingSpeciesFilterProvider);
-    final dateFrom = ref.watch(sightingDateFromProvider);
-    final dateTo = ref.watch(sightingDateToProvider);
-    final hasFilters = ref.watch(hasActiveFiltersProvider);
-
-    // Build species label
-    String speciesLabel;
-    if (speciesFilter != null && speciesMap.containsKey(speciesFilter)) {
-      final sp = speciesMap[speciesFilter]!;
-      speciesLabel = isEs ? sp.commonNameEs : sp.commonNameEn;
-    } else {
-      speciesLabel = context.t.sightings.allSpecies;
-    }
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.darkCard.withValues(alpha: 0.6)
-            : Colors.grey.shade50,
-        border: Border(
-          bottom: BorderSide(
-            color: isDark ? AppColors.darkBorder : Colors.grey.shade200,
-          ),
-        ),
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            // Species filter chip
-            FilterChip(
-              avatar: const Icon(Icons.pets, size: 18),
-              label: Text(
-                speciesLabel,
-                overflow: TextOverflow.ellipsis,
-              ),
-              selected: speciesFilter != null,
-              onSelected: (_) => _pickSpecies(context, ref),
-            ),
-            const SizedBox(width: 8),
-            // Date From chip
-            FilterChip(
-              avatar: const Icon(Icons.calendar_today, size: 18),
-              label: Text(
-                dateFrom != null
-                    ? '${context.t.sightings.from}: ${DateFormat.yMMMd().format(dateFrom)}'
-                    : context.t.sightings.from,
-              ),
-              selected: dateFrom != null,
-              onSelected: (_) => _pickDateFrom(context, ref),
-            ),
-            const SizedBox(width: 8),
-            // Date To chip
-            FilterChip(
-              avatar: const Icon(Icons.event, size: 18),
-              label: Text(
-                dateTo != null
-                    ? '${context.t.sightings.to}: ${DateFormat.yMMMd().format(dateTo)}'
-                    : context.t.sightings.to,
-              ),
-              selected: dateTo != null,
-              onSelected: (_) => _pickDateTo(context, ref),
-            ),
-            const SizedBox(width: 8),
-            // Clear all filters
-            if (hasFilters)
-              ActionChip(
-                avatar: const Icon(Icons.clear_all, size: 18),
-                label: Text(context.t.sightings.clearFilters),
-                onPressed: () {
-                  ref.read(sightingSpeciesFilterProvider.notifier).state = null;
-                  ref.read(sightingDateFromProvider.notifier).state = null;
-                  ref.read(sightingDateToProvider.notifier).state = null;
-                },
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickSpecies(BuildContext context, WidgetRef ref) async {
-    final sortedSpecies = speciesMap.values.toList()
-      ..sort((a, b) {
-        final nameA = isEs ? a.commonNameEs : a.commonNameEn;
-        final nameB = isEs ? b.commonNameEs : b.commonNameEn;
-        return nameA.compareTo(nameB);
-      });
-
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-
-    final result = await showModalBottomSheet<int?>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          expand: false,
-          builder: (ctx, scrollController) {
-            return Column(
-              children: [
-                // Handle bar
-                Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 8),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.white24 : Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    context.t.sightings.allSpecies,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    children: [
-                      // "All Species" option
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: isDarkTheme
-                              ? AppColors.primaryLight.withValues(alpha: 0.15)
-                              : null,
-                          child: const Icon(Icons.all_inclusive, size: 20),
-                        ),
-                        title: Text(context.t.sightings.allSpecies),
-                        selected:
-                            ref.read(sightingSpeciesFilterProvider) == null,
-                        onTap: () => Navigator.of(ctx).pop(null),
-                      ),
-                      const Divider(),
-                      ...sortedSpecies.map((sp) {
-                        final name =
-                            isEs ? sp.commonNameEs : sp.commonNameEn;
-                        return ListTile(
-                          leading: sp.thumbnailUrl != null
-                              ? CircleAvatar(
-                                  backgroundImage:
-                                      NetworkImage(sp.thumbnailUrl!),
-                                  onBackgroundImageError: (_, _) {},
-                                )
-                              : CircleAvatar(
-                                  backgroundColor: isDarkTheme
-                                      ? AppColors.primaryLight
-                                          .withValues(alpha: 0.15)
-                                      : null,
-                                  child: const Icon(Icons.pets, size: 20),
-                                ),
-                          title: Text(name),
-                          subtitle: Text(
-                            sp.scientificName,
-                            style:
-                                const TextStyle(fontStyle: FontStyle.italic),
-                          ),
-                          selected: ref.read(sightingSpeciesFilterProvider) ==
-                              sp.id,
-                          onTap: () => Navigator.of(ctx).pop(sp.id),
-                        );
-                      }),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (!context.mounted) return;
-    // result is null when "All Species" is tapped or sheet is dismissed
-    // We use a sentinel to differentiate "All Species" tap from dismiss
-    ref.read(sightingSpeciesFilterProvider.notifier).state = result;
-  }
-
-  Future<void> _pickDateFrom(BuildContext context, WidgetRef ref) async {
-    final current = ref.read(sightingDateFromProvider);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      ref.read(sightingDateFromProvider.notifier).state = picked;
-    }
-  }
-
-  Future<void> _pickDateTo(BuildContext context, WidgetRef ref) async {
-    final current = ref.read(sightingDateToProvider);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: current ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-    );
-    if (picked != null) {
-      ref.read(sightingDateToProvider.notifier).state = picked;
-    }
-  }
-}
 
 // ── Stats summary ──
 
@@ -1310,149 +1038,6 @@ class _SightingListTile extends StatelessWidget {
   }
 }
 
-class _SightingDetail extends StatelessWidget {
-  final Sighting sighting;
-  final Species? species;
-  final bool isDark;
-  final bool isEs;
-  final VoidCallback onDelete;
-
-  const _SightingDetail({
-    required this.sighting,
-    required this.species,
-    required this.isDark,
-    required this.isEs,
-    required this.onDelete,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final name = species != null
-        ? (isEs ? species!.commonNameEs : species!.commonNameEn)
-        : 'Species #${sighting.speciesId}';
-    final dateStr = sighting.observedAt != null
-        ? DateFormat.yMMMd().add_jm().format(sighting.observedAt!)
-        : '';
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Photo
-          if (sighting.photoUrl != null) ...[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: Semantics(
-                  label: context.t.sightings.sightingPhoto,
-                  image: true,
-                  child: Image.network(
-                    sighting.photoUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => Container(
-                      color: isDark ? AppColors.darkSurface : Colors.grey[200],
-                      child: const Center(
-                          child: Icon(Icons.broken_image, size: 48)),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
-          // Header
-          Row(
-            children: [
-              species?.thumbnailUrl != null
-                  ? CircleAvatar(
-                      radius: 28,
-                      backgroundImage: NetworkImage(species!.thumbnailUrl!),
-                      onBackgroundImageError: (_, _) {},
-                      backgroundColor:
-                          isDark ? AppColors.darkSurface : Colors.grey[200],
-                      child: Icon(Icons.pets,
-                          size: 24,
-                          color: isDark ? Colors.white38 : Colors.grey),
-                    )
-                  : CircleAvatar(
-                      radius: 28,
-                      backgroundColor: isDark
-                          ? AppColors.accentOrange.withValues(alpha: 0.15)
-                          : Theme.of(context).colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.camera_alt,
-                        size: 28,
-                        color: isDark
-                            ? AppColors.accentOrange
-                            : Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    if (species != null)
-                      Text(
-                        species!.scientificName,
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          color:
-                              isDark ? Colors.white54 : Colors.grey.shade600,
-                        ),
-                      ),
-                    Text(
-                      dateStr,
-                      style: TextStyle(
-                        color: isDark ? Colors.white54 : Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                tooltip: context.t.sightings.delete,
-                onPressed: onDelete,
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          const Divider(),
-          const SizedBox(height: 16),
-          // Notes
-          if (sighting.notes != null) ...[
-            Text(context.t.sightings.notes,
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              sighting.notes!,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 16),
-          ],
-          // Location
-          if (sighting.latitude != null && sighting.longitude != null) ...[
-            Text(context.t.sightings.location,
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text(
-              '${sighting.latitude!.toStringAsFixed(4)}, ${sighting.longitude!.toStringAsFixed(4)}',
-              style: TextStyle(
-                  color: isDark ? Colors.white54 : Colors.grey.shade600),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
 
 // ── Delete confirmation ──
 

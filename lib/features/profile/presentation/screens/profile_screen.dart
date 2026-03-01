@@ -14,6 +14,11 @@ import 'package:galapagos_wildlife/features/badges/models/badge_definition.dart'
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/profile/providers/profile_provider.dart';
+import 'package:galapagos_wildlife/features/profile/providers/profile_stats_provider.dart';
+import 'package:galapagos_wildlife/features/profile/presentation/widgets/badge_progress_section.dart';
+import 'package:galapagos_wildlife/features/profile/presentation/widgets/recent_activity_section.dart';
+import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
+import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -106,28 +111,20 @@ class _AuthenticatedProfile extends ConsumerWidget {
     final isEs = locale == 'es';
     final isTablet = AdaptiveLayout.isTablet(context);
 
-    return sightingsAsync.when(
+    final statsAsync = ref.watch(profileStatsProvider);
+
+    return statsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(child: Text('$e')),
-      data: (sightings) {
+      data: (stats) {
         final speciesMap = speciesMapAsync.asData?.value ?? {};
         final badgeProgress = badgesAsync.asData?.value ?? [];
         final profile = profileAsync.asData?.value;
-
-        // Compute stats
-        final totalSightings = sightings.length;
-        final uniqueSpeciesIds = <int>{};
-        final visitSiteIds = <int>{};
-        int photosCount = 0;
-        for (final s in sightings) {
-          uniqueSpeciesIds.add(s.speciesId);
-          if (s.visitSiteId != null) visitSiteIds.add(s.visitSiteId!);
-          if (s.photoUrl != null) photosCount++;
-        }
+        final sightings = sightingsAsync.asData?.value ?? [];
 
         // Level
-        final level = _levelLabel(context, totalSightings);
-        final levelIcon = _levelIcon(totalSightings);
+        final level = _levelLabel(context, stats.totalSightings);
+        final levelIcon = _levelIcon(stats.totalSightings);
 
         // Recent sightings (last 5)
         final recent = sightings.take(5).toList();
@@ -137,10 +134,10 @@ class _AuthenticatedProfile extends ConsumerWidget {
             isDark: isDark,
             level: level,
             levelIcon: levelIcon,
-            totalSightings: totalSightings,
-            speciesSeen: uniqueSpeciesIds.length,
-            islandsVisited: visitSiteIds.length,
-            photosTaken: photosCount,
+            totalSightings: stats.totalSightings,
+            speciesSeen: stats.uniqueSpecies,
+            islandsVisited: stats.uniqueSites,
+            photosTaken: stats.photosCount,
             profile: profile,
             badgeProgress: badgeProgress,
             recentSightings: recent,
@@ -157,25 +154,25 @@ class _AuthenticatedProfile extends ConsumerWidget {
               isDark: isDark,
               level: level,
               levelIcon: levelIcon,
-              totalSightings: totalSightings,
+              totalSightings: stats.totalSightings,
               profile: profile,
               onEdit: () => _showEditDialog(context, ref, profile),
             ),
             const SizedBox(height: 12),
             _StatsRow(
               isDark: isDark,
-              totalSightings: totalSightings,
-              speciesSeen: uniqueSpeciesIds.length,
-              islandsVisited: visitSiteIds.length,
-              photosTaken: photosCount,
+              totalSightings: stats.totalSightings,
+              speciesSeen: stats.uniqueSpecies,
+              islandsVisited: stats.uniqueSites,
+              photosTaken: stats.photosCount,
             ),
             const SizedBox(height: 16),
-            _BadgeProgressSection(
+            BadgeProgressSection(
               isDark: isDark,
               badgeProgress: badgeProgress,
             ),
             const SizedBox(height: 16),
-            _RecentActivitySection(
+            RecentActivitySection(
               isDark: isDark,
               sightings: recent,
               speciesMap: speciesMap,
@@ -281,8 +278,8 @@ class _TabletLayout extends StatelessWidget {
   final int photosTaken;
   final UserProfile? profile;
   final List<BadgeProgress> badgeProgress;
-  final List recentSightings;
-  final Map speciesMap;
+  final List<Sighting> recentSightings;
+  final Map<int, Species> speciesMap;
   final bool isEs;
   final VoidCallback onEdit;
 
@@ -323,12 +320,12 @@ class _TabletLayout extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(0, 16, 16, 32),
               children: [
-                _BadgeProgressSection(
+                BadgeProgressSection(
                   isDark: isDark,
                   badgeProgress: badgeProgress,
                 ),
                 const SizedBox(height: 16),
-                _RecentActivitySection(
+                RecentActivitySection(
                   isDark: isDark,
                   sightings: recentSightings,
                   speciesMap: speciesMap,
@@ -860,273 +857,6 @@ class _StatChip extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Badge progress section
-// ---------------------------------------------------------------------------
-class _BadgeProgressSection extends StatelessWidget {
-  const _BadgeProgressSection({
-    required this.isDark,
-    required this.badgeProgress,
-  });
-
-  final bool isDark;
-  final List<BadgeProgress> badgeProgress;
-
-  @override
-  Widget build(BuildContext context) {
-    final unlockedCount = badgeProgress.where((p) => p.isUnlocked).length;
-    final totalBadges = badgeProgress.length;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        elevation: isDark ? 0 : 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isDark
-              ? BorderSide(color: AppColors.darkBorder)
-              : BorderSide.none,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header row
-              Row(
-                children: [
-                  Icon(
-                    Icons.emoji_events,
-                    color: isDark ? Colors.amber : Colors.amber.shade700,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    context.t.badges.title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    context.t.auth.badgesUnlocked(
-                      count: unlockedCount,
-                      total: totalBadges,
-                    ),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.white54 : Colors.black45,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              // Badge icons row
-              if (badgeProgress.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      context.t.auth.noBadgesYet,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: isDark ? Colors.white38 : Colors.black38,
-                          ),
-                    ),
-                  ),
-                )
-              else
-                SizedBox(
-                  height: 48,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: badgeProgress.length,
-                    separatorBuilder: (_, _) => const SizedBox(width: 10),
-                    itemBuilder: (context, index) {
-                      final bp = badgeProgress[index];
-                      final unlocked = bp.isUnlocked;
-                      return Tooltip(
-                        message: bp.badge.name(context.t),
-                        child: Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: unlocked
-                                ? bp.badge.color.withValues(alpha: 0.15)
-                                : (isDark
-                                    ? Colors.white.withValues(alpha: 0.05)
-                                    : Colors.grey.withValues(alpha: 0.1)),
-                            border: Border.all(
-                              color: unlocked
-                                  ? bp.badge.color.withValues(alpha: 0.4)
-                                  : (isDark
-                                      ? Colors.white.withValues(alpha: 0.1)
-                                      : Colors.grey.withValues(alpha: 0.2)),
-                              width: 2,
-                            ),
-                          ),
-                          child: Icon(
-                            bp.badge.icon,
-                            size: 20,
-                            color: unlocked
-                                ? bp.badge.color
-                                : (isDark
-                                    ? Colors.white.withValues(alpha: 0.2)
-                                    : Colors.grey.withValues(alpha: 0.4)),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              const SizedBox(height: 8),
-              // "View All Badges" button
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () => context.goNamed('badges'),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: isDark
-                          ? AppColors.primaryLight.withValues(alpha: 0.3)
-                          : AppColors.primary.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Text(context.t.auth.viewAllBadges),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Recent activity section
-// ---------------------------------------------------------------------------
-class _RecentActivitySection extends ConsumerWidget {
-  const _RecentActivitySection({
-    required this.isDark,
-    required this.sightings,
-    required this.speciesMap,
-    required this.isEs,
-  });
-
-  final bool isDark;
-  final List sightings;
-  final Map speciesMap;
-  final bool isEs;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        color: isDark ? AppColors.darkCard : Colors.white,
-        elevation: isDark ? 0 : 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: isDark
-              ? BorderSide(color: AppColors.darkBorder)
-              : BorderSide.none,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.history,
-                    color: isDark ? AppColors.primaryLight : AppColors.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    context.t.auth.recentActivity,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              if (sightings.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Center(
-                    child: Text(
-                      context.t.auth.noRecentSightings,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: isDark ? Colors.white38 : Colors.black38,
-                          ),
-                    ),
-                  ),
-                )
-              else
-                ...sightings.map((s) {
-                  final species = speciesMap[s.speciesId];
-                  final name = species != null
-                      ? (isEs ? species.commonNameEs : species.commonNameEn)
-                      : 'Species #${s.speciesId}';
-                  final date = s.observedAt != null
-                      ? DateFormat.yMMMd(isEs ? 'es' : 'en')
-                          .format(s.observedAt!)
-                      : '';
-                  final hasPhoto = s.photoUrl != null;
-
-                  return ListTile(
-                    dense: true,
-                    contentPadding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    leading: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: isDark
-                          ? AppColors.primaryLight.withValues(alpha: 0.1)
-                          : AppColors.primary.withValues(alpha: 0.08),
-                      child: Icon(
-                        hasPhoto ? Icons.photo_camera : Icons.visibility,
-                        size: 16,
-                        color: isDark
-                            ? AppColors.primaryLight
-                            : AppColors.primary,
-                      ),
-                    ),
-                    title: Text(
-                      name,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                    subtitle: Text(
-                      date,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark ? Colors.white38 : Colors.black38,
-                      ),
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right,
-                      size: 16,
-                      color: isDark ? Colors.white24 : Colors.black26,
-                    ),
-                    onTap: () => context.go('/sightings'),
-                  );
-                }),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Edit profile side panel (tablet)
