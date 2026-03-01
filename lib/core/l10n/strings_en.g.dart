@@ -63,6 +63,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final TranslationsShareEn share = TranslationsShareEn._(_root);
 	late final TranslationsCelebrationsEn celebrations = TranslationsCelebrationsEn._(_root);
 	late final TranslationsErrorsEn errors = TranslationsErrorsEn._(_root);
+	late final TranslationsFieldEditEn fieldEdit = TranslationsFieldEditEn._(_root);
 }
 
 // Path: app
@@ -2194,6 +2195,216 @@ class TranslationsErrorsEn {
 	String get tryAgain => 'Try Again';
 }
 
+// Path: fieldEdit
+class TranslationsFieldEditEn {
+	TranslationsFieldEditEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Field Edit'
+	String get title => 'Field Edit';
+
+	/// en: 'Field Editing Mode'
+	String get mode => 'Field Editing Mode';
+
+	/// en: 'Move Visit Site'
+	String get moveVisitSite => 'Move Visit Site';
+
+	/// en: 'Edit Trail'
+	String get editTrail => 'Edit Trail';
+
+	/// en: 'Create New Trail'
+	String get createNewTrail => 'Create New Trail';
+
+	/// en: 'How to Move Site?'
+	String get howToMoveSite => 'How to Move Site?';
+
+	/// en: 'Drag on Map'
+	String get dragOnMap => 'Drag on Map';
+
+	/// en: 'All markers become draggable — drag any to its correct position'
+	String get dragOnMapDesc => 'All markers become draggable — drag any to its correct position';
+
+	/// en: 'Use Current GPS Location'
+	String get useCurrentGps => 'Use Current GPS Location';
+
+	/// en: 'Tap a site marker to move it to your current position'
+	String get useCurrentGpsDesc => 'Tap a site marker to move it to your current position';
+
+	/// en: 'How to Edit Trail?'
+	String get howToEditTrail => 'How to Edit Trail?';
+
+	/// en: 'Edit on Map'
+	String get editOnMap => 'Edit on Map';
+
+	/// en: 'Tap a trail, then add/remove points'
+	String get editOnMapDesc => 'Tap a trail, then add/remove points';
+
+	/// en: 'Walk & Record GPS'
+	String get walkRecordGps => 'Walk & Record GPS';
+
+	/// en: 'Re-record trail by walking the route'
+	String get walkRecordGpsDesc => 'Re-record trail by walking the route';
+
+	/// en: 'How to Create Trail?'
+	String get howToCreateTrail => 'How to Create Trail?';
+
+	/// en: 'Draw on Map'
+	String get drawOnMap => 'Draw on Map';
+
+	/// en: 'Tap map to add points, drag to adjust'
+	String get drawOnMapDesc => 'Tap map to add points, drag to adjust';
+
+	/// en: 'GPS tracking while walking the route'
+	String get walkRecordGpsNewDesc => 'GPS tracking while walking the route';
+
+	/// en: 'Correct site location'
+	String get correctSiteLocation => 'Correct site location';
+
+	/// en: 'Correct trail path'
+	String get correctTrailPath => 'Correct trail path';
+
+	/// en: 'Draw on map or GPS tracking'
+	String get drawOnMapOrGps => 'Draw on map or GPS tracking';
+
+	/// en: 'Drag any site marker to move it'
+	String get dragAnySiteToMove => 'Drag any site marker to move it';
+
+	/// en: 'Tap a site marker to move it to your current location'
+	String get tapSiteToMoveToCurrentLocation => 'Tap a site marker to move it to your current location';
+
+	/// en: 'Tap a trail to start editing'
+	String get tapTrailToStartEditing => 'Tap a trail to start editing';
+
+	/// en: 'Tap a trail, then start walking to re-record'
+	String get tapTrailThenWalk => 'Tap a trail, then start walking to re-record';
+
+	/// en: 'Tap on map to add trail points'
+	String get tapMapToAddPoints => 'Tap on map to add trail points';
+
+	/// en: 'Discard Changes?'
+	String get discardChanges => 'Discard Changes?';
+
+	/// en: 'You have unsaved changes. Discard them?'
+	String get discardChangesMessage => 'You have unsaved changes. Discard them?';
+
+	/// en: 'Keep Editing'
+	String get keepEditing => 'Keep Editing';
+
+	/// en: 'Discard'
+	String get discard => 'Discard';
+
+	/// en: 'Done Editing?'
+	String get doneEditing => 'Done Editing?';
+
+	/// en: 'Site positions have been saved to the server.'
+	String get sitesSaved => 'Site positions have been saved to the server.';
+
+	/// en: 'Save New Trail'
+	String get saveNewTrail => 'Save New Trail';
+
+	/// en: 'Trail Name (English)'
+	String get trailNameEn => 'Trail Name (English)';
+
+	/// en: 'e.g., Tortuga Bay Trail'
+	String get trailNameEnHint => 'e.g., Tortuga Bay Trail';
+
+	/// en: 'Trail Name (Spanish)'
+	String get trailNameEs => 'Trail Name (Spanish)';
+
+	/// en: 'e.g., Sendero Bahía Tortuga'
+	String get trailNameEsHint => 'e.g., Sendero Bahía Tortuga';
+
+	/// en: 'Continue Recording'
+	String get continueRecording => 'Continue Recording';
+
+	/// en: 'Save'
+	String get saveTrail => 'Save';
+
+	/// en: 'Need at least 2 points to save trail'
+	String get needTwoPoints => 'Need at least 2 points to save trail';
+
+	/// en: 'Please enter trail names in both languages'
+	String get enterBothTrailNames => 'Please enter trail names in both languages';
+
+	/// en: 'Save Trail Changes'
+	String get saveTrailChanges => 'Save Trail Changes';
+
+	/// en: 'This will replace the existing trail path with the edited coordinates.'
+	String get saveTrailChangesDesc => 'This will replace the existing trail path with the edited coordinates.';
+
+	/// en: 'Continue Editing'
+	String get continueEditing => 'Continue Editing';
+
+	/// en: 'Save Changes'
+	String get saveChanges => 'Save Changes';
+
+	/// en: 'Moving Sites — drag any marker'
+	String get movingSitesDrag => 'Moving Sites — drag any marker';
+
+	/// en: 'Moving Site (Drag)'
+	String get movingSiteManual => 'Moving Site (Drag)';
+
+	/// en: 'Moving Site (GPS)'
+	String get movingSiteGps => 'Moving Site (GPS)';
+
+	/// en: 'Tap a trail to edit'
+	String get tapTrailToEdit => 'Tap a trail to edit';
+
+	/// en: 'Editing Trail'
+	String get editingTrail => 'Editing Trail';
+
+	/// en: 'Recording Trail (GPS)'
+	String get recordingTrailGps => 'Recording Trail (GPS)';
+
+	/// en: 'Creating Trail'
+	String get creatingTrail => 'Creating Trail';
+
+	/// en: 'Recording New Trail (GPS)'
+	String get recordingNewTrailGps => 'Recording New Trail (GPS)';
+
+	/// en: 'Pause'
+	String get pauseRecording => 'Pause';
+
+	/// en: 'Resume'
+	String get resumeRecording => 'Resume';
+
+	/// en: 'Stop & Save'
+	String get stopAndSave => 'Stop & Save';
+
+	/// en: 'Edit info'
+	String get editTrailInfo => 'Edit info';
+
+	/// en: 'Undo'
+	String get undo => 'Undo';
+
+	/// en: 'Cancel'
+	String get cancel => 'Cancel';
+
+	/// en: 'Save'
+	String get save => 'Save';
+
+	/// en: 'Delete point ${number}'
+	String deletePoint({required Object number}) => 'Delete point ${number}';
+
+	/// en: 'Delete ${count} points'
+	String deletePoints({required Object count}) => 'Delete ${count} points';
+
+	/// en: 'Tap point(s) • drag moves selection'
+	String get tapPointsDragToMove => 'Tap point(s) • drag moves selection';
+
+	/// en: 'Points'
+	String get subModePoints => 'Points';
+
+	/// en: 'Move'
+	String get subModeMove => 'Move';
+
+	/// en: 'Rotate'
+	String get subModeRotate => 'Rotate';
+}
+
 // Path: species.frequency
 class TranslationsSpeciesFrequencyEn {
 	TranslationsSpeciesFrequencyEn._(this._root);
@@ -2869,6 +3080,73 @@ extension on Translations {
 			'errors.validation' => 'Please check your input.',
 			'errors.unknown' => 'An unexpected error occurred.',
 			'errors.tryAgain' => 'Try Again',
+			'fieldEdit.title' => 'Field Edit',
+			'fieldEdit.mode' => 'Field Editing Mode',
+			'fieldEdit.moveVisitSite' => 'Move Visit Site',
+			'fieldEdit.editTrail' => 'Edit Trail',
+			'fieldEdit.createNewTrail' => 'Create New Trail',
+			'fieldEdit.howToMoveSite' => 'How to Move Site?',
+			'fieldEdit.dragOnMap' => 'Drag on Map',
+			'fieldEdit.dragOnMapDesc' => 'All markers become draggable — drag any to its correct position',
+			'fieldEdit.useCurrentGps' => 'Use Current GPS Location',
+			'fieldEdit.useCurrentGpsDesc' => 'Tap a site marker to move it to your current position',
+			'fieldEdit.howToEditTrail' => 'How to Edit Trail?',
+			'fieldEdit.editOnMap' => 'Edit on Map',
+			'fieldEdit.editOnMapDesc' => 'Tap a trail, then add/remove points',
+			'fieldEdit.walkRecordGps' => 'Walk & Record GPS',
+			'fieldEdit.walkRecordGpsDesc' => 'Re-record trail by walking the route',
+			'fieldEdit.howToCreateTrail' => 'How to Create Trail?',
+			'fieldEdit.drawOnMap' => 'Draw on Map',
+			'fieldEdit.drawOnMapDesc' => 'Tap map to add points, drag to adjust',
+			'fieldEdit.walkRecordGpsNewDesc' => 'GPS tracking while walking the route',
+			'fieldEdit.correctSiteLocation' => 'Correct site location',
+			'fieldEdit.correctTrailPath' => 'Correct trail path',
+			'fieldEdit.drawOnMapOrGps' => 'Draw on map or GPS tracking',
+			'fieldEdit.dragAnySiteToMove' => 'Drag any site marker to move it',
+			'fieldEdit.tapSiteToMoveToCurrentLocation' => 'Tap a site marker to move it to your current location',
+			'fieldEdit.tapTrailToStartEditing' => 'Tap a trail to start editing',
+			'fieldEdit.tapTrailThenWalk' => 'Tap a trail, then start walking to re-record',
+			'fieldEdit.tapMapToAddPoints' => 'Tap on map to add trail points',
+			'fieldEdit.discardChanges' => 'Discard Changes?',
+			'fieldEdit.discardChangesMessage' => 'You have unsaved changes. Discard them?',
+			'fieldEdit.keepEditing' => 'Keep Editing',
+			'fieldEdit.discard' => 'Discard',
+			'fieldEdit.doneEditing' => 'Done Editing?',
+			'fieldEdit.sitesSaved' => 'Site positions have been saved to the server.',
+			'fieldEdit.saveNewTrail' => 'Save New Trail',
+			'fieldEdit.trailNameEn' => 'Trail Name (English)',
+			'fieldEdit.trailNameEnHint' => 'e.g., Tortuga Bay Trail',
+			'fieldEdit.trailNameEs' => 'Trail Name (Spanish)',
+			'fieldEdit.trailNameEsHint' => 'e.g., Sendero Bahía Tortuga',
+			'fieldEdit.continueRecording' => 'Continue Recording',
+			'fieldEdit.saveTrail' => 'Save',
+			'fieldEdit.needTwoPoints' => 'Need at least 2 points to save trail',
+			'fieldEdit.enterBothTrailNames' => 'Please enter trail names in both languages',
+			'fieldEdit.saveTrailChanges' => 'Save Trail Changes',
+			'fieldEdit.saveTrailChangesDesc' => 'This will replace the existing trail path with the edited coordinates.',
+			'fieldEdit.continueEditing' => 'Continue Editing',
+			'fieldEdit.saveChanges' => 'Save Changes',
+			'fieldEdit.movingSitesDrag' => 'Moving Sites — drag any marker',
+			'fieldEdit.movingSiteManual' => 'Moving Site (Drag)',
+			'fieldEdit.movingSiteGps' => 'Moving Site (GPS)',
+			'fieldEdit.tapTrailToEdit' => 'Tap a trail to edit',
+			'fieldEdit.editingTrail' => 'Editing Trail',
+			'fieldEdit.recordingTrailGps' => 'Recording Trail (GPS)',
+			'fieldEdit.creatingTrail' => 'Creating Trail',
+			'fieldEdit.recordingNewTrailGps' => 'Recording New Trail (GPS)',
+			'fieldEdit.pauseRecording' => 'Pause',
+			'fieldEdit.resumeRecording' => 'Resume',
+			'fieldEdit.stopAndSave' => 'Stop & Save',
+			'fieldEdit.editTrailInfo' => 'Edit info',
+			'fieldEdit.undo' => 'Undo',
+			'fieldEdit.cancel' => 'Cancel',
+			'fieldEdit.save' => 'Save',
+			'fieldEdit.deletePoint' => ({required Object number}) => 'Delete point ${number}',
+			'fieldEdit.deletePoints' => ({required Object count}) => 'Delete ${count} points',
+			'fieldEdit.tapPointsDragToMove' => 'Tap point(s) • drag moves selection',
+			'fieldEdit.subModePoints' => 'Points',
+			'fieldEdit.subModeMove' => 'Move',
+			'fieldEdit.subModeRotate' => 'Rotate',
 			_ => null,
 		};
 	}
