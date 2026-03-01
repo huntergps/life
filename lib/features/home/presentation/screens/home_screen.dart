@@ -123,7 +123,7 @@ class _PhoneHome extends StatelessWidget {
 
   Widget _buildFeaturedSpecies(BuildContext context, WidgetRef ref) {
     final speciesAsync = ref.watch(featuredSpeciesProvider);
-    final locale = ref.watch(localeProvider);
+    final isEs = ref.watch(localeProvider.select((l) => l == 'es'));
     final screenWidth = MediaQuery.sizeOf(context).width;
     // Responsive card width: ~45% of screen on phone, clamped to reasonable range
     final cardWidth = (screenWidth * 0.45).clamp(160.0, 240.0);
@@ -137,11 +137,12 @@ class _PhoneHome extends StatelessWidget {
           itemBuilder: (context, index) {
             final s = species[index];
             return SizedBox(
+              key: ObjectKey(s.id),
               width: cardWidth,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: SpeciesCard(
-                  commonName: locale == 'es' ? s.commonNameEs : s.commonNameEn,
+                  commonName: isEs ? s.commonNameEs : s.commonNameEn,
                   scientificName: s.scientificName,
                   thumbnailUrl: s.thumbnailUrl ?? SpeciesAssets.thumbnail(s.id),
                   conservationStatus: s.conservationStatus,
@@ -218,8 +219,8 @@ class _TabletHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final speciesAsync = ref.watch(featuredSpeciesProvider);
-    final locale = ref.watch(localeProvider);
-    String speciesName(dynamic s) => locale == 'es' ? s.commonNameEs : s.commonNameEn;
+    final isEs = ref.watch(localeProvider.select((l) => l == 'es'));
+    String speciesName(dynamic s) => isEs ? s.commonNameEs : s.commonNameEn;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -443,10 +444,10 @@ class _WildlifeHeroState extends State<_WildlifeHero> {
   @override
   Widget build(BuildContext context) {
     final speciesAsync = widget.ref.watch(featuredSpeciesProvider);
-    final locale = widget.ref.watch(localeProvider);
+    final isEs = widget.ref.watch(localeProvider.select((l) => l == 'es'));
     final screenHeight = MediaQuery.sizeOf(context).height;
-    String speciesName(dynamic s) => locale == 'es' ? s.commonNameEs : s.commonNameEn;
-    String? speciesDesc(dynamic s) => locale == 'es' ? (s.descriptionEs ?? s.descriptionEn) : s.descriptionEn;
+    String speciesName(dynamic s) => isEs ? s.commonNameEs : s.commonNameEn;
+    String? speciesDesc(dynamic s) => isEs ? (s.descriptionEs ?? s.descriptionEn) : s.descriptionEn;
 
     return speciesAsync.when(
       data: (species) {
@@ -470,6 +471,7 @@ class _WildlifeHeroState extends State<_WildlifeHero> {
                   final s = featured[index];
                   final desc = speciesDesc(s);
                   return Semantics(
+                    key: ObjectKey(s.id),
                     button: true,
                     child: GestureDetector(
                     onTap: () => context.goNamed('species-detail', pathParameters: {'id': '${s.id}'}),

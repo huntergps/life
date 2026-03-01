@@ -48,8 +48,7 @@ class SightingsListScreen extends ConsumerWidget {
     final allSightingsAsync = ref.watch(sightingsProvider);
     final speciesLookupAsync = ref.watch(speciesLookupProvider);
     final speciesMap = speciesLookupAsync.asData?.value ?? {};
-    final locale = ref.watch(localeProvider);
-    final isEs = locale == 'es';
+    final isEs = ref.watch(localeProvider.select((l) => l == 'es'));
 
     if (isTablet) {
       return _TabletSightings(
@@ -199,6 +198,7 @@ class _PhoneSightings extends ConsumerWidget {
                     itemCount: sightings.length,
                     itemBuilder: (context, index) {
                       return _SightingCard(
+                        key: ObjectKey(sightings[index].id),
                         sighting: sightings[index],
                         species: speciesMap[sightings[index].speciesId],
                         isDark: isDark,
@@ -380,6 +380,7 @@ class _TabletSightings extends StatelessWidget {
                                 itemBuilder: (context, index) {
                                   final isSelected = selectedIndex == index;
                                   return Card(
+                                    key: ObjectKey(sightings[index].id),
                                     color: isSelected
                                         ? (isDark
                                             ? AppColors.primaryLight
@@ -517,6 +518,7 @@ class _CalendarGroupedView extends StatelessWidget {
         final item = items[index];
         if (item.isHeader) {
           return _MonthHeader(
+            key: ValueKey('header_${item.headerTitle}'),
             title: item.headerTitle!,
             isDark: isDark,
           );
@@ -524,6 +526,7 @@ class _CalendarGroupedView extends StatelessWidget {
         final sighting = item.sighting!;
         final isSelected = selectedSighting?.id == sighting.id;
         return _CalendarSightingTile(
+          key: ObjectKey(sighting.id),
           sighting: sighting,
           species: speciesMap[sighting.speciesId],
           isDark: isDark,
@@ -561,7 +564,7 @@ class _MonthHeader extends StatelessWidget {
   final String title;
   final bool isDark;
 
-  const _MonthHeader({required this.title, required this.isDark});
+  const _MonthHeader({super.key, required this.title, required this.isDark});
 
   @override
   Widget build(BuildContext context) {
@@ -606,6 +609,7 @@ class _CalendarSightingTile extends StatelessWidget {
   final VoidCallback? onDelete;
 
   const _CalendarSightingTile({
+    super.key,
     required this.sighting,
     required this.species,
     required this.isDark,
@@ -896,6 +900,7 @@ class _SightingCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const _SightingCard({
+    super.key,
     required this.sighting,
     required this.species,
     required this.isDark,
