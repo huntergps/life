@@ -31,6 +31,7 @@ import '../../services/field_edit_service.dart';
 import '../../themes/protomaps_theme.dart';
 import '../../utils/route_utils.dart';
 import '../widgets/map_download_sheet.dart';
+import '../widgets/map_layer_builders.dart';
 import '../widgets/map_mode_selector.dart';
 import '../widgets/field_edit_toolbar.dart';
 import '../widgets/trail_recording_panel.dart';
@@ -45,31 +46,11 @@ TileProvider _tileProvider(String storeName) {
   );
 }
 
-Color _trailDifficultyColor(String? difficulty) {
-  switch (difficulty?.toLowerCase()) {
-    case 'easy':
-      return Colors.green;
-    case 'moderate':
-      return Colors.orange;
-    case 'hard':
-      return Colors.red;
-    default:
-      return Colors.green;
-  }
-}
-
-String _trailDifficultyLabel(BuildContext context, String? difficulty) {
-  switch (difficulty?.toLowerCase()) {
-    case 'easy':
-      return context.t.map.difficultyEasy;
-    case 'moderate':
-      return context.t.map.difficultyModerate;
-    case 'hard':
-      return context.t.map.difficultyHard;
-    default:
-      return context.t.map.difficultyEasy;
-  }
-}
+// Difficulty helpers are defined in map_layer_builders.dart and re-used here
+// via top-level aliases to avoid breaking existing call sites.
+Color _trailDifficultyColor(String? d) => trailDifficultyColor(d);
+String _trailDifficultyLabel(BuildContext ctx, String? d) =>
+    trailDifficultyLabel(ctx, d);
 
 class MapScreen extends ConsumerStatefulWidget {
   const MapScreen({super.key});
@@ -1486,112 +1467,27 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   Widget _buildTrailPolylinesLayer(AsyncValue<List<Trail>> trailsAsync) {
     // While a trail is being edited its path is drawn by _buildFieldEditingLayer
     // as an orange overlay.  Hide the original polyline so the two do not overlap.
-    final editingTrailId = ref
-        .watch(fieldEditProvider.select((s) => s.selectedTrailId));
-    final isEditing = ref.watch(
-        fieldEditProvider.select((s) => s.mode == FieldEditMode.editTrailManual));
-
-    return trailsAsync.when(
-      data: (trails) {
-        final polylines = <Polyline>[];
-        for (final trail in trails) {
-          // Skip the trail that is currently being edited
-          if (isEditing && trail.id != null && trail.id == editingTrailId) continue;
-
-          final coords = parseTrailCoordinates(trail.coordinates);
-          if (coords.length < 2) continue;
-
-          polylines.add(
-            Polyline(
-              points: coords,
-              color: _trailDifficultyColor(trail.difficulty),
-              strokeWidth: 4,
-              borderColor: Colors.white,
-              borderStrokeWidth: 1,
-            ),
-          );
-        }
-        return PolylineLayer(polylines: polylines);
-      },
-      loading: () => PolylineLayer(polylines: <Polyline>[]),
-      error: (_, _) => PolylineLayer(polylines: <Polyline>[]),
+    return MapLayerBuilders.buildTrailPolylinesLayer(
+      trailsAsync: trailsAsync,
+      editingTrailId: ref.watch(fieldEditProvider.select((s) => s.selectedTrailId)),
+      isEditing: ref.watch(
+          fieldEditProvider.select((s) => s.mode == FieldEditMode.editTrailManual)),
     );
   }
 
   /// Builds small circular markers at each trail's midpoint so the user can
   /// tap to open the trail info bottom sheet or select a trail for editing.
   Widget _buildTrailMarkers(AsyncValue<List<Trail>> trailsAsync, bool isEs) {
-    final editMode = ref.watch(fieldEditProvider.select((s) => s.mode));
-    final isSelectingForEdit = editMode == FieldEditMode.selectTrailForEdit;
+    final isSelectingForEdit = ref.watch(
+        fieldEditProvider.select((s) => s.mode == FieldEditMode.selectTrailForEdit));
 
-    return trailsAsync.when(
-      data: (trails) {
-        final markers = <Marker>[];
-        for (final trail in trails) {
-          final coords = parseTrailCoordinates(trail.coordinates);
-          if (coords.length < 2) continue;
-
-          final midPoint = coords[coords.length ~/ 2];
-          final trailName = isEs ? trail.nameEs : trail.nameEn;
-          // Highlight markers orange when in selection mode
-          final color = isSelectingForEdit
-              ? Colors.orange
-              : _trailDifficultyColor(trail.difficulty);
-
-          // Larger tap target and pulsing shadow in selection mode
-          final markerSize = isSelectingForEdit ? 48.0 : 36.0;
-          final iconSize  = isSelectingForEdit ? 24.0 : 18.0;
-          markers.add(
-            Marker(
-              point: midPoint,
-              width: markerSize,
-              height: markerSize,
-              child: Semantics(
-                button: true,
-                label: context.t.map.trailLabel(name: trailName),
-                child: GestureDetector(
-                  onTap: () {
-                    if (isSelectingForEdit) {
-                      final id = trail.id;
-                      if (id != null) {
-                        _loadTrailForEditing(id);
-                      } else {
-                        _showSnackBar('❌ Trail has no ID');
-                      }
-                    } else {
-                      _showTrailInfo(context, trail);
-                    }
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.9),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: isSelectingForEdit ? 3 : 2),
-                      boxShadow: isSelectingForEdit
-                          ? [
-                              BoxShadow(
-                                color: Colors.orange.withValues(alpha: 0.6),
-                                blurRadius: 12,
-                                spreadRadius: 3,
-                              ),
-                            ]
-                          : null,
-                    ),
-                    child: Icon(
-                      isSelectingForEdit ? Icons.edit : Icons.route,
-                      color: Colors.white,
-                      size: iconSize,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          );
-        }
-        return MarkerLayer(markers: markers);
-      },
-      loading: () => const MarkerLayer(markers: []),
-      error: (_, _) => const MarkerLayer(markers: []),
+    return MapLayerBuilders.buildTrailMarkers(
+      context: context,
+      trailsAsync: trailsAsync,
+      isEs: isEs,
+      isSelectingForEdit: isSelectingForEdit,
+      onShowTrailInfo: (trail) => _showTrailInfo(context, trail),
+      onSelectTrailForEdit: (id) => _loadTrailForEditing(id),
     );
   }
 
@@ -1941,53 +1837,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     AsyncValue<dynamic> sightingsAsync,
     AsyncValue<dynamic> speciesLookupAsync,
   ) {
-    final speciesMap = speciesLookupAsync.asData?.value as Map<int, dynamic>?;
-    return sightingsAsync.when(
-      data: (sightings) => MarkerLayer(
-        markers: (sightings as List)
-            .where((s) => s.latitude != null && s.longitude != null)
-            .where((s) => _isWithinViewport(s.latitude, s.longitude))
-            .map((sighting) {
-              final species = speciesMap?[sighting.speciesId];
-              final speciesName = species != null
-                  ? (isEs ? species.commonNameEs : species.commonNameEn)
-                  : '?';
-              return Marker(
-                point: LatLng(sighting.latitude!, sighting.longitude!),
-                width: 30,
-                height: 30,
-                child: Semantics(
-                  button: true,
-                  label: context.t.map.sightingLabel(species: speciesName),
-                  child: GestureDetector(
-                    onTap: () => _showSightingInfo(context, sighting, species),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.teal,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.teal.withValues(alpha: 0.3),
-                            blurRadius: 6,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.camera_alt,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            })
-            .toList().cast<Marker>(),
-      ),
-      loading: () => const MarkerLayer(markers: []),
-      error: (_, _) => const MarkerLayer(markers: []),
+    return MapLayerBuilders.buildSightingsLayer(
+      context: context,
+      isEs: isEs,
+      sightingsAsync: sightingsAsync,
+      speciesLookupAsync: speciesLookupAsync,
+      isWithinViewport: _isWithinViewport,
+      onSightingTap: (sighting, species) =>
+          _showSightingInfo(context, sighting, species),
     );
   }
 
