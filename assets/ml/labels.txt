@@ -1,0 +1,39 @@
+Aetobatus narinari|Spotted Eagle Ray|Raya Aguila Moteada
+Amblyrhynchus cristatus|Marine Iguana|Iguana Marina
+Arctocephalus galapagoensis|Galapagos Fur Seal|Lobo Peletero
+Ardea herodias|Great Blue Heron|Garza Azul
+Asio flammeus|Short-eared Owl|Buho Orejas Cortas
+Buteo galapagoensis|Galapagos Hawk|Gavillan de Galapagos
+Butorides sundevalli|Lava Heron|Garza de Lava
+Carcharhinus galapagensis|Galapagos Shark|Tiburon de Galapagos
+Chelonia mydas|Green Sea Turtle|Tortuga Marina Verde
+Chelonoidis porteri|Santa Cruz Giant Tortoise|Tortuga Gigante
+Conolophus pallidus|Santa Fe Land Iguana|Iguana de Santa Fe
+Conolophus subcristatus|Galapagos Land Iguana|Iguana Terrestre
+Creagrus furcatus|Swallow-tailed Gull|Gaviota Cola Bifurcada
+Fregata magnificens|Magnificent Frigatebird|Fragata Magnifica
+Fregata minor|Great Frigatebird|Fragata Real
+Geospiza fortis|Medium Ground Finch|Pinzon Terrestre Mediano
+Geospiza fuliginosa|Small Ground Finch|Pinzon Terrestre Pequeno
+Geospiza magnirostris|Large Ground Finch|Pinzon Terrestre Grande
+Grapsus grapsus|Sally Lightfoot Crab|Cangrejo Zayapa
+Leucophaeus fuliginosus|Lava Gull|Gaviota de Lava
+Microlophus albemarlensis|Galapagos Lava Lizard|Lagartija de Lava
+Mimus parvulus|Galapagos Mockingbird|Cucuve de Galapagos
+Mobula birostris|Giant Manta Ray|Mantarraya Gigante
+Myiarchus magnirostris|Galapagos Flycatcher|Papamoscas de Galapagos
+Nannopterum harrisi|Flightless Cormorant|Cormoran no Volador
+Pelecanus occidentalis|Brown Pelican|Pelicano Pardo
+Phoebastria irrorata|Waved Albatross|Albatros de Galapagos
+Phoenicopterus ruber|American Flamingo|Flamingo Americano
+Pseudalsophis biserialis|Galapagos Racer|Culebra de Galapagos
+Pyrocephalus nanus|Galapagos Vermilion Flycatcher|Brujo de Galapagos
+Rhincodon typus|Whale Shark|Tiburon Ballena
+Spheniscus mendiculus|Galapagos Penguin|Pinguino de Galapagos
+Sphyrna lewini|Hammerhead Shark|Tiburon Martillo
+Sula granti|Nazca Booby|Piquero de Nazca
+Sula nebouxii|Blue-footed Booby|Piquero Patas Azules
+Sula sula|Red-footed Booby|Piquero Patas Rojas
+Triaenodon obesus|Whitetip Reef Shark|Tiburon Punta Blanca
+Zalophus wollebaeki|Galapagos Sea Lion|Lobo Marino
+Zenaida galapagoensis|Galapagos Dove|Paloma de Galapagos
