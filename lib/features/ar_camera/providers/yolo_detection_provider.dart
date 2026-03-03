@@ -4,7 +4,8 @@ import 'package:flutter/foundation.dart' show compute, kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
-import 'package:tflite_flutter/tflite_flutter.dart';
+import 'package:tflite_flutter/tflite_flutter.dart'
+    if (dart.library.html) '../../species/providers/_tflite_stub.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 
 // ── Assets ──────────────────────────────────────────────────────────────────
