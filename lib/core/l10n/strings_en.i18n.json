@@ -20,6 +20,7 @@
     "discoverSpecies": "Discover Species",
     "exploreMap": "Explore the Map",
     "recentSightings": "Recent Sightings",
+    "photoId": "Photo ID",
     "browseWildlife": "Browse all wildlife",
     "findSites": "Find visit sites and islands",
     "logEncounters": "Log your wildlife encounters"
@@ -92,7 +93,24 @@
     "pauseSound": "Pause sound",
     "markAsSeen": "Mark as Seen",
     "markAsNotSeen": "Mark as Not Seen",
-    "seen": "Seen"
+    "seen": "Seen",
+    "aiIdentify": "Identify with AI",
+    "aiIdentifying": "Analyzing photo...",
+    "aiSuggestions": "AI Suggestions",
+    "aiNoMatch": "No wildlife detected",
+    "aiSelectSpecies": "Select this species",
+    "aiNotInDatabase": "Not in our database",
+    "sortBy": "Sort by",
+    "sortNameAsc": "Name A–Z",
+    "sortNameDesc": "Name Z–A",
+    "sortRarityFirst": "Most Endangered First",
+    "sortEndemicFirst": "Endemic First",
+    "dietFilter": "Diet",
+    "activityFilter": "Activity",
+    "whereToFind": "Where to Find",
+    "altitudeRange": "Altitude Range",
+    "native": "Native",
+    "introduced": "Introduced"
   },
   "conservation": {
     "EX": "Extinct",
@@ -200,7 +218,9 @@
     "addToWishlist": "Add to wishlist",
     "removeFromWishlist": "Remove from wishlist",
     "wishlist": "Wishlist",
-    "myWishlist": "My Wishlist"
+    "myWishlist": "My Wishlist",
+    "nearbySpeciesChip": "${count} species nearby",
+    "viewOnMap": "View on map"
   },
   "favorites": {
     "title": "Favorites",
@@ -798,5 +818,30 @@
     "subModePoints": "Points",
     "subModeMove": "Move",
     "subModeRotate": "Rotate"
+  },
+  "soundId": {
+    "title": "Sound ID",
+    "tapToRecord": "Tap to identify nearby wildlife",
+    "recording": "Recording...",
+    "analyzing": "Finding nearby wildlife...",
+    "nearbyWildlife": "Wildlife near you right now",
+    "tapToStop": "Tap to stop recording",
+    "noLocation": "Enable location for better results",
+    "basedOnLocation": "Based on your location & time",
+    "whyHere": "Why here",
+    "logSighting": "Log Sighting",
+    "viewSpecies": "View Species",
+    "soundHint": "Listen for",
+    "noSpeciesFound": "No species data for this area"
+  },
+  "fieldCamera": {
+    "title": "Field Camera",
+    "nearbySpecies": "Nearby species",
+    "aiIdentify": "AI Identify",
+    "capturing": "Capturing...",
+    "notAvailableOnWeb": "Field Camera requires a mobile device",
+    "permissionRequired": "Camera permission required",
+    "noNearbySpecies": "Walk to a visit site to see nearby species",
+    "tapToIdentify": "Tap the shutter to identify"
   }
 }

@@ -61,6 +61,8 @@ class TranslationsEs with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _TranslationsCelebrationsEs celebrations = _TranslationsCelebrationsEs._(_root);
 	@override late final _TranslationsErrorsEs errors = _TranslationsErrorsEs._(_root);
 	@override late final _TranslationsFieldEditEs fieldEdit = _TranslationsFieldEditEs._(_root);
+	@override late final _TranslationsSoundIdEs soundId = _TranslationsSoundIdEs._(_root);
+	@override late final _TranslationsFieldCameraEs fieldCamera = _TranslationsFieldCameraEs._(_root);
 }
 
 // Path: app
@@ -104,6 +106,7 @@ class _TranslationsHomeEs implements TranslationsHomeEn {
 	@override String get discoverSpecies => 'Descubrir Especies';
 	@override String get exploreMap => 'Explorar el Mapa';
 	@override String get recentSightings => 'Avistamientos Recientes';
+	@override String get photoId => 'Foto ID';
 	@override String get browseWildlife => 'Explorar toda la fauna';
 	@override String get findSites => 'Encontrar sitios de visita e islas';
 	@override String get logEncounters => 'Registra tus encuentros con la fauna';
@@ -179,6 +182,23 @@ class _TranslationsSpeciesEs implements TranslationsSpeciesEn {
 	@override String get markAsSeen => 'Marcar como Vista';
 	@override String get markAsNotSeen => 'Desmarcar como Vista';
 	@override String get seen => 'Vista';
+	@override String get aiIdentify => 'Identificar con IA';
+	@override String get aiIdentifying => 'Analizando foto...';
+	@override String get aiSuggestions => 'Sugerencias IA';
+	@override String get aiNoMatch => 'No se detectó fauna';
+	@override String get aiSelectSpecies => 'Seleccionar especie';
+	@override String get aiNotInDatabase => 'No está en nuestra base de datos';
+	@override String get sortBy => 'Ordenar por';
+	@override String get sortNameAsc => 'Nombre A–Z';
+	@override String get sortNameDesc => 'Nombre Z–A';
+	@override String get sortRarityFirst => 'Más Amenazadas Primero';
+	@override String get sortEndemicFirst => 'Endémicas Primero';
+	@override String get dietFilter => 'Dieta';
+	@override String get activityFilter => 'Actividad';
+	@override String get whereToFind => 'Dónde Encontrarla';
+	@override String get altitudeRange => 'Rango de Altitud';
+	@override String get native => 'Nativa';
+	@override String get introduced => 'Introducida';
 }
 
 // Path: conservation
@@ -301,6 +321,8 @@ class _TranslationsMapEs implements TranslationsMapEn {
 	@override String get removeFromWishlist => 'Quitar de lista de deseos';
 	@override String get wishlist => 'Lista de deseos';
 	@override String get myWishlist => 'Mi lista de deseos';
+	@override String nearbySpeciesChip({required Object count}) => '${count} especies cercanas';
+	@override String get viewOnMap => 'Ver en mapa';
 }
 
 // Path: favorites
@@ -1026,6 +1048,45 @@ class _TranslationsFieldEditEs implements TranslationsFieldEditEn {
 	@override String get subModeRotate => 'Rotar';
 }
 
+// Path: soundId
+class _TranslationsSoundIdEs implements TranslationsSoundIdEn {
+	_TranslationsSoundIdEs._(this._root);
+
+	final TranslationsEs _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'ID de Sonido';
+	@override String get tapToRecord => 'Toca para identificar fauna cercana';
+	@override String get recording => 'Grabando...';
+	@override String get analyzing => 'Buscando fauna cercana...';
+	@override String get nearbyWildlife => 'Fauna cerca de ti ahora';
+	@override String get tapToStop => 'Toca para detener la grabación';
+	@override String get noLocation => 'Activa la ubicación para mejores resultados';
+	@override String get basedOnLocation => 'Basado en tu ubicación y hora';
+	@override String get whyHere => 'Por qué aquí';
+	@override String get logSighting => 'Registrar Avistamiento';
+	@override String get viewSpecies => 'Ver Especie';
+	@override String get soundHint => 'Escucha';
+	@override String get noSpeciesFound => 'Sin datos de especies para esta área';
+}
+
+// Path: fieldCamera
+class _TranslationsFieldCameraEs implements TranslationsFieldCameraEn {
+	_TranslationsFieldCameraEs._(this._root);
+
+	final TranslationsEs _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Cámara de Campo';
+	@override String get nearbySpecies => 'Especies cercanas';
+	@override String get aiIdentify => 'Identificar con IA';
+	@override String get capturing => 'Capturando...';
+	@override String get notAvailableOnWeb => 'La Cámara de Campo requiere un dispositivo móvil';
+	@override String get permissionRequired => 'Se requiere permiso de cámara';
+	@override String get noNearbySpecies => 'Camina hasta un sitio de visita para ver especies cercanas';
+	@override String get tapToIdentify => 'Toca para identificar';
+}
+
 // Path: species.frequency
 class _TranslationsSpeciesFrequencyEs implements TranslationsSpeciesFrequencyEn {
 	_TranslationsSpeciesFrequencyEs._(this._root);
@@ -1063,6 +1124,7 @@ extension on TranslationsEs {
 			'home.discoverSpecies' => 'Descubrir Especies',
 			'home.exploreMap' => 'Explorar el Mapa',
 			'home.recentSightings' => 'Avistamientos Recientes',
+			'home.photoId' => 'Foto ID',
 			'home.browseWildlife' => 'Explorar toda la fauna',
 			'home.findSites' => 'Encontrar sitios de visita e islas',
 			'home.logEncounters' => 'Registra tus encuentros con la fauna',
@@ -1132,6 +1194,23 @@ extension on TranslationsEs {
 			'species.markAsSeen' => 'Marcar como Vista',
 			'species.markAsNotSeen' => 'Desmarcar como Vista',
 			'species.seen' => 'Vista',
+			'species.aiIdentify' => 'Identificar con IA',
+			'species.aiIdentifying' => 'Analizando foto...',
+			'species.aiSuggestions' => 'Sugerencias IA',
+			'species.aiNoMatch' => 'No se detectó fauna',
+			'species.aiSelectSpecies' => 'Seleccionar especie',
+			'species.aiNotInDatabase' => 'No está en nuestra base de datos',
+			'species.sortBy' => 'Ordenar por',
+			'species.sortNameAsc' => 'Nombre A–Z',
+			'species.sortNameDesc' => 'Nombre Z–A',
+			'species.sortRarityFirst' => 'Más Amenazadas Primero',
+			'species.sortEndemicFirst' => 'Endémicas Primero',
+			'species.dietFilter' => 'Dieta',
+			'species.activityFilter' => 'Actividad',
+			'species.whereToFind' => 'Dónde Encontrarla',
+			'species.altitudeRange' => 'Rango de Altitud',
+			'species.native' => 'Nativa',
+			'species.introduced' => 'Introducida',
 			'conservation.EX' => 'Extinta',
 			'conservation.EW' => 'Extinta en Estado Silvestre',
 			'conservation.CR' => 'En Peligro Crítico',
@@ -1236,6 +1315,8 @@ extension on TranslationsEs {
 			'map.removeFromWishlist' => 'Quitar de lista de deseos',
 			'map.wishlist' => 'Lista de deseos',
 			'map.myWishlist' => 'Mi lista de deseos',
+			'map.nearbySpeciesChip' => ({required Object count}) => '${count} especies cercanas',
+			'map.viewOnMap' => 'Ver en mapa',
 			'favorites.title' => 'Favoritos',
 			'favorites.empty' => 'Sin favoritos aún',
 			'favorites.emptySubtitle' => 'Toca el corazón en cualquier especie para agregarla aquí',
@@ -1539,6 +1620,8 @@ extension on TranslationsEs {
 			'admin.siteTypeDiving' => 'Buceo',
 			'admin.siteTypeViewpoint' => 'Mirador',
 			'admin.siteTypeDock' => 'Muelle',
+			_ => null,
+		} ?? switch (path) {
 			'admin.uploadPicking' => 'Seleccionando imagen...',
 			'admin.uploadCropping' => 'Recortando imagen...',
 			'admin.uploadCompressing' => 'Comprimiendo imagen...',
@@ -1559,8 +1642,6 @@ extension on TranslationsEs {
 			'admin.native' => 'Nativa',
 			'admin.introduced' => 'Introducida',
 			'admin.endemismLevel' => 'Nivel de Endemismo',
-			_ => null,
-		} ?? switch (path) {
 			'admin.endemismArchipelago' => 'Endémica del Archipiélago',
 			'admin.endemismIslandSpecific' => 'Endémica de Isla Específica',
 			'admin.behavior' => 'Comportamiento',
@@ -1799,6 +1880,27 @@ extension on TranslationsEs {
 			'fieldEdit.subModePoints' => 'Puntos',
 			'fieldEdit.subModeMove' => 'Mover',
 			'fieldEdit.subModeRotate' => 'Rotar',
+			'soundId.title' => 'ID de Sonido',
+			'soundId.tapToRecord' => 'Toca para identificar fauna cercana',
+			'soundId.recording' => 'Grabando...',
+			'soundId.analyzing' => 'Buscando fauna cercana...',
+			'soundId.nearbyWildlife' => 'Fauna cerca de ti ahora',
+			'soundId.tapToStop' => 'Toca para detener la grabación',
+			'soundId.noLocation' => 'Activa la ubicación para mejores resultados',
+			'soundId.basedOnLocation' => 'Basado en tu ubicación y hora',
+			'soundId.whyHere' => 'Por qué aquí',
+			'soundId.logSighting' => 'Registrar Avistamiento',
+			'soundId.viewSpecies' => 'Ver Especie',
+			'soundId.soundHint' => 'Escucha',
+			'soundId.noSpeciesFound' => 'Sin datos de especies para esta área',
+			'fieldCamera.title' => 'Cámara de Campo',
+			'fieldCamera.nearbySpecies' => 'Especies cercanas',
+			'fieldCamera.aiIdentify' => 'Identificar con IA',
+			'fieldCamera.capturing' => 'Capturando...',
+			'fieldCamera.notAvailableOnWeb' => 'La Cámara de Campo requiere un dispositivo móvil',
+			'fieldCamera.permissionRequired' => 'Se requiere permiso de cámara',
+			'fieldCamera.noNearbySpecies' => 'Camina hasta un sitio de visita para ver especies cercanas',
+			'fieldCamera.tapToIdentify' => 'Toca para identificar',
 			_ => null,
 		};
 	}

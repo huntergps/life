@@ -7,16 +7,15 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:http/http.dart' as http;
 import 'package:supabase/supabase.dart';
 
 // ── Supabase credentials ────────────────────────────────────────
-const _supabaseUrl = 'https://pxkopudkwqysfdeprmke.supabase.co';
+const _supabaseUrl = 'https://vojbznerffkemxqlwapf.supabase.co';
 const _serviceRoleKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4a29wdWRrd3F5c2ZkZXBybWtlIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDc4ODI3MCwiZXhwIjoyMDg2MzY0MjcwfQ.HxzvQOADCEzon8Vg-AZfN1vEtyMxcQ-6jW__cq67x8I';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvamJ6bmVyZmZrZW14cWx3YXBmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MTc2NTk0OSwiZXhwIjoyMDg3MzQxOTQ5fQ.Edz8JhsevSfJ3rj-U8q2lg6mYOjnXrbh68O_4XpB72s';
 const _bucket = 'species-images';
 
 // ── Image settings ──────────────────────────────────────────────
@@ -53,7 +52,8 @@ Future<String?> _findWikiImage(String scientificName) async {
       if (title.toLowerCase().endsWith('.svg') ||
           title.toLowerCase().endsWith('.pdf') ||
           title.toLowerCase().endsWith('.ogg') ||
-          title.toLowerCase().endsWith('.webm')) continue;
+          title.toLowerCase().endsWith('.webm'))
+        continue;
 
       // Get the actual image URL
       final infoUrl = Uri.parse(
@@ -79,8 +79,8 @@ Future<String?> _findWikiImage(String scientificName) async {
         if (width < 400 || height < 300) continue; // skip tiny images
 
         // Use thumburl if available (pre-scaled), else url
-        final url = (imageInfo['thumburl'] as String?) ??
-            (imageInfo['url'] as String?);
+        final url =
+            (imageInfo['thumburl'] as String?) ?? (imageInfo['url'] as String?);
         if (url != null) return url;
       }
     }
@@ -99,9 +99,7 @@ Future<Uint8List?> _downloadImage(String url) async {
   try {
     final resp = await client.get(
       Uri.parse(url),
-      headers: {
-        'User-Agent': 'GalapagosWildlifeApp/1.0 (educational project)',
-      },
+      headers: {'User-Agent': 'GalapagosWildlifeApp/1.0 (educational project)'},
     );
     if (resp.statusCode == 200) return resp.bodyBytes;
     print('  ⚠ Download failed: HTTP ${resp.statusCode}');
@@ -139,8 +137,13 @@ Uint8List _cropTo16x9(Uint8List bytes, int targetW, int targetH) {
     cropY = (decoded.height - cropH) ~/ 2;
   }
 
-  final cropped =
-      img.copyCrop(decoded, x: cropX, y: cropY, width: cropW, height: cropH);
+  final cropped = img.copyCrop(
+    decoded,
+    x: cropX,
+    y: cropY,
+    width: cropW,
+    height: cropH,
+  );
   final resized = img.copyResize(cropped, width: targetW, height: targetH);
   return Uint8List.fromList(img.encodeJpg(resized, quality: 85));
 }
@@ -149,12 +152,10 @@ Uint8List _cropTo16x9(Uint8List bytes, int targetW, int targetH) {
 Uint8List _cropToSquare(Uint8List bytes, int size) {
   final decoded = img.decodeImage(bytes);
   if (decoded == null) throw Exception('Failed to decode image');
-  final side =
-      decoded.height < decoded.width ? decoded.height : decoded.width;
+  final side = decoded.height < decoded.width ? decoded.height : decoded.width;
   final x = (decoded.width - side) ~/ 2;
   final y = (decoded.height - side) ~/ 2;
-  final cropped =
-      img.copyCrop(decoded, x: x, y: y, width: side, height: side);
+  final cropped = img.copyCrop(decoded, x: x, y: y, width: side, height: side);
   final thumb = img.copyResize(cropped, width: size, height: size);
   return Uint8List.fromList(img.encodeJpg(thumb, quality: 80));
 }
@@ -183,9 +184,17 @@ Future<void> main(List<String> args) async {
   final rows = await query;
   final species = List<Map<String, dynamic>>.from(rows);
 
-  final cats = {1: 'Reptiles', 2: 'Birds', 3: 'Mammals', 4: 'Marine', 5: 'Invertebrates'};
-  print('Found ${species.length} species missing images'
-      '${filterCategory != null ? " (category: ${cats[filterCategory]})" : ""}');
+  final cats = {
+    1: 'Reptiles',
+    2: 'Birds',
+    3: 'Mammals',
+    4: 'Marine',
+    5: 'Invertebrates',
+  };
+  print(
+    'Found ${species.length} species missing images'
+    '${filterCategory != null ? " (category: ${cats[filterCategory]})" : ""}',
+  );
   print('');
 
   var processed = 0;
@@ -207,7 +216,9 @@ Future<void> main(List<String> args) async {
       failed++;
       continue;
     }
-    print('  ✓ Found: ${imageUrl.length > 80 ? '${imageUrl.substring(0, 80)}...' : imageUrl}');
+    print(
+      '  ✓ Found: ${imageUrl.length > 80 ? '${imageUrl.substring(0, 80)}...' : imageUrl}',
+    );
 
     // 2. Download
     print('  ⬇ Downloading...');
@@ -234,33 +245,51 @@ Future<void> main(List<String> args) async {
     }
 
     // 4. Upload to Supabase Storage
-    final baseName = sciName.toLowerCase().replaceAll(' ', '_').replaceAll('.', '');
+    final baseName = sciName
+        .toLowerCase()
+        .replaceAll(' ', '_')
+        .replaceAll('.', '');
     print('  ⬆ Uploading to storage...');
     try {
       // Hero (full 16:9)
       final heroPath = '$id/gallery_0_$baseName.jpg';
-      await client.storage.from(_bucket).uploadBinary(
+      await client.storage
+          .from(_bucket)
+          .uploadBinary(
             heroPath,
             heroBytes,
-            fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
           );
       final heroUrl = client.storage.from(_bucket).getPublicUrl(heroPath);
 
       // Thumbnail (16:9 small)
       final thumbPath = '$id/thumb_0_$baseName.jpg';
-      await client.storage.from(_bucket).uploadBinary(
+      await client.storage
+          .from(_bucket)
+          .uploadBinary(
             thumbPath,
             thumbBytes,
-            fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
           );
       final thumbUrl = client.storage.from(_bucket).getPublicUrl(thumbPath);
 
       // Card thumbnail (1:1)
       final cardPath = '$id/card_thumb_0_$baseName.jpg';
-      await client.storage.from(_bucket).uploadBinary(
+      await client.storage
+          .from(_bucket)
+          .uploadBinary(
             cardPath,
             cardThumbBytes,
-            fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+            fileOptions: const FileOptions(
+              contentType: 'image/jpeg',
+              upsert: true,
+            ),
           );
       final cardUrl = client.storage.from(_bucket).getPublicUrl(cardPath);
 
@@ -277,8 +306,10 @@ Future<void> main(List<String> args) async {
         'is_primary': true,
       });
 
-      print('  ✅ Done! hero=${(heroBytes.length / 1024).toStringAsFixed(0)}KB, '
-          'thumb=${(thumbBytes.length / 1024).toStringAsFixed(0)}KB');
+      print(
+        '  ✅ Done! hero=${(heroBytes.length / 1024).toStringAsFixed(0)}KB, '
+        'thumb=${(thumbBytes.length / 1024).toStringAsFixed(0)}KB',
+      );
       processed++;
     } catch (e) {
       print('  ❌ Upload/insert failed: $e');

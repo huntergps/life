@@ -47,7 +47,9 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>We need camera access to photograph wildlife sightings</string>
+	<string>We need camera access to photograph wildlife sightings and identify species</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Used to record wildlife sounds for identification</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need background location access to continue recording trails when the screen is locked</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

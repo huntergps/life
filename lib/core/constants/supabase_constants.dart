@@ -10,6 +10,7 @@ class SupabaseConstants {
   static String get anonKey => const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: cloudAnonKey);
 
   // Storage buckets
-  static const String speciesImagesBucket = 'species-images';
+  static const String speciesImagesBucket  = 'species-images';
   static const String sightingPhotosBucket = 'sighting-photos';
+  static const String feedbackPhotosBucket = 'feedback-photos';
 }

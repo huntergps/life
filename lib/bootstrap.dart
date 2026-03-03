@@ -1,6 +1,7 @@
 import 'dart:async' show unawaited;
 import 'package:background_downloader/background_downloader.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -17,6 +18,11 @@ class Bootstrap {
 
   /// Whether Supabase connected successfully during init.
   static bool supabaseConnected = false;
+
+  static bool get isMobile =>
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -63,8 +69,8 @@ class Bootstrap {
       debugPrint('Supabase init failed (offline mode): $e');
     }
 
-    // Configure Brick repository (offline-first, native only — web uses Supabase directly)
-    if (!kIsWeb) {
+    // Configure Brick repository (offline-first, mobile only — desktop/web use Supabase directly)
+    if (isMobile) {
       Repository.configure(
         supabaseUrl: SupabaseConstants.url,
         supabaseAnonKey: SupabaseConstants.anonKey,
@@ -100,8 +106,8 @@ class Bootstrap {
         'last_synced',
         DateTime.now().millisecondsSinceEpoch,
       );
-      // Upload any trails that were recorded offline in a previous session (native only).
-      if (!kIsWeb) {
+      // Upload any trails that were recorded offline in a previous session (mobile only).
+      if (isMobile) {
         final pending = FieldEditService.pendingTrailCount();
         if (pending > 0) {
           debugPrint('📤 Found $pending pending trail(s) — syncing now…');

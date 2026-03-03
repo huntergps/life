@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/bootstrap.dart';
+import 'package:galapagos_wildlife/features/ar_camera/presentation/screens/ar_camera_screen.dart';
+import 'package:galapagos_wildlife/features/species/presentation/screens/photo_id_screen.dart';
 import 'router_keys.dart';
 import 'routes/app_routes.dart';
 import 'routes/admin_routes.dart';
@@ -15,8 +17,9 @@ final appRouter = GoRouter(
   initialLocation: Bootstrap.prefs.getString('last_route') ?? '/',
   redirect: (context, state) {
     final path = state.uri.path;
-    // Persist current route for cold-start restoration (skip login)
-    if (path != '/login' && path != '/profile') {
+    // Persist current route for cold-start restoration (skip transient screens)
+    const noSave = {'/login', '/profile', '/field-camera', '/photo-id'};
+    if (!noSave.contains(path)) {
       Bootstrap.prefs.setString('last_route', path);
     }
     // Guard admin routes — redirect non-admins to home
@@ -48,5 +51,17 @@ final appRouter = GoRouter(
     ),
     ...authRoutes(),
     ...searchRoutes(),
+    GoRoute(
+      path: '/field-camera',
+      name: 'field-camera',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const ArCameraScreen(),
+    ),
+    GoRoute(
+      path: '/photo-id',
+      name: 'photo-id',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const PhotoIdScreen(),
+    ),
   ],
 );

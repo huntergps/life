@@ -2,6 +2,7 @@ import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/services/location/location_permission_service.dart';
 import 'package:galapagos_wildlife/brick/models/island.model.dart';
@@ -170,6 +171,31 @@ final recentSightingsBySiteProvider = FutureProvider<Map<int, List<Map<String, d
     return {};
   }
 });
+
+/// Nearest visit site within 2km of the user, or null if none / no GPS.
+final nearbyMapSiteProvider = FutureProvider<({VisitSite site, double distanceM})?>(
+  (ref) async {
+    if (kIsWeb) return null;
+    final pos = await ref.watch(userLocationProvider.future);
+    if (pos == null) return null;
+    final sites = await ref.watch(visitSitesProvider.future);
+    const distCalc = Distance();
+    final userPos = LatLng(pos.latitude, pos.longitude);
+
+    VisitSite? nearest;
+    double nearestDist = double.infinity;
+    for (final site in sites) {
+      if (site.latitude == null || site.longitude == null) continue;
+      final d = distCalc.distance(userPos, LatLng(site.latitude!, site.longitude!));
+      if (d < nearestDist && d < 2000) {
+        nearestDist = d;
+        nearest = site;
+      }
+    }
+    if (nearest == null) return null;
+    return (site: nearest, distanceM: nearestDist);
+  },
+);
 
 /// Whether the given position is within the Galápagos bounding box.
 bool isInGalapagos(Position pos) {

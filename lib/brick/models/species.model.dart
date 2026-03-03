@@ -153,6 +153,36 @@ class Species extends OfflineFirstWithSupabaseModel {
   @Supabase(name: 'video_url')
   final String? videoUrl;
 
+  // Arácnidos — tamaños por sexo (mm)
+  @Supabase(name: 'size_mm_female_min', fromGenerator: "data['size_mm_female_min'] == null ? null : (data['size_mm_female_min'] as num).toDouble()")
+  final double? sizeMmFemaleMin;
+
+  @Supabase(name: 'size_mm_female_max', fromGenerator: "data['size_mm_female_max'] == null ? null : (data['size_mm_female_max'] as num).toDouble()")
+  final double? sizeMmFemaleMax;
+
+  @Supabase(name: 'size_mm_male_min', fromGenerator: "data['size_mm_male_min'] == null ? null : (data['size_mm_male_min'] as num).toDouble()")
+  final double? sizeMmMaleMin;
+
+  @Supabase(name: 'size_mm_male_max', fromGenerator: "data['size_mm_male_max'] == null ? null : (data['size_mm_male_max'] as num).toDouble()")
+  final double? sizeMmMaleMax;
+
+  // Arácnidos — comportamiento
+  @Supabase(name: 'builds_web')
+  final bool? buildsWeb;
+
+  @Supabase(name: 'web_type')
+  final String? webType;
+
+  @Supabase(name: 'venomous_to_humans')
+  final bool? venomousToHumans;
+
+  // IDs externos adicionales
+  @Supabase(name: 'inaturalist_taxon_id')
+  final int? inaturalistTaxonId;
+
+  @Supabase(name: 'datazone_id')
+  final int? datazoneId;
+
   Species({
     required this.id,
     required this.categoryId,
@@ -208,5 +238,15 @@ class Species extends OfflineFirstWithSupabaseModel {
     // Multimedia
     this.soundRecordingUrl,
     this.videoUrl,
+    // Arácnidos
+    this.sizeMmFemaleMin,
+    this.sizeMmFemaleMax,
+    this.sizeMmMaleMin,
+    this.sizeMmMaleMax,
+    this.buildsWeb,
+    this.webType,
+    this.venomousToHumans,
+    this.inaturalistTaxonId,
+    this.datazoneId,
   });
 }

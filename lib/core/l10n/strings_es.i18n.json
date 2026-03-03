@@ -20,6 +20,7 @@
     "discoverSpecies": "Descubrir Especies",
     "exploreMap": "Explorar el Mapa",
     "recentSightings": "Avistamientos Recientes",
+    "photoId": "Foto ID",
     "browseWildlife": "Explorar toda la fauna",
     "findSites": "Encontrar sitios de visita e islas",
     "logEncounters": "Registra tus encuentros con la fauna"
@@ -92,7 +93,24 @@
     "pauseSound": "Pausar sonido",
     "markAsSeen": "Marcar como Vista",
     "markAsNotSeen": "Desmarcar como Vista",
-    "seen": "Vista"
+    "seen": "Vista",
+    "aiIdentify": "Identificar con IA",
+    "aiIdentifying": "Analizando foto...",
+    "aiSuggestions": "Sugerencias IA",
+    "aiNoMatch": "No se detectó fauna",
+    "aiSelectSpecies": "Seleccionar especie",
+    "aiNotInDatabase": "No está en nuestra base de datos",
+    "sortBy": "Ordenar por",
+    "sortNameAsc": "Nombre A–Z",
+    "sortNameDesc": "Nombre Z–A",
+    "sortRarityFirst": "Más Amenazadas Primero",
+    "sortEndemicFirst": "Endémicas Primero",
+    "dietFilter": "Dieta",
+    "activityFilter": "Actividad",
+    "whereToFind": "Dónde Encontrarla",
+    "altitudeRange": "Rango de Altitud",
+    "native": "Nativa",
+    "introduced": "Introducida"
   },
   "conservation": {
     "EX": "Extinta",
@@ -200,7 +218,9 @@
     "addToWishlist": "Agregar a lista de deseos",
     "removeFromWishlist": "Quitar de lista de deseos",
     "wishlist": "Lista de deseos",
-    "myWishlist": "Mi lista de deseos"
+    "myWishlist": "Mi lista de deseos",
+    "nearbySpeciesChip": "${count} especies cercanas",
+    "viewOnMap": "Ver en mapa"
   },
   "favorites": {
     "title": "Favoritos",
@@ -798,5 +818,30 @@
     "subModePoints": "Puntos",
     "subModeMove": "Mover",
     "subModeRotate": "Rotar"
+  },
+  "soundId": {
+    "title": "ID de Sonido",
+    "tapToRecord": "Toca para identificar fauna cercana",
+    "recording": "Grabando...",
+    "analyzing": "Buscando fauna cercana...",
+    "nearbyWildlife": "Fauna cerca de ti ahora",
+    "tapToStop": "Toca para detener la grabación",
+    "noLocation": "Activa la ubicación para mejores resultados",
+    "basedOnLocation": "Basado en tu ubicación y hora",
+    "whyHere": "Por qué aquí",
+    "logSighting": "Registrar Avistamiento",
+    "viewSpecies": "Ver Especie",
+    "soundHint": "Escucha",
+    "noSpeciesFound": "Sin datos de especies para esta área"
+  },
+  "fieldCamera": {
+    "title": "Cámara de Campo",
+    "nearbySpecies": "Especies cercanas",
+    "aiIdentify": "Identificar con IA",
+    "capturing": "Capturando...",
+    "notAvailableOnWeb": "La Cámara de Campo requiere un dispositivo móvil",
+    "permissionRequired": "Se requiere permiso de cámara",
+    "noNearbySpecies": "Camina hasta un sitio de visita para ver especies cercanas",
+    "tapToIdentify": "Toca para identificar"
   }
 }

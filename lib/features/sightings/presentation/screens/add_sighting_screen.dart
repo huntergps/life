@@ -18,6 +18,8 @@ import 'package:galapagos_wildlife/features/sightings/providers/sightings_provid
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
+import 'package:galapagos_wildlife/features/species/presentation/widgets/species_id_sheet.dart';
 import '../widgets/species_picker_sheet.dart';
 import 'location_picker_screen.dart';
 
@@ -39,6 +41,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   bool _isSaving = false;
   bool _isLoadingLocation = false;
   bool _isProcessingPhoto = false;
+  bool _isIdentifying = false;
 
   bool get _hasData =>
       _selectedSpecies != null ||
@@ -283,6 +286,27 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _identifyPhoto() async {
+    if (_photoBytes == null) return;
+    setState(() => _isIdentifying = true);
+    final notifier = ref.read(speciesIdProvider.notifier);
+    await notifier.identify(
+      _photoBytes!,
+      lat: _latitude,
+      lng: _longitude,
+    );
+    setState(() => _isIdentifying = false);
+    if (!mounted) return;
+    final result = await showModalBottomSheet<Species>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const SpeciesIdSheet(),
+    );
+    if (result != null && mounted) {
+      setState(() => _selectedSpecies = result);
+    }
   }
 
   Future<void> _save() async {
@@ -576,6 +600,24 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
               child: Image.memory(_photoBytes!, fit: BoxFit.cover),
             ),
           ),
+          const SizedBox(height: 8),
+          if (_isMobile)
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: _isIdentifying
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome, size: 18),
+                label: Text(
+                  isEs ? 'Identificar con IA' : 'Identify with AI',
+                ),
+                onPressed: (_isIdentifying || kIsWeb) ? null : _identifyPhoto,
+              ),
+            ),
           const SizedBox(height: 8),
         ],
         Card(

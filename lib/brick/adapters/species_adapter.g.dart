@@ -126,6 +126,37 @@ Future<Species> _$SpeciesFromSupabase(
         ? null
         : data['sound_recording_url'] as String?,
     videoUrl: data['video_url'] == null ? null : data['video_url'] as String?,
+    sizeMmFemaleMin: data['size_mm_female_min'] == null
+        ? null
+        : data['size_mm_female_min'] == null
+        ? null
+        : (data['size_mm_female_min'] as num).toDouble(),
+    sizeMmFemaleMax: data['size_mm_female_max'] == null
+        ? null
+        : data['size_mm_female_max'] == null
+        ? null
+        : (data['size_mm_female_max'] as num).toDouble(),
+    sizeMmMaleMin: data['size_mm_male_min'] == null
+        ? null
+        : data['size_mm_male_min'] == null
+        ? null
+        : (data['size_mm_male_min'] as num).toDouble(),
+    sizeMmMaleMax: data['size_mm_male_max'] == null
+        ? null
+        : data['size_mm_male_max'] == null
+        ? null
+        : (data['size_mm_male_max'] as num).toDouble(),
+    buildsWeb: data['builds_web'] == null ? null : data['builds_web'] as bool?,
+    webType: data['web_type'] == null ? null : data['web_type'] as String?,
+    venomousToHumans: data['venomous_to_humans'] == null
+        ? null
+        : data['venomous_to_humans'] as bool?,
+    inaturalistTaxonId: data['inaturalist_taxon_id'] == null
+        ? null
+        : data['inaturalist_taxon_id'] as int?,
+    datazoneId: data['datazone_id'] == null
+        ? null
+        : data['datazone_id'] as int?,
   );
 }
 
@@ -182,6 +213,15 @@ Future<Map<String, dynamic>> _$SpeciesToSupabase(
     'iucn_assessment_url': instance.iucnAssessmentUrl,
     'sound_recording_url': instance.soundRecordingUrl,
     'video_url': instance.videoUrl,
+    'size_mm_female_min': instance.sizeMmFemaleMin,
+    'size_mm_female_max': instance.sizeMmFemaleMax,
+    'size_mm_male_min': instance.sizeMmMaleMin,
+    'size_mm_male_max': instance.sizeMmMaleMax,
+    'builds_web': instance.buildsWeb,
+    'web_type': instance.webType,
+    'venomous_to_humans': instance.venomousToHumans,
+    'inaturalist_taxon_id': instance.inaturalistTaxonId,
+    'datazone_id': instance.datazoneId,
   };
 }
 
@@ -306,6 +346,29 @@ Future<Species> _$SpeciesFromSqlite(
         ? null
         : data['sound_recording_url'] as String?,
     videoUrl: data['video_url'] == null ? null : data['video_url'] as String?,
+    sizeMmFemaleMin: data['size_mm_female_min'] == null
+        ? null
+        : data['size_mm_female_min'] as double?,
+    sizeMmFemaleMax: data['size_mm_female_max'] == null
+        ? null
+        : data['size_mm_female_max'] as double?,
+    sizeMmMaleMin: data['size_mm_male_min'] == null
+        ? null
+        : data['size_mm_male_min'] as double?,
+    sizeMmMaleMax: data['size_mm_male_max'] == null
+        ? null
+        : data['size_mm_male_max'] as double?,
+    buildsWeb: data['builds_web'] == null ? null : data['builds_web'] == 1,
+    webType: data['web_type'] == null ? null : data['web_type'] as String?,
+    venomousToHumans: data['venomous_to_humans'] == null
+        ? null
+        : data['venomous_to_humans'] == 1,
+    inaturalistTaxonId: data['inaturalist_taxon_id'] == null
+        ? null
+        : data['inaturalist_taxon_id'] as int?,
+    datazoneId: data['datazone_id'] == null
+        ? null
+        : data['datazone_id'] as int?,
   )..primaryKey = data['_brick_id'] as int;
 }
 
@@ -368,6 +431,19 @@ Future<Map<String, dynamic>> _$SpeciesToSqlite(
     'iucn_assessment_url': instance.iucnAssessmentUrl,
     'sound_recording_url': instance.soundRecordingUrl,
     'video_url': instance.videoUrl,
+    'size_mm_female_min': instance.sizeMmFemaleMin,
+    'size_mm_female_max': instance.sizeMmFemaleMax,
+    'size_mm_male_min': instance.sizeMmMaleMin,
+    'size_mm_male_max': instance.sizeMmMaleMax,
+    'builds_web': instance.buildsWeb == null
+        ? null
+        : (instance.buildsWeb! ? 1 : 0),
+    'web_type': instance.webType,
+    'venomous_to_humans': instance.venomousToHumans == null
+        ? null
+        : (instance.venomousToHumans! ? 1 : 0),
+    'inaturalist_taxon_id': instance.inaturalistTaxonId,
+    'datazone_id': instance.datazoneId,
   };
 }
 
@@ -568,6 +644,42 @@ class SpeciesAdapter extends OfflineFirstWithSupabaseAdapter<Species> {
     'videoUrl': const RuntimeSupabaseColumnDefinition(
       association: false,
       columnName: 'video_url',
+    ),
+    'sizeMmFemaleMin': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'size_mm_female_min',
+    ),
+    'sizeMmFemaleMax': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'size_mm_female_max',
+    ),
+    'sizeMmMaleMin': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'size_mm_male_min',
+    ),
+    'sizeMmMaleMax': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'size_mm_male_max',
+    ),
+    'buildsWeb': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'builds_web',
+    ),
+    'webType': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'web_type',
+    ),
+    'venomousToHumans': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'venomous_to_humans',
+    ),
+    'inaturalistTaxonId': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'inaturalist_taxon_id',
+    ),
+    'datazoneId': const RuntimeSupabaseColumnDefinition(
+      association: false,
+      columnName: 'datazone_id',
     ),
   };
   @override
@@ -863,6 +975,60 @@ class SpeciesAdapter extends OfflineFirstWithSupabaseAdapter<Species> {
       columnName: 'video_url',
       iterable: false,
       type: String,
+    ),
+    'sizeMmFemaleMin': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'size_mm_female_min',
+      iterable: false,
+      type: double,
+    ),
+    'sizeMmFemaleMax': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'size_mm_female_max',
+      iterable: false,
+      type: double,
+    ),
+    'sizeMmMaleMin': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'size_mm_male_min',
+      iterable: false,
+      type: double,
+    ),
+    'sizeMmMaleMax': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'size_mm_male_max',
+      iterable: false,
+      type: double,
+    ),
+    'buildsWeb': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'builds_web',
+      iterable: false,
+      type: bool,
+    ),
+    'webType': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'web_type',
+      iterable: false,
+      type: String,
+    ),
+    'venomousToHumans': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'venomous_to_humans',
+      iterable: false,
+      type: bool,
+    ),
+    'inaturalistTaxonId': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'inaturalist_taxon_id',
+      iterable: false,
+      type: int,
+    ),
+    'datazoneId': const RuntimeSqliteColumnDefinition(
+      association: false,
+      columnName: 'datazone_id',
+      iterable: false,
+      type: int,
     ),
   };
   @override

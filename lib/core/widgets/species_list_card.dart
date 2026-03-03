@@ -4,6 +4,7 @@ import 'package:galapagos_wildlife/core/widgets/favorite_heart_button.dart';
 import 'cached_species_image.dart';
 import '../theme/app_colors.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
+import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
 
 /// Card designed for grid/list views (species list & favorites).
 /// Shows a 16:9 image on top with name overlay, then a 2-column attribute
@@ -151,8 +152,35 @@ class SpeciesListCard extends ConsumerWidget {
     );
   }
 
+  // ── AI recognition badge ──────────────────────────────────────────────────
+  static Widget _buildAiBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.teal.shade600.withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_awesome, size: 9, color: Colors.white),
+          SizedBox(width: 3),
+          Text(
+            'IA',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // ── Image + name overlay ──────────────────────────────────────────────────
-  Widget _buildImageStack() {
+  Widget _buildImageStack(bool hasAiRecognition) {
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -179,13 +207,21 @@ class SpeciesListCard extends ConsumerWidget {
             ),
           ),
         ),
-        // IUCN conservation badge (top-left)
-        if (conservationStatus != null)
-          Positioned(
-            top: 6,
-            left: 6,
-            child: _buildIucnBadge(),
+        // IUCN + AI badges (top-left, stacked vertically)
+        Positioned(
+          top: 6,
+          left: 6,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (conservationStatus != null) _buildIucnBadge(),
+              if (hasAiRecognition) ...[
+                if (conservationStatus != null) const SizedBox(height: 4),
+                _buildAiBadge(),
+              ],
+            ],
           ),
+        ),
         // Name + endemic badge
         Positioned(
           left: 10,
@@ -460,6 +496,8 @@ class SpeciesListCard extends ConsumerWidget {
     final locale  = ref.watch(localeProvider);
     final isEs    = locale == 'es';
     final isDark  = Theme.of(context).brightness == Brightness.dark;
+    final aiNames = ref.watch(aiRecognizedSpeciesProvider).asData?.value ?? {};
+    final hasAiRecognition = aiNames.contains(scientificName.toLowerCase());
 
     return Semantics(
       button: onTap != null,
@@ -480,7 +518,7 @@ class SpeciesListCard extends ConsumerWidget {
               children: [
                 AspectRatio(
                   aspectRatio: 16 / 9,
-                  child: _buildImageStack(),
+                  child: _buildImageStack(hasAiRecognition),
                 ),
                 _buildAttributeGrid(isEs, isDark),
               ],

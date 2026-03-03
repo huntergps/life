@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:brick_offline_first_with_supabase/brick_offline_first_with_supabase.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/brick/models/category.model.dart';
 import 'package:galapagos_wildlife/brick/models/island.model.dart';
@@ -163,6 +162,53 @@ Sighting sightingFromRow(Map<String, dynamic> r) => Sighting(
       photoUrl: r['photo_url'] as String?,
     );
 
+// ---------------------------------------------------------------------------
+// Non-mobile: Supabase direct fetch (desktop / web — Brick not initialized)
+// ---------------------------------------------------------------------------
+
+/// Queries Supabase directly when Brick is not available (desktop/web).
+/// Covers the main model types used by providers.
+Future<List<T>> _supabaseGet<T extends OfflineFirstWithSupabaseModel>() async {
+  final db = Supabase.instance.client;
+  try {
+    if (T == Species) {
+      final d = await db.from('species').select();
+      return d.map((r) => speciesFromRow(r) as T).toList();
+    }
+    if (T == Category) {
+      final d = await db.from('categories').select();
+      return d.map((r) => categoryFromRow(r) as T).toList();
+    }
+    if (T == Island) {
+      final d = await db.from('islands').select();
+      return d.map((r) => islandFromRow(r) as T).toList();
+    }
+    if (T == VisitSite) {
+      final d = await db.from('visit_sites').select();
+      return d.map((r) => visitSiteFromRow(r) as T).toList();
+    }
+    if (T == SpeciesImage) {
+      final d = await db.from('species_images').select();
+      return d.map((r) => speciesImageFromRow(r) as T).toList();
+    }
+    if (T == SpeciesSite) {
+      final d = await db.from('species_sites').select();
+      return d.map((r) => speciesSiteFromRow(r) as T).toList();
+    }
+    if (T == Sighting) {
+      final d = await db.from('sightings').select();
+      return d.map((r) => sightingFromRow(r) as T).toList();
+    }
+    if (T == UserProfile) {
+      final d = await db.from('user_profiles').select();
+      return d.map((r) => userProfileFromRow(r) as T).toList();
+    }
+    return [];
+  } catch (_) {
+    return [];
+  }
+}
+
 /// Fetches a list from Brick with local-first strategy.
 ///
 /// By default returns local SQLite data immediately and fires a background
@@ -179,6 +225,14 @@ Future<List<T>> fetchDeduped<T extends OfflineFirstWithSupabaseModel>({
   Query? query,
   bool awaitRemote = false,
 }) async {
+  // Desktop / web: Brick not initialized — query Supabase directly.
+  if (!Repository.initialized) {
+    final raw = await _supabaseGet<T>();
+    final deduped = <int, T>{};
+    for (final item in raw) deduped[idSelector(item)] = item;
+    return deduped.values.toList();
+  }
+
   final repo = Repository();
 
   List<T> raw;
@@ -227,6 +281,12 @@ Future<Map<int, T>> fetchLookup<T extends OfflineFirstWithSupabaseModel>({
   OfflineFirstGetPolicy policy = OfflineFirstGetPolicy.localOnly,
   Query? query,
 }) async {
+  if (!Repository.initialized) {
+    final raw = await _supabaseGet<T>();
+    final map = <int, T>{};
+    for (final item in raw) map[idSelector(item)] = item;
+    return map;
+  }
   final raw = await Repository().get<T>(policy: policy, query: query);
   final map = <int, T>{};
   for (final item in raw) {

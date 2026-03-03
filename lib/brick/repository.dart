@@ -22,6 +22,8 @@ class Repository extends OfflineFirstWithSupabaseRepository {
 
   factory Repository() => _singleton!;
 
+  static bool get initialized => _singleton != null;
+
   /// Writes [instance] to local SQLite only — bypasses the Supabase offline
   /// queue entirely. Use this after a successful direct Supabase write to keep
   /// the local cache in sync without re-queuing the same write.

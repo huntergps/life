@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/core/widgets/favorite_heart_button.dart';
+import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
 import 'cached_species_image.dart';
 import 'conservation_badge.dart';
 import '../theme/app_colors.dart';
 
-class SpeciesCard extends StatelessWidget {
+class SpeciesCard extends ConsumerWidget {
   final String commonName;
   final String scientificName;
   final String? thumbnailUrl;
@@ -37,7 +39,7 @@ class SpeciesCard extends StatelessWidget {
   });
 
   // ── Image stack (shared between expandImage and AspectRatio modes) ──────────
-  Widget _imageStack(bool hasInfoStrip) {
+  Widget _imageStack(bool hasInfoStrip, bool hasAiRecognition) {
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -68,6 +70,35 @@ class SpeciesCard extends StatelessWidget {
             ),
           ),
         ),
+        // AI badge (top-left)
+        if (hasAiRecognition)
+          Positioned(
+            top: 6,
+            left: 6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.teal.shade600.withValues(alpha: 0.9),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.auto_awesome, size: 9, color: Colors.white),
+                  SizedBox(width: 3),
+                  Text(
+                    'IA',
+                    style: TextStyle(
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         // Text overlay on gradient (bottom)
         Positioned(
           left: 8,
@@ -240,12 +271,14 @@ class SpeciesCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasInfoStrip = conservationStatus != null ||
         dietType != null ||
         activityPattern != null ||
         populationTrend != null;
+    final aiNames = ref.watch(aiRecognizedSpeciesProvider).asData?.value ?? {};
+    final hasAiRecognition = aiNames.contains(scientificName.toLowerCase());
 
     return Semantics(
       button: onTap != null,
@@ -270,11 +303,11 @@ class SpeciesCard extends StatelessWidget {
                 // expandImage=true  → Expanded fills all available height
                 // expandImage=false → AspectRatio(16:9) fixed height
                 if (expandImage)
-                  Expanded(child: _imageStack(hasInfoStrip))
+                  Expanded(child: _imageStack(hasInfoStrip, hasAiRecognition))
                 else
                   AspectRatio(
                     aspectRatio: 16 / 9,
-                    child: _imageStack(hasInfoStrip),
+                    child: _imageStack(hasInfoStrip, hasAiRecognition),
                   ),
 
                 // ── Info strip: badge left · icon+label chips right ──────────

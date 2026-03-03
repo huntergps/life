@@ -1,8 +1,7 @@
 // GENERATED CODE DO NOT EDIT
 // This file should be version controlled
 import 'package:brick_sqlite/db.dart';
-part '20260301221322.migration.dart';
-part '20260301221322.migration.dart';
+part '20260303163824.migration.dart';
 part '20260211025650.migration.dart';
 part '20260212070549.migration.dart';
 part '20260212075533.migration.dart';
@@ -15,11 +14,11 @@ part '20260223183752.migration.dart';
 part '20260223201904.migration.dart';
 part '20260224031718.migration.dart';
 part '20260224040000.migration.dart';
+part '20260301221322.migration.dart';
 
 /// All intelligently-generated migrations from all `@Migratable` classes on disk
 final migrations = <Migration>{
-  const Migration20260301221322(),
-  const Migration20260301221322(),
+  const Migration20260303163824(),
   const Migration20260211025650(),
   const Migration20260212070549(),
   const Migration20260212075533(),
@@ -32,11 +31,12 @@ final migrations = <Migration>{
   const Migration20260223201904(),
   const Migration20260224031718(),
   const Migration20260224040000(),
+  const Migration20260301221322(),
 };
 
 /// A consumable database structure including the latest generated migration.
 final schema = Schema(
-  20260224040000,
+  20260301221322,
   generatorVersion: 1,
   tables: <SchemaTable>{
     SchemaTable(
@@ -163,6 +163,15 @@ final schema = Schema(
         SchemaColumn('iucn_assessment_url', Column.varchar),
         SchemaColumn('sound_recording_url', Column.varchar),
         SchemaColumn('video_url', Column.varchar),
+        SchemaColumn('size_mm_female_min', Column.Double),
+        SchemaColumn('size_mm_female_max', Column.Double),
+        SchemaColumn('size_mm_male_min', Column.Double),
+        SchemaColumn('size_mm_male_max', Column.Double),
+        SchemaColumn('builds_web', Column.boolean),
+        SchemaColumn('web_type', Column.varchar),
+        SchemaColumn('venomous_to_humans', Column.boolean),
+        SchemaColumn('inaturalist_taxon_id', Column.integer),
+        SchemaColumn('datazone_id', Column.integer),
       },
       indices: <SchemaIndex>{},
     ),

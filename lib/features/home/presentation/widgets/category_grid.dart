@@ -11,9 +11,10 @@ IconData _iconForSlug(String slug) {
   return switch (slug) {
     'reptiles' => FontAwesomeIcons.staffSnake,
     'birds' => FontAwesomeIcons.dove,
-    'mammals' => FontAwesomeIcons.otter,
+    'mammals' => FontAwesomeIcons.paw,
     'marine-life' => FontAwesomeIcons.fishFins,
     'invertebrates' => FontAwesomeIcons.shrimp,
+    'spiders' => FontAwesomeIcons.spider,
     _ => FontAwesomeIcons.leaf,
   };
 }
@@ -39,13 +40,19 @@ class CategoryGrid extends ConsumerWidget {
               child: _CategoryChip(
                 name: locale == 'es' ? cat.nameEs : cat.nameEn,
                 slug: cat.slug,
-                onTap: () => context.goNamed('species', queryParameters: {'category': '${cat.id}'}),
+                onTap: () => context.goNamed(
+                  'species',
+                  queryParameters: {'category': '${cat.id}'},
+                ),
               ),
             );
           },
         ),
       ),
-      loading: () => const SizedBox(height: 110, child: Center(child: CircularProgressIndicator())),
+      loading: () => const SizedBox(
+        height: 110,
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (e, _) => SizedBox(
         height: 110,
         child: Center(
@@ -71,7 +78,11 @@ class _CategoryChip extends StatefulWidget {
   final String slug;
   final VoidCallback onTap;
 
-  const _CategoryChip({required this.name, required this.slug, required this.onTap});
+  const _CategoryChip({
+    required this.name,
+    required this.slug,
+    required this.onTap,
+  });
 
   @override
   State<_CategoryChip> createState() => _CategoryChipState();
@@ -83,7 +94,9 @@ class _CategoryChipState extends State<_CategoryChip> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final color = isDark ? AppColors.primaryLight : Theme.of(context).colorScheme.primary;
+    final color = isDark
+        ? AppColors.primaryLight
+        : Theme.of(context).colorScheme.primary;
 
     return Semantics(
       button: true,
@@ -109,8 +122,10 @@ class _CategoryChipState extends State<_CategoryChip> {
                       color: _isHovered
                           ? color.withValues(alpha: 0.2)
                           : isDark
-                              ? AppColors.primaryLight.withValues(alpha: 0.12)
-                              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                          ? AppColors.primaryLight.withValues(alpha: 0.12)
+                          : Theme.of(
+                              context,
+                            ).colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                       border: isDark
                           ? Border.all(color: AppColors.darkBorder, width: 0.5)

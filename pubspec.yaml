@@ -40,6 +40,14 @@ dependencies:
 
   # Audio
   just_audio: ^0.9.41
+  record: ^6.2.0
+
+  # Camera
+  camera: ^0.12.0
+
+  # AI - Offline on-device species identification (open source, no Google deps)
+  tflite_flutter: ^0.12.1
+  image: ^4.5.2
 
   # Images & UI
   cached_network_image: ^3.4.1
@@ -47,7 +55,9 @@ dependencies:
   shimmer: ^3.0.0
   photo_view: ^0.15.0
   image_cropper: ^8.0.2
-  image: ^4.5.2
+
+  # Crypto (SHA-256 hash para dedup de fotos de feedback)
+  crypto: ^3.0.5
 
   # Utilities
   shared_preferences: ^2.5.0
@@ -106,3 +116,4 @@ flutter:
     - assets/images/hero/
     - assets/images/gwl_logo.png
     - assets/maps/galapagos.pmtiles
+    - assets/ml/

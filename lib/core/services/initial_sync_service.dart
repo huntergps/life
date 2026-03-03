@@ -28,6 +28,24 @@ class InitialSyncService {
     }
   }
 
+  /// Clears all pending offline queue requests to avoid blocking new syncs.
+  Future<void> _clearOfflineQueue() async {
+    try {
+      final queueManager =
+          _repo.offlineRequestQueue.client.requestManager;
+      final pending = await queueManager.unprocessedRequests();
+      for (final req in pending) {
+        final id = req[queueManager.primaryKeyColumn] as int?;
+        if (id != null) await queueManager.deleteUnprocessedRequest(id);
+      }
+      if (pending.isNotEmpty) {
+        debugPrint('🧹 Cleared ${pending.length} offline queue requests before sync');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Could not clear offline queue: $e');
+    }
+  }
+
   /// Perform full sync of all reference data from Supabase to local SQLite.
   /// Calls [onProgress] with (step, totalSteps, tableName).
   Future<void> syncAll({
@@ -43,49 +61,53 @@ class InitialSyncService {
       'Trails',
     ];
     final total = tables.length;
+    const timeout = Duration(seconds: 60);
+
+    // Clear any stale queued requests that would block new syncs
+    await _clearOfflineQueue();
 
     try {
       // 1. Categories
       onProgress?.call(1, total, tables[0]);
       await _repo.get<brick.Category>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       // 2. Islands
       onProgress?.call(2, total, tables[1]);
       await _repo.get<Island>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       // 3. Visit Sites
       onProgress?.call(3, total, tables[2]);
       await _repo.get<VisitSite>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       // 4. Species
       onProgress?.call(4, total, tables[3]);
       await _repo.get<Species>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       // 5. Species-Sites relationships
       onProgress?.call(5, total, tables[4]);
       await _repo.get<SpeciesSite>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       // 6. Species Images
       onProgress?.call(6, total, tables[5]);
       await _repo.get<SpeciesImage>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       // 7. Trails (admin-created routes visible to all users)
       onProgress?.call(7, total, tables[6]);
       await _repo.get<Trail>(
         policy: OfflineFirstGetPolicy.awaitRemote,
-      );
+      ).timeout(timeout);
 
       debugPrint('Initial sync complete: all tables cached locally');
     } catch (e) {

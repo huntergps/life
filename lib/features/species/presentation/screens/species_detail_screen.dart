@@ -21,6 +21,7 @@ import '../widgets/quick_facts_row.dart';
 import '../widgets/taxonomy_tree.dart';
 import '../widgets/gallery_carousel.dart';
 import '../widgets/species_sound_player.dart';
+import 'package:go_router/go_router.dart';
 
 class SpeciesDetailScreen extends ConsumerWidget {
   final int speciesId;
@@ -215,7 +216,7 @@ class _DetailContent extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
-        // Badges in same row (conservation status + endemic)
+        // Badges in same row (conservation status + endemic + trend + native/introduced)
         Wrap(
           spacing: 8,
           runSpacing: 8,
@@ -243,6 +244,20 @@ class _DetailContent extends ConsumerWidget {
                   ),
                 ),
               ),
+            if (species.populationTrend != null)
+              _TrendBadge(trend: species.populationTrend!, isDark: isDark),
+            if (species.isNative == true && !species.isEndemic)
+              _StatusChip(
+                label: context.t.species.native,
+                color: Colors.teal,
+                isDark: isDark,
+              ),
+            if (species.isIntroduced == true)
+              _StatusChip(
+                label: context.t.species.introduced,
+                color: Colors.orange,
+                isDark: isDark,
+              ),
           ],
         ),
         const SizedBox(height: 20),
@@ -253,6 +268,19 @@ class _DetailContent extends ConsumerWidget {
         ],
         // Quick facts chips
         QuickFactsRow(species: species),
+        const SizedBox(height: 16),
+        // Altitude range bar
+        if (species.altitudeMinM != null || species.altitudeMaxM != null) ...[
+          _AltitudeBar(
+            minM: species.altitudeMinM,
+            maxM: species.altitudeMaxM,
+            locale: locale,
+            isDark: isDark,
+          ),
+          const SizedBox(height: 16),
+        ],
+        // Visit sites strip — where to find this species
+        _VisitSitesStrip(speciesId: species.id, locale: locale, isDark: isDark),
         const SizedBox(height: 20),
         // Description
         ..._localizedSection(
@@ -306,6 +334,79 @@ class _DetailContent extends ConsumerWidget {
 
     final widgets = <Widget>[];
 
+    // Venomous warning badge — only for arachnids with venomous_to_humans = true
+    if (species.venomousToHumans == true) {
+      widgets.add(Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.red.shade900.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.red.shade700, width: 1),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.warning_rounded, color: Colors.red.shade400, size: 18),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                locale == 'es'
+                    ? 'Especie con veneno neurotóxico. Sin registros de mordidas en Galápagos.'
+                    : 'Species with neurotoxic venom. No bite records in Galápagos.',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.red.shade300,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ));
+      widgets.add(const SizedBox(height: 16));
+    }
+
+    // Morphology (arachnids) — size by sex, only when data exists
+    if (species.sizeMmFemaleMin != null || species.sizeMmMaleMin != null) {
+      widgets.add(Text(
+        locale == 'es' ? 'Morfología' : 'Morphology',
+        style: Theme.of(context).textTheme.titleLarge,
+      ));
+      widgets.add(const SizedBox(height: 8));
+      if (species.sizeMmFemaleMin != null) {
+        final fMin = species.sizeMmFemaleMin!;
+        final fMax = species.sizeMmFemaleMax;
+        widgets.add(Row(
+          children: [
+            const Icon(Icons.straighten_outlined, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              locale == 'es'
+                  ? 'Hembra: ${_formatMm(fMin, fMax)}'
+                  : 'Female: ${_formatMm(fMin, fMax)}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ));
+        widgets.add(const SizedBox(height: 4));
+      }
+      if (species.sizeMmMaleMin != null) {
+        final mMin = species.sizeMmMaleMin!;
+        final mMax = species.sizeMmMaleMax;
+        widgets.add(Row(
+          children: [
+            const Icon(Icons.straighten_outlined, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              locale == 'es'
+                  ? 'Macho: ${_formatMm(mMin, mMax)}'
+                  : 'Male: ${_formatMm(mMin, mMax)}',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ));
+      }
+      widgets.add(const SizedBox(height: 20));
+    }
+
     // Behavior section — always visible
     widgets.add(Text(
       locale == 'es' ? 'Comportamiento' : 'Behavior',
@@ -324,6 +425,17 @@ class _DetailContent extends ConsumerWidget {
     }
     if (species.primaryFoodSources != null && species.primaryFoodSources!.isNotEmpty) {
       behaviorInfo.add('${locale == 'es' ? 'Alimentación' : 'Food'}: ${species.primaryFoodSources!.join(', ')}');
+    }
+    // Spider web behavior
+    if (species.buildsWeb != null) {
+      if (species.buildsWeb!) {
+        final webLabel = species.webType != null
+            ? _formatWebType(species.webType!, locale)
+            : (locale == 'es' ? 'Sí' : 'Yes');
+        behaviorInfo.add('${locale == 'es' ? 'Telaraña' : 'Web'}: $webLabel');
+      } else {
+        behaviorInfo.add(locale == 'es' ? 'Sin telaraña (cazadora)' : 'No web (active hunter)');
+      }
     }
     widgets.add(behaviorInfo.isEmpty
         ? emptyValue()
@@ -538,6 +650,23 @@ class _DetailContent extends ConsumerWidget {
     return value.split('_').map((word) =>
       word[0].toUpperCase() + word.substring(1)
     ).join(' ');
+  }
+
+  String _formatMm(double min, double? max) {
+    if (max == null || max == min) return '${min.toStringAsFixed(1)} mm';
+    return '${min.toStringAsFixed(1)}–${max.toStringAsFixed(1)} mm';
+  }
+
+  String _formatWebType(String type, String locale) {
+    const labels = {
+      'orbicular': {'es': 'Orbicular (rueda)', 'en': 'Orb web'},
+      'cobweb':    {'es': 'Cobweb (irregular)', 'en': 'Cobweb'},
+      'irregular': {'es': 'Irregular', 'en': 'Irregular'},
+      'funnel':    {'es': 'Embudo', 'en': 'Funnel web'},
+      'sheet':     {'es': 'Laminar', 'en': 'Sheet web'},
+      'tubular':   {'es': 'Tubular', 'en': 'Tubular'},
+    };
+    return labels[type]?[locale] ?? type;
   }
 
   List<Widget> _localizedSection(
@@ -795,3 +924,276 @@ class _ThreatCard extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Population trend badge
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TrendBadge extends StatelessWidget {
+  final String trend;
+  final bool isDark;
+  const _TrendBadge({required this.trend, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final (icon, color, label) = switch (trend.toLowerCase()) {
+      'increasing' => (Icons.trending_up, Colors.green.shade600, trend),
+      'stable'     => (Icons.trending_flat, Colors.amber.shade700, trend),
+      'decreasing' => (Icons.trending_down, Colors.red.shade600, trend),
+      _            => (Icons.trending_flat, Colors.grey, trend),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 4),
+          Text(
+            label[0].toUpperCase() + label.substring(1),
+            style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Native / Introduced status chip
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StatusChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final bool isDark;
+  const _StatusChip({required this.label, required this.color, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Altitude range bar
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _AltitudeBar extends StatelessWidget {
+  final int? minM;
+  final int? maxM;
+  final String locale;
+  final bool isDark;
+
+  const _AltitudeBar({this.minM, this.maxM, required this.locale, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    const totalMax = 2000; // Galápagos max ~1707m (Wolf Volcano)
+    final lo = (minM ?? 0).clamp(0, totalMax);
+    final hi = (maxM ?? totalMax).clamp(0, totalMax);
+    final startFrac = lo / totalMax;
+    final endFrac = hi / totalMax;
+    final primary = Theme.of(context).colorScheme.primary;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t.species.altitudeRange,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
+        LayoutBuilder(builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          return Stack(
+            children: [
+              // Background track
+              Container(
+                height: 8,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.12) : Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              // Filled range
+              Positioned(
+                left: w * startFrac,
+                width: (w * (endFrac - startFrac)).clamp(8.0, w),
+                child: Container(
+                  height: 8,
+                  decoration: BoxDecoration(
+                    color: primary,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('0 m', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            )),
+            Text(
+              '${minM ?? 0}–${maxM ?? totalMax} m',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: primary,
+              ),
+            ),
+            Text('$totalMax m', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            )),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Visit sites horizontal strip
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _VisitSitesStrip extends ConsumerWidget {
+  final int speciesId;
+  final String locale;
+  final bool isDark;
+
+  const _VisitSitesStrip({
+    required this.speciesId,
+    required this.locale,
+    required this.isDark,
+  });
+
+  Color _frequencyColor(String? frequency) {
+    return switch (frequency?.toLowerCase()) {
+      'common'     => Colors.green.shade600,
+      'occasional' => Colors.amber.shade700,
+      'uncommon'   => Colors.amber.shade700,
+      'rare'       => Colors.red.shade600,
+      _            => Colors.grey,
+    };
+  }
+
+  String _frequencyLabel(BuildContext context, String? frequency) {
+    return switch (frequency?.toLowerCase()) {
+      'common'     => context.t.species.frequency.common,
+      'occasional' => context.t.species.frequency.occasional,
+      'uncommon'   => context.t.species.frequency.uncommon,
+      'rare'       => context.t.species.frequency.rare,
+      _            => frequency ?? '',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sitesAsync = ref.watch(speciesVisitSitesProvider(speciesId));
+    final sites = sitesAsync.asData?.value ?? [];
+
+    if (sites.isEmpty && sitesAsync is! AsyncLoading) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t.species.whereToFind,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (sitesAsync is AsyncLoading)
+          const SizedBox(height: 36, child: Center(child: LinearProgressIndicator()))
+        else
+          SizedBox(
+            height: 36,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: sites.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, i) {
+                final entry = sites[i];
+                final siteName = locale == 'es'
+                    ? entry.site.nameEs
+                    : (entry.site.nameEn ?? entry.site.nameEs);
+                final freqColor = _frequencyColor(entry.frequency);
+                final freqLabel = _frequencyLabel(context, entry.frequency);
+                return GestureDetector(
+                  onTap: () => context.goNamed('map'),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.15)
+                            : Colors.grey.shade300,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.location_on, size: 13, color: freqColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          siteName,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (freqLabel.isNotEmpty) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: freqColor.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              freqLabel,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: freqColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
+    );
+  }
+}

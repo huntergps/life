@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,43 +64,38 @@ class _PhoneHome extends StatelessWidget {
             },
             child: CustomScrollView(
               slivers: [
-                // Hero section
+                        // Hero section
                 SliverToBoxAdapter(child: _WildlifeHero(ref: ref)),
 
-            // Categories
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(context.t.home.categories, style: Theme.of(context).textTheme.titleLarge),
-                    TextButton(
-                      onPressed: () => context.goNamed('species'),
-                      child: Text(context.t.home.viewAll),
+                // Quick action buttons — visible without scrolling
+                const SliverToBoxAdapter(child: _QuickActionsRow()),
+
+                // Categories
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(context.t.home.categories, style: Theme.of(context).textTheme.titleLarge),
+                        TextButton(
+                          onPressed: () => context.goNamed('species'),
+                          child: Text(context.t.home.viewAll),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: CategoryGrid()),
-            // Featured Species
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                child: Text(context.t.home.featured, style: Theme.of(context).textTheme.titleLarge),
-              ),
-            ),
-            SliverToBoxAdapter(child: _buildFeaturedSpecies(context, ref)),
-            // Quick Links
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-                child: Text(context.t.home.quickLinks, style: Theme.of(context).textTheme.titleLarge),
-              ),
-            ),
-            SliverToBoxAdapter(child: _buildQuickLinks(context)),
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                const SliverToBoxAdapter(child: CategoryGrid()),
+                // Featured Species
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                    child: Text(context.t.home.featured, style: Theme.of(context).textTheme.titleLarge),
+                  ),
+                ),
+                SliverToBoxAdapter(child: _buildFeaturedSpecies(context, ref)),
+                const SliverToBoxAdapter(child: SizedBox(height: 32)),
           ],
         ),
       ),
@@ -179,37 +176,6 @@ class _PhoneHome extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickLinks(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        children: [
-          _QuickLinkTile(
-            icon: Icons.pets,
-            title: context.t.home.discoverSpecies,
-            subtitle: context.t.home.browseWildlife,
-            isDark: isDark,
-            onTap: () => context.goNamed('species'),
-          ),
-          _QuickLinkTile(
-            icon: Icons.map,
-            title: context.t.home.exploreMap,
-            subtitle: context.t.home.findSites,
-            isDark: isDark,
-            onTap: () => context.goNamed('map'),
-          ),
-          _QuickLinkTile(
-            icon: Icons.camera_alt,
-            title: context.t.home.recentSightings,
-            subtitle: context.t.home.logEncounters,
-            isDark: isDark,
-            onTap: () => context.goNamed('sightings'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _TabletHome extends StatelessWidget {
@@ -459,7 +425,7 @@ class _WildlifeHeroState extends State<_WildlifeHero> {
           );
         }
         return SizedBox(
-          height: screenHeight * 0.55,
+          height: screenHeight * 0.46,
           child: Stack(
             children: [
               // PageView
@@ -577,11 +543,11 @@ class _WildlifeHeroState extends State<_WildlifeHero> {
         );
       },
       loading: () => SizedBox(
-        height: screenHeight * 0.55,
+        height: screenHeight * 0.46,
         child: const Center(child: CircularProgressIndicator()),
       ),
       error: (_, _) => SizedBox(
-        height: screenHeight * 0.55,
+        height: screenHeight * 0.46,
         child: _fallbackHero(context),
       ),
     );
@@ -699,35 +665,103 @@ class _HeroFactsRow extends StatelessWidget {
   }
 }
 
-class _QuickLinkTile extends StatelessWidget {
+// ─── Quick Actions Row ────────────────────────────────────────────────────────
+
+class _QuickActionsRow extends StatelessWidget {
+  const _QuickActionsRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.t;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 16, 12, 4),
+      child: Row(
+        children: [
+          if (!kIsWeb &&
+              (defaultTargetPlatform == TargetPlatform.android ||
+                  defaultTargetPlatform == TargetPlatform.iOS))
+            _ActionBtn(
+              icon:  Icons.image_search_outlined,
+              label: t.home.photoId,
+              color: const Color(0xFF00E5FF),
+              isDark: isDark,
+              onTap: () => context.push('/photo-id'),
+            ),
+          _ActionBtn(
+            icon: Icons.add_a_photo_outlined,
+            label: t.home.recentSightings,
+            color: Colors.orange,
+            isDark: isDark,
+            onTap: () => context.goNamed('sightings'),
+          ),
+          _ActionBtn(
+            icon: Icons.map_outlined,
+            label: t.home.exploreMap,
+            color: Colors.blue,
+            isDark: isDark,
+            onTap: () => context.goNamed('map'),
+          ),
+        ].map((w) => Expanded(child: w)).toList(),
+      ),
+    );
+  }
+}
+
+class _ActionBtn extends StatelessWidget {
   final IconData icon;
-  final String title;
-  final String subtitle;
+  final String label;
+  final Color color;
   final bool isDark;
   final VoidCallback onTap;
 
-  const _QuickLinkTile({
+  const _ActionBtn({
     required this.icon,
-    required this.title,
-    required this.subtitle,
+    required this.label,
+    required this.color,
     required this.isDark,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: isDark
-              ? AppColors.primaryLight.withValues(alpha: 0.15)
-              : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-          child: Icon(icon, color: isDark ? AppColors.primaryLight : Theme.of(context).colorScheme.primary),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: isDark ? 0.2 : 0.12),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: color.withValues(alpha: isDark ? 0.4 : 0.25),
+                  width: 1.5,
+                ),
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white70 : Colors.black87,
+                height: 1.2,
+              ),
+            ),
+          ],
         ),
-        title: Text(title),
-        subtitle: Text(subtitle, style: TextStyle(color: isDark ? Colors.white54 : null)),
-        trailing: Icon(Icons.chevron_right, color: isDark ? Colors.white38 : null),
-        onTap: onTap,
       ),
     );
   }
