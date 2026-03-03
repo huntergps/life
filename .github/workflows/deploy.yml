@@ -26,6 +26,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.38.4'
           channel: 'stable'
           cache: true
 
@@ -33,7 +34,7 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        run: flutter build web --release --base-href /life/ --no-wasm
+        run: flutter build web --release --base-href /life/ --web-renderer canvaskit
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
