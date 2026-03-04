@@ -760,24 +760,25 @@ class _UserDetailSheet extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           // Role management
-          if (!isSelf) ...[
+          ...[
             const Divider(),
             const SizedBox(height: 8),
             const Text('Roles',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
             const SizedBox(height: 12),
-            _RoleRow(
-              icon: Icons.admin_panel_settings_outlined,
-              label: 'Administrador',
-              description: 'Gestiona todo el contenido y aprueba propuestas',
-              hasRole: user.isAdmin,
-              role: 'admin',
-              userId: user.id,
-              isSelf: isSelf,
-              isDark: isDark,
-              ref: ref,
-            ),
-            const SizedBox(height: 8),
+            if (!isSelf)
+              _RoleRow(
+                icon: Icons.admin_panel_settings_outlined,
+                label: 'Administrador',
+                description: 'Gestiona todo el contenido y aprueba propuestas',
+                hasRole: user.isAdmin,
+                role: 'admin',
+                userId: user.id,
+                isSelf: isSelf,
+                isDark: isDark,
+                ref: ref,
+              ),
+            if (!isSelf) const SizedBox(height: 8),
             _RoleRow(
               icon: Icons.edit_note_outlined,
               label: 'Editor',
