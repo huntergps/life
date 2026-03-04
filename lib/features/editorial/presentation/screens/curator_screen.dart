@@ -5,13 +5,32 @@ import 'package:photo_view/photo_view.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
 
-class CuratorScreen extends ConsumerWidget {
+class CuratorScreen extends ConsumerStatefulWidget {
   const CuratorScreen({super.key});
+  @override
+  ConsumerState<CuratorScreen> createState() => _CuratorScreenState();
+}
+
+class _CuratorScreenState extends ConsumerState<CuratorScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabs;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(pendingFeedbackProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  void initState() {
+    super.initState();
+    _tabs = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pendingAsync = ref.watch(pendingFeedbackProvider);
+    final pendingCount = pendingAsync.asData?.value.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -20,96 +39,178 @@ class CuratorScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualizar',
-            onPressed: () => ref.invalidate(pendingFeedbackProvider),
+            onPressed: () {
+              ref.invalidate(pendingFeedbackProvider);
+              ref.invalidate(validatedFeedbackProvider);
+            },
           ),
         ],
-      ),
-      body: async.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-              const SizedBox(height: 12),
-              Text('Error: $e',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: AppColors.error)),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => ref.invalidate(pendingFeedbackProvider),
-                child: const Text('Reintentar'),
+        bottom: TabBar(
+          controller: _tabs,
+          tabs: [
+            Tab(
+              icon: Badge(
+                isLabelVisible: pendingCount != null && pendingCount > 0,
+                label: Text('$pendingCount'),
+                child: const Icon(Icons.pending_outlined),
               ),
-            ],
-          ),
-        ),
-        data: (items) {
-          if (items.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle_outline, size: 72, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text(
-                    'Sin correcciones pendientes',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.grey),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    'Todas las correcciones de IA han sido validadas.',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(pendingFeedbackProvider),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1100),
-                child: _buildList(context, items, ref, isDark),
-              ),
+              text: 'Pendientes',
             ),
-          );
-        },
+            const Tab(
+              icon: Icon(Icons.history),
+              text: 'Historial',
+            ),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabs,
+        children: const [
+          _PendingTab(),
+          _HistoryTab(),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildList(BuildContext context, List<Map<String, dynamic>> items,
-      WidgetRef ref, bool isDark) {
-    final width = MediaQuery.sizeOf(context).width;
-    final isWide = width >= 800;
+// ── Pending tab ───────────────────────────────────────────────────────────────
 
+class _PendingTab extends ConsumerWidget {
+  const _PendingTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(pendingFeedbackProvider);
+    return async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => _ErrorView(
+          error: e,
+          onRetry: () => ref.invalidate(pendingFeedbackProvider)),
+      data: (items) {
+        if (items.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.check_circle_outline, size: 72, color: Colors.grey),
+                SizedBox(height: 16),
+                Text('Sin correcciones pendientes',
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey)),
+                SizedBox(height: 6),
+                Text('Todas las correcciones han sido validadas.',
+                    style: TextStyle(color: Colors.grey)),
+              ],
+            ),
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(pendingFeedbackProvider),
+          child: _FeedbackGrid(
+            items: items,
+            ref: ref,
+            showUndo: false,
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── History tab ───────────────────────────────────────────────────────────────
+
+class _HistoryTab extends ConsumerWidget {
+  const _HistoryTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final async = ref.watch(validatedFeedbackProvider);
+    return async.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => _ErrorView(
+          error: e,
+          onRetry: () => ref.invalidate(validatedFeedbackProvider)),
+      data: (items) {
+        if (items.isEmpty) {
+          return const Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.history, size: 72, color: Colors.grey),
+                SizedBox(height: 16),
+                Text('Sin validaciones aún',
+                    style: TextStyle(fontSize: 18, color: Colors.grey)),
+              ],
+            ),
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(validatedFeedbackProvider),
+          child: _FeedbackGrid(
+            items: items,
+            ref: ref,
+            showUndo: true,
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Shared grid/list layout ───────────────────────────────────────────────────
+
+class _FeedbackGrid extends StatelessWidget {
+  final List<Map<String, dynamic>> items;
+  final WidgetRef ref;
+  final bool showUndo;
+  const _FeedbackGrid(
+      {required this.items, required this.ref, required this.showUndo});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isWide = MediaQuery.sizeOf(context).width >= 800;
+
+    Widget listChild;
     if (isWide) {
-      // Two-column grid on wide screens
-      return GridView.builder(
+      listChild = GridView.builder(
         padding: const EdgeInsets.all(20),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 1.55,
+          childAspectRatio: 1.6,
         ),
         itemCount: items.length,
-        itemBuilder: (_, i) =>
-            _FeedbackCard(feedback: items[i], ref: ref, isDark: isDark),
+        itemBuilder: (_, i) => _FeedbackCard(
+          feedback: items[i],
+          ref: ref,
+          isDark: isDark,
+          showUndo: showUndo,
+        ),
+      );
+    } else {
+      listChild = ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: items.length,
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (_, i) => _FeedbackCard(
+          feedback: items[i],
+          ref: ref,
+          isDark: isDark,
+          showUndo: showUndo,
+        ),
       );
     }
 
-    // Single column on narrow screens
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 12),
-      itemBuilder: (_, i) =>
-          _FeedbackCard(feedback: items[i], ref: ref, isDark: isDark),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: listChild,
+      ),
     );
   }
 }
@@ -120,8 +221,13 @@ class _FeedbackCard extends StatelessWidget {
   final Map<String, dynamic> feedback;
   final WidgetRef ref;
   final bool isDark;
-  const _FeedbackCard(
-      {required this.feedback, required this.ref, required this.isDark});
+  final bool showUndo;
+  const _FeedbackCard({
+    required this.feedback,
+    required this.ref,
+    required this.isDark,
+    required this.showUndo,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,30 +247,70 @@ class _FeedbackCard extends StatelessWidget {
         : '';
     final rankStr = rank > 0 ? ' — rango $rank' : ' — búsqueda manual';
 
+    // History: show decision badge
+    final isValidated = feedback['is_curator_validated'] as bool?;
+    final curatorNotes = feedback['curator_notes'] as String?;
+
     return Card(
       clipBehavior: Clip.antiAlias,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Thumbnail row ──────────────────────────────────────────────────
+          // ── History decision banner ────────────────────────────────────────
+          if (showUndo && isValidated != null)
+            Container(
+              color: isValidated ? Colors.green.shade700 : Colors.red.shade700,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    isValidated ? Icons.check_circle : Icons.cancel,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isValidated
+                        ? 'Validada como correcta'
+                        : 'Validada como incorrecta',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600),
+                  ),
+                  if (curatorNotes != null && curatorNotes.isNotEmpty) ...[
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '— $curatorNotes',
+                        style: const TextStyle(
+                            color: Colors.white70, fontSize: 11),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+          // ── Main content ───────────────────────────────────────────────────
           Expanded(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Photo thumbnail
                 SizedBox(
-                  width: 130,
+                  width: 120,
                   child: _Thumbnail(url: photoUrl, isDark: isDark),
                 ),
-
                 // Info panel
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
+                    padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Predicted
                         _SpeciesRow(
                           icon: Icons.warning_amber_outlined,
                           color: Colors.red,
@@ -173,7 +319,6 @@ class _FeedbackCard extends StatelessWidget {
                           scientific: predictedSci,
                         ),
                         const SizedBox(height: 8),
-                        // Correct
                         _SpeciesRow(
                           icon: Icons.person_outlined,
                           color: Colors.blue,
@@ -181,12 +326,14 @@ class _FeedbackCard extends StatelessWidget {
                           name: correctName,
                           scientific: correctSci,
                         ),
-                        const Spacer(),
-                        const Text(
-                          '¿La corrección es científicamente correcta?',
-                          style: TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.w600),
-                        ),
+                        if (!showUndo) ...[
+                          const Spacer(),
+                          const Text(
+                            '¿La corrección es científicamente correcta?',
+                            style: TextStyle(
+                                fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -198,34 +345,43 @@ class _FeedbackCard extends StatelessWidget {
           // ── Action buttons ─────────────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.close, size: 16, color: Colors.red),
-                    label: const Text('No válida',
-                        style: TextStyle(color: Colors.red)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.red),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                    onPressed: () => _validate(context, false),
+            child: showUndo
+                ? OutlinedButton.icon(
+                    icon: const Icon(Icons.undo, size: 16),
+                    label: const Text('Deshacer validación'),
+                    onPressed: () => _undo(context),
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.close,
+                              size: 16, color: Colors.red),
+                          label: const Text('No válida',
+                              style: TextStyle(color: Colors.red)),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.red),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onPressed: () => _validate(context, false),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton.icon(
+                          icon: const Icon(Icons.check, size: 16),
+                          label: const Text('Válida'),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                          onPressed: () => _validate(context, true),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: FilledButton.icon(
-                    icon: const Icon(Icons.check, size: 16),
-                    label: const Text('Válida'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                    onPressed: () => _validate(context, true),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),
@@ -237,8 +393,9 @@ class _FeedbackCard extends StatelessWidget {
     final notes = await showDialog<String?>(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        title: Text(
-            isValid ? 'Confirmar corrección válida' : 'Marcar como inválida'),
+        title: Text(isValid
+            ? 'Confirmar corrección válida'
+            : 'Marcar como inválida'),
         content: TextField(
           controller: notesCtrl,
           autofocus: true,
@@ -257,7 +414,8 @@ class _FeedbackCard extends StatelessWidget {
                 backgroundColor: isValid ? Colors.green : Colors.red),
             onPressed: () =>
                 Navigator.pop(dialogCtx, notesCtrl.text.trim()),
-            child: Text(isValid ? 'Confirmar válida' : 'Confirmar inválida'),
+            child:
+                Text(isValid ? 'Confirmar válida' : 'Confirmar inválida'),
           ),
         ],
       ),
@@ -270,6 +428,45 @@ class _FeedbackCard extends StatelessWidget {
         notes: notes.isEmpty ? null : notes,
       );
       ref.invalidate(pendingFeedbackProvider);
+      ref.invalidate(validatedFeedbackProvider);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppColors.error),
+        );
+      }
+    }
+  }
+
+  Future<void> _undo(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Deshacer validación'),
+        content: const Text(
+            'Esto devuelve el registro al estado pendiente para revisarlo de nuevo.'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: const Text('Cancelar')),
+          FilledButton(
+              onPressed: () => Navigator.pop(dialogCtx, true),
+              child: const Text('Deshacer')),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    try {
+      await ProposalService.undoFeedbackValidation(feedback['id'] as int);
+      ref.invalidate(pendingFeedbackProvider);
+      ref.invalidate(validatedFeedbackProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Validación deshecha. Registro devuelto a pendientes.')),
+        );
+      }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -282,7 +479,7 @@ class _FeedbackCard extends StatelessWidget {
   }
 }
 
-// ── Thumbnail widget ──────────────────────────────────────────────────────────
+// ── Thumbnail ─────────────────────────────────────────────────────────────────
 
 class _Thumbnail extends StatelessWidget {
   final String? url;
@@ -295,11 +492,10 @@ class _Thumbnail extends StatelessWidget {
       return Container(
         color: isDark ? Colors.white10 : Colors.grey[200],
         child: Icon(Icons.photo_camera_outlined,
-            size: 40,
+            size: 36,
             color: isDark ? Colors.white30 : Colors.grey[400]),
       );
     }
-
     return GestureDetector(
       onTap: () => _openFullscreen(context, url!),
       child: Stack(
@@ -314,7 +510,6 @@ class _Thumbnail extends StatelessWidget {
                   color: isDark ? Colors.white30 : Colors.grey[400]),
             ),
           ),
-          // Zoom hint overlay
           Positioned(
             bottom: 6,
             right: 6,
@@ -362,8 +557,7 @@ class _SpeciesRow extends StatelessWidget {
             children: [
               Text(label,
                   style: TextStyle(
-                      fontSize: 11,
-                      color: color.withValues(alpha: 0.8))),
+                      fontSize: 11, color: color.withValues(alpha: 0.8))),
               Text(name,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -383,7 +577,7 @@ class _SpeciesRow extends StatelessWidget {
   }
 }
 
-// ── Fullscreen image viewer ────────────────────────────────────────────────────
+// ── Fullscreen image viewer ───────────────────────────────────────────────────
 
 void _openFullscreen(BuildContext context, String url) {
   Navigator.of(context, rootNavigator: true).push(
@@ -406,8 +600,7 @@ class _FullscreenImagePage extends StatelessWidget {
       },
       child: Actions(
         actions: {
-          _CloseIntent:
-              CallbackAction<_CloseIntent>(onInvoke: (_) {
+          _CloseIntent: CallbackAction<_CloseIntent>(onInvoke: (_) {
             Navigator.of(context).pop();
             return null;
           }),
@@ -432,7 +625,6 @@ class _FullscreenImagePage extends StatelessWidget {
                   const BoxDecoration(color: Colors.black),
               minScale: PhotoViewComputedScale.contained,
               maxScale: PhotoViewComputedScale.covered * 4,
-              heroAttributes: PhotoViewHeroAttributes(tag: url),
             ),
           ),
         ),
@@ -443,4 +635,28 @@ class _FullscreenImagePage extends StatelessWidget {
 
 class _CloseIntent extends Intent {
   const _CloseIntent();
+}
+
+// ── Error view ────────────────────────────────────────────────────────────────
+
+class _ErrorView extends StatelessWidget {
+  final Object error;
+  final VoidCallback onRetry;
+  const _ErrorView({required this.error, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 12),
+            Text('Error: $error',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: AppColors.error)),
+            const SizedBox(height: 16),
+            FilledButton(onPressed: onRetry, child: const Text('Reintentar')),
+          ],
+        ),
+      );
 }

@@ -108,6 +108,32 @@ class ProposalService {
     });
   }
 
+  /// Fetch recently validated feedback (history for undo).
+  static Future<List<Map<String, dynamic>>> fetchValidatedFeedback() async {
+    final data = await _db
+        .from('species_recognition_feedback')
+        .select('*, '
+            'predicted:species!predicted_species_id(common_name_es, scientific_name), '
+            'correct:species!correct_species_id(common_name_es, scientific_name)')
+        .not('is_curator_validated', 'is', null)
+        .order('curator_validated_at', ascending: false)
+        .limit(100);
+    return List<Map<String, dynamic>>.from(data as List);
+  }
+
+  /// Undo a curator validation — resets the record back to pending.
+  static Future<void> undoFeedbackValidation(int feedbackId) async {
+    await _db
+        .from('species_recognition_feedback')
+        .update({
+          'is_curator_validated': null,
+          'curator_id': null,
+          'curator_notes': null,
+          'curator_validated_at': null,
+        })
+        .eq('id', feedbackId);
+  }
+
   // ── Admin ────────────────────────────────────────────────────────────────────
 
   /// Approve a proposal — atomically applies all changes to species table.
@@ -144,4 +170,9 @@ final pendingProposalsProvider =
 final pendingFeedbackProvider =
     FutureProvider<List<Map<String, dynamic>>>((ref) async {
   return ProposalService.fetchPendingFeedback();
+});
+
+final validatedFeedbackProvider =
+    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  return ProposalService.fetchValidatedFeedback();
 });
