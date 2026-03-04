@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
 import 'proposal_detail_sheet.dart';
@@ -273,14 +274,16 @@ class _FeedbackTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (photoUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  photoUrl,
-                  height: 160,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              GestureDetector(
+                onTap: () => _openFullscreen(context, photoUrl),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    photoUrl,
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
                 ),
               ),
             const SizedBox(height: 10),
@@ -417,6 +420,30 @@ class _FeedbackTile extends StatelessWidget {
       }
     }
   }
+}
+
+// ── Fullscreen image viewer ────────────────────────────────────────────────────
+
+void _openFullscreen(BuildContext context, String url) {
+  Navigator.of(context).push(
+    MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (_) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          title: const Text('Foto del feedback'),
+        ),
+        body: PhotoView(
+          imageProvider: NetworkImage(url),
+          backgroundDecoration: const BoxDecoration(color: Colors.black),
+          minScale: PhotoViewComputedScale.contained,
+          maxScale: PhotoViewComputedScale.covered * 3,
+        ),
+      ),
+    ),
+  );
 }
 
 // ── Shared widgets ────────────────────────────────────────────────────────────
