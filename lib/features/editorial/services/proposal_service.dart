@@ -176,3 +176,23 @@ final validatedFeedbackProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   return ProposalService.fetchValidatedFeedback();
 });
+
+/// Returns the set of DB field keys that have a pending proposal for [speciesId].
+/// Used by the species detail screen to show pending-proposal badges on section headers.
+final speciesProposalsProvider =
+    FutureProvider.autoDispose.family<Set<String>, int>((ref, speciesId) async {
+  final user = Supabase.instance.client.auth.currentUser;
+  if (user == null) return {};
+  final data = await Supabase.instance.client
+      .from('species_change_proposals')
+      .select('changes')
+      .eq('species_id', speciesId)
+      .eq('status', 'pending')
+      .limit(20);
+  final fields = <String>{};
+  for (final row in data as List) {
+    final changes = row['changes'] as Map<String, dynamic>? ?? {};
+    fields.addAll(changes.keys);
+  }
+  return fields;
+});

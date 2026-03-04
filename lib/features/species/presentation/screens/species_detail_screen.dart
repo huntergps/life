@@ -17,7 +17,8 @@ import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
-import 'package:galapagos_wildlife/features/editorial/presentation/sheets/species_proposal_form_sheet.dart';
+import 'package:galapagos_wildlife/features/editorial/presentation/sheets/field_proposal_sheet.dart';
+import 'package:galapagos_wildlife/features/editorial/services/proposal_service.dart';
 import '../../providers/species_detail_provider.dart';
 import '../../providers/species_sounds_provider.dart';
 import '../widgets/quick_facts_row.dart';
@@ -156,17 +157,6 @@ class _PhoneDetail extends StatelessWidget {
                 onPressed: () => toggleSpeciesSeen(ref, speciesId),
               );
             }),
-            // Propose-edit button: only visible to editors and admins
-            Consumer(builder: (context, ref, _) {
-              final isEditor = ref.watch(isEditorProvider).asData?.value ?? false;
-              if (!isEditor) return const SizedBox.shrink();
-              return IconButton(
-                icon: const Icon(Icons.edit_note_outlined),
-                tooltip: 'Proponer cambio',
-                onPressed: () => showSpeciesProposalFormSheet(
-                    context, species as Species),
-              );
-            }),
           ],
         ),
         // Gallery carousel below hero
@@ -203,6 +193,10 @@ class _DetailContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isLoggedIn = ref.watch(isAuthenticatedProvider);
+    final isEditor = ref.watch(isEditorProvider).asData?.value ?? false;
+    final pendingFields = isEditor
+        ? (ref.watch(speciesProposalsProvider(species.id)).asData?.value ?? {})
+        : const <String>{};
     final threatsAsync = ref.watch(speciesThreatsProvider(species.id));
     final referencesAsync = ref.watch(speciesReferencesProvider(species.id));
     final soundsAsync = ref.watch(speciesSoundsProvider(species.id));
@@ -297,20 +291,30 @@ class _DetailContent extends ConsumerWidget {
         _VisitSitesStrip(speciesId: species.id, locale: locale, isDark: isDark),
         const SizedBox(height: 20),
         // Description
-        ..._localizedSection(
+        ..._editableLocalizedSection(
           context,
           label: context.t.species.description,
           en: species.descriptionEn,
           es: species.descriptionEs,
           locale: locale,
+          isEditor: isEditor,
+          hasPending: pendingFields.any(
+              ['description_es', 'description_en'].contains),
+          onEdit: () => showFieldProposalSheet(
+              context, species as Species, ProposalSection.description),
         ),
         // Habitat
-        ..._localizedSection(
+        ..._editableLocalizedSection(
           context,
           label: context.t.species.habitat,
           en: species.habitatEn,
           es: species.habitatEs,
           locale: locale,
+          isEditor: isEditor,
+          hasPending: pendingFields.any(
+              ['habitat_es', 'habitat_en'].contains),
+          onEdit: () => showFieldProposalSheet(
+              context, species as Species, ProposalSection.habitat),
         ),
 
         // Extended information (only for logged-in users)
@@ -321,6 +325,8 @@ class _DetailContent extends ConsumerWidget {
             isDark: isDark,
             threatsAsync: threatsAsync,
             referencesAsync: referencesAsync,
+            isEditor: isEditor,
+            pendingFields: pendingFields,
           ),
           if ((soundsAsync.asData?.value ?? []).isNotEmpty)
             Padding(
@@ -364,22 +370,83 @@ String _webTypeLabel(BuildContext context, String type) {
   };
 }
 
-List<Widget> _localizedSection(
+
+List<Widget> _editableLocalizedSection(
   BuildContext context, {
   required String label,
   String? en,
   String? es,
   required String locale,
+  required bool isEditor,
+  required bool hasPending,
+  required VoidCallback onEdit,
 }) {
   final text = locale == 'es' ? (es ?? en) : en;
-  if (text == null) return [];
+  if (text == null && !isEditor) return [];
   return [
-    Text(label, style: Theme.of(context).textTheme.titleLarge),
+    _sectionHeaderRow(context,
+        label: label, hasPending: hasPending,
+        isEditor: isEditor, onEdit: onEdit),
     const SizedBox(height: 8),
-    Text(text, style: Theme.of(context).textTheme.bodyMedium),
+    if (text != null)
+      Text(text, style: Theme.of(context).textTheme.bodyMedium)
+    else
+      Text(
+        '(sin contenido — toca ✏ para agregar)',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: Colors.grey,
+          fontStyle: FontStyle.italic,
+        ),
+      ),
     const SizedBox(height: 20),
   ];
 }
+
+Widget _sectionHeaderRow(
+  BuildContext context, {
+  required String label,
+  required bool hasPending,
+  required bool isEditor,
+  required VoidCallback onEdit,
+}) =>
+    Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+            child: Text(label,
+                style: Theme.of(context).textTheme.titleLarge)),
+        if (hasPending)
+          Container(
+            margin: const EdgeInsets.only(right: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                  color: Colors.amber.withValues(alpha: 0.6)),
+            ),
+            child: const Text('pendiente',
+                style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.amber,
+                    fontWeight: FontWeight.w600)),
+          ),
+        if (isEditor)
+          GestureDetector(
+            onTap: onEdit,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Icon(Icons.edit_outlined,
+                  size: 16,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.4)),
+            ),
+          ),
+      ],
+    );
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Extended info section (logged-in users)
@@ -391,6 +458,8 @@ class _ExtendedInfoSection extends StatelessWidget {
   final bool isDark;
   final AsyncValue<List<SpeciesThreat>> threatsAsync;
   final AsyncValue<List<SpeciesReference>> referencesAsync;
+  final bool isEditor;
+  final Set<String> pendingFields;
 
   const _ExtendedInfoSection({
     required this.species,
@@ -398,7 +467,19 @@ class _ExtendedInfoSection extends StatelessWidget {
     required this.isDark,
     required this.threatsAsync,
     required this.referencesAsync,
+    this.isEditor = false,
+    this.pendingFields = const {},
   });
+
+  Widget _sectionHeader(BuildContext context, String label,
+      {required ProposalSection section}) =>
+      _sectionHeaderRow(context,
+          label: label,
+          hasPending: (kSectionFields[section] ?? [])
+              .any(pendingFields.contains),
+          isEditor: isEditor,
+          onEdit: () => showFieldProposalSheet(
+              context, species as Species, section));
 
   @override
   Widget build(BuildContext context) {
@@ -470,19 +551,22 @@ class _ExtendedInfoSection extends StatelessWidget {
         ],
 
         // Behavior
-        Text(context.t.species.behavior, style: Theme.of(context).textTheme.titleLarge),
+        _sectionHeader(context, context.t.species.behavior,
+            section: ProposalSection.behavior),
         const SizedBox(height: 8),
         _behaviorWidget(context, emptyValue),
         const SizedBox(height: 20),
 
         // Reproduction
-        Text(context.t.species.reproduction, style: Theme.of(context).textTheme.titleLarge),
+        _sectionHeader(context, context.t.species.reproduction,
+            section: ProposalSection.reproduction),
         const SizedBox(height: 8),
         _reproductionWidget(context, emptyValue),
         const SizedBox(height: 20),
 
         // Distinguishing Features
-        Text(context.t.species.distinguishingFeatures, style: Theme.of(context).textTheme.titleLarge),
+        _sectionHeader(context, context.t.species.distinguishingFeatures,
+            section: ProposalSection.distinguishingFeatures),
         const SizedBox(height: 8),
         _distinguishingWidget(context, emptyValue),
         if (species.sexualDimorphism != null && (species.sexualDimorphism as String).isNotEmpty) ...[
