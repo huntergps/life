@@ -105,7 +105,6 @@ class _AdminSpeciesFormScreenState
 
   String? _heroImageUrl;
   bool _isLoading = false;
-  bool _isLoadingSpecies = false;
   bool _initialized = false;
   bool _isPopulating = false;
   bool _hasUnsavedChanges = false;
@@ -116,32 +115,6 @@ class _AdminSpeciesFormScreenState
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-
-    // Fetch species data once after first frame — avoids calling
-    // ref.read(provider.notifier) inside build() which is an anti-pattern.
-    if (isEditing) {
-      _isLoadingSpecies = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) async {
-        if (!mounted) return;
-        try {
-          final service = ref.read(adminSupabaseServiceProvider);
-          final data = await service.getSpeciesById(widget.speciesId!);
-          if (!mounted) return;
-          if (data != null) {
-            _populateFields(data);
-          }
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error cargando especie: $e'),
-                  backgroundColor: AppColors.error),
-            );
-          }
-        } finally {
-          if (mounted) setState(() => _isLoadingSpecies = false);
-        }
-      });
-    }
 
     // Map each controller to its provider field name so we can sync both
     // the dirty-flag AND the provider state in a single listener per controller.
@@ -255,10 +228,16 @@ class _AdminSpeciesFormScreenState
     _dietType = data['diet_type'];
     _sexualDimorphism = data['sexual_dimorphism'] ?? false;
 
-    // Populate the SpeciesFormNotifier — all fields including text values.
-    ref.read(speciesFormProvider.notifier).loadFromSpecies(data: data);
-
     _isPopulating = false;
+
+    // Populate the SpeciesFormNotifier after the current build pass to
+    // avoid triggering a Riverpod state change during build().
+    final snapshot = Map<String, dynamic>.from(data);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(speciesFormProvider.notifier).loadFromSpecies(data: snapshot);
+      }
+    });
   }
 
   /// Validate the form across both tabs. If validation fails on another tab,
@@ -416,10 +395,21 @@ class _AdminSpeciesFormScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final categoriesAsync = ref.watch(adminCategoriesProvider);
 
-    if (isEditing && _isLoadingSpecies) {
-      return Scaffold(
-        appBar: AppBar(title: Text(context.t.admin.editItem)),
-        body: const Center(child: CircularProgressIndicator()),
+    if (isEditing) {
+      final speciesAsync = ref.watch(adminSpeciesProvider(widget.speciesId!));
+      return speciesAsync.when(
+        loading: () => Scaffold(
+          appBar: AppBar(title: Text(context.t.admin.editItem)),
+          body: const Center(child: CircularProgressIndicator()),
+        ),
+        error: (e, _) => Scaffold(
+          appBar: AppBar(title: Text(context.t.admin.editItem)),
+          body: Center(child: Text('${context.t.common.error}: $e')),
+        ),
+        data: (data) {
+          if (data != null) _populateFields(data);
+          return _buildForm(context, isDark, categoriesAsync);
+        },
       );
     }
 
