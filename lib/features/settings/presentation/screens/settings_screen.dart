@@ -57,38 +57,76 @@ class SettingsScreen extends ConsumerWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.pushNamed('login'),
           ),
-        // Admin Panel (only for admin users)
+        // Admin Panel (admin users) / Staff Panel (curator/editor)
         if (isAuthenticated)
-          ref.watch(isAdminProvider).when(
-            data: (isAdmin) => isAdmin
-                ? Column(
-                    children: [
-                      const Divider(),
-                      _SectionHeader(title: context.t.admin.title),
-                      ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: isDark
-                              ? AppColors.accentOrange.withValues(alpha: 0.15)
-                              : AppColors.secondary.withValues(alpha: 0.1),
-                          child: Icon(
-                            Icons.admin_panel_settings,
-                            color: isDark ? AppColors.accentOrange : AppColors.secondary,
-                          ),
+          ref.watch(userRolesProvider).when(
+            data: (roles) {
+              final isAdmin = roles.contains('admin');
+              final isCurator = roles.contains('curator') || isAdmin;
+              final isEditor = roles.contains('editor') || isAdmin;
+              if (!isAdmin && !isCurator && !isEditor) return const SizedBox.shrink();
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Divider(),
+                  _SectionHeader(title: isAdmin ? context.t.admin.title : 'Panel de trabajo'),
+                  if (isAdmin)
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isDark
+                            ? AppColors.accentOrange.withValues(alpha: 0.15)
+                            : AppColors.secondary.withValues(alpha: 0.1),
+                        child: Icon(
+                          Icons.admin_panel_settings,
+                          color: isDark ? AppColors.accentOrange : AppColors.secondary,
                         ),
-                        title: Text(
-                          context.t.admin.panel,
-                          style: TextStyle(color: isDark ? Colors.white : null),
-                        ),
-                        subtitle: Text(
-                          context.t.admin.panelSubtitle,
-                          style: TextStyle(color: isDark ? Colors.white54 : null),
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () => context.go('/admin'),
                       ),
-                    ],
-                  )
-                : const SizedBox.shrink(),
+                      title: Text(
+                        context.t.admin.panel,
+                        style: TextStyle(color: isDark ? Colors.white : null),
+                      ),
+                      subtitle: Text(
+                        context.t.admin.panelSubtitle,
+                        style: TextStyle(color: isDark ? Colors.white54 : null),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go('/admin'),
+                    ),
+                  if (isCurator)
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isDark
+                            ? Colors.teal.withValues(alpha: 0.15)
+                            : Colors.teal.withValues(alpha: 0.1),
+                        child: Icon(Icons.verified_user_outlined,
+                            color: isDark ? Colors.tealAccent : Colors.teal),
+                      ),
+                      title: Text('Panel del curador',
+                          style: TextStyle(color: isDark ? Colors.white : null)),
+                      subtitle: Text('Revisar propuestas y validar IA',
+                          style: TextStyle(color: isDark ? Colors.white54 : null)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go('/admin/curator'),
+                    ),
+                  if (isEditor)
+                    ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: isDark
+                            ? Colors.blue.withValues(alpha: 0.15)
+                            : Colors.blue.withValues(alpha: 0.1),
+                        child: Icon(Icons.edit_note,
+                            color: isDark ? Colors.lightBlueAccent : Colors.blue),
+                      ),
+                      title: Text('Mis propuestas',
+                          style: TextStyle(color: isDark ? Colors.white : null)),
+                      subtitle: Text('Ver y gestionar cambios propuestos',
+                          style: TextStyle(color: isDark ? Colors.white54 : null)),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => context.go('/admin/my-proposals'),
+                    ),
+                ],
+              );
+            },
             loading: () => const SizedBox.shrink(),
             error: (_, _) => const SizedBox.shrink(),
           ),

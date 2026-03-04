@@ -31,6 +31,14 @@ final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
         .eq('status', 'pending')
         .count(CountOption.exact)
         .then((r) => r.count),
+    // Pending AI feedback count (is_correction=true, not yet validated)
+    Supabase.instance.client
+        .from('species_recognition_feedback')
+        .select()
+        .isFilter('is_curator_validated', null)
+        .eq('is_correction', true)
+        .count(CountOption.exact)
+        .then((r) => r.count),
   ]);
   return {
     'species': results[0],
@@ -42,6 +50,7 @@ final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
     'site_catalogs': results[6] + results[7] + results[8],
     'users': results[9],
     'proposals': results[10],
+    'feedback': results[11],
   };
 });
 
@@ -188,8 +197,15 @@ class AdminDashboardScreen extends ConsumerWidget {
                         onTap: () => context.go('/admin/proposals'),
                       ),
                       AdminEntityTile(
+                        title: 'Curador',
+                        subtitle: 'Validar propuestas e IA',
+                        icon: Icons.verified_user_outlined,
+                        count: (counts['proposals'] ?? 0) + (counts['feedback'] ?? 0),
+                        onTap: () => context.go('/admin/curator'),
+                      ),
+                      AdminEntityTile(
                         title: 'ML Training',
-                        subtitle: 'Exportar feedback a Drive',
+                        subtitle: 'Exportar feedback validado',
                         icon: Icons.model_training,
                         onTap: () => context.go('/admin/ml-training'),
                       ),

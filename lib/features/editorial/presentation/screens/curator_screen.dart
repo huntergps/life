@@ -73,7 +73,7 @@ class _CuratorProposalsTab extends ConsumerWidget {
           child: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: proposals.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (_, i) =>
                 _CuratorProposalTile(proposal: proposals[i], ref: ref),
           ),
@@ -237,7 +237,7 @@ class _CuratorFeedbackTab extends ConsumerWidget {
           child: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (_, i) =>
                 _FeedbackTile(feedback: items[i], ref: ref),
           ),
@@ -254,11 +254,17 @@ class _FeedbackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final predictedId = feedback['predicted_species_id'];
-    final correctId = feedback['correct_species_id'];
     final confidence = (feedback['predicted_confidence'] as num?)?.toDouble();
     final photoUrl = feedback['photo_url'] as String?;
     final rank = feedback['user_selected_rank'] as int? ?? 0;
+    final predicted = feedback['predicted'] as Map?;
+    final correct = feedback['correct'] as Map?;
+    final predictedName = predicted?['common_name_es'] as String?
+        ?? 'Especie #${feedback['predicted_species_id']}';
+    final predictedSci = predicted?['scientific_name'] as String?;
+    final correctName = correct?['common_name_es'] as String?
+        ?? 'Especie #${feedback['correct_species_id']}';
+    final correctSci = correct?['scientific_name'] as String?;
 
     return Card(
       child: Padding(
@@ -271,40 +277,64 @@ class _FeedbackTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
                   photoUrl,
-                  height: 140,
+                  height: 160,
                   width: double.infinity,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
                 ),
               ),
             const SizedBox(height: 10),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.warning_amber_outlined,
                     color: Colors.red, size: 18),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
-                    'IA predijo: especie #$predictedId'
-                    '${confidence != null ? ' (${(confidence * 100).toStringAsFixed(1)}%)' : ''}',
-                    style: const TextStyle(
-                        color: Colors.red, fontWeight: FontWeight.w500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'IA predijo: $predictedName'
+                        '${confidence != null ? ' (${(confidence * 100).toStringAsFixed(1)}%)' : ''}',
+                        style: const TextStyle(
+                            color: Colors.red, fontWeight: FontWeight.w500),
+                      ),
+                      if (predictedSci != null)
+                        Text(predictedSci,
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                color: Colors.red.shade300)),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(Icons.check_circle_outline,
                     color: Colors.green, size: 18),
                 const SizedBox(width: 6),
                 Expanded(
-                  child: Text(
-                    'Usuario seleccionó: especie #$correctId'
-                    '${rank > 0 ? ' (rango $rank)' : ' (búsqueda manual)'}',
-                    style: const TextStyle(
-                        color: Colors.green, fontWeight: FontWeight.w500),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Usuario seleccionó: $correctName'
+                        '${rank > 0 ? ' (rango $rank)' : ' (búsqueda manual)'}',
+                        style: const TextStyle(
+                            color: Colors.green, fontWeight: FontWeight.w500),
+                      ),
+                      if (correctSci != null)
+                        Text(correctSci,
+                            style: TextStyle(
+                                fontSize: 11,
+                                fontStyle: FontStyle.italic,
+                                color: Colors.green.shade400)),
+                    ],
                   ),
                 ),
               ],

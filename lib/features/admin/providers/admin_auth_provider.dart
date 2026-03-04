@@ -60,6 +60,8 @@ final userRolesProvider = Provider<AsyncValue<Set<String>>>((ref) {
         );
         // Legacy key used by the router guard (synchronous check on cold start)
         Bootstrap.prefs.setBool('is_admin', roles.contains('admin'));
+        Bootstrap.prefs.setBool('is_curator', roles.contains('curator') || roles.contains('admin'));
+        Bootstrap.prefs.setBool('is_editor', roles.contains('editor') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_staff', roles.isNotEmpty);
       });
       return AsyncValue.data(roles);

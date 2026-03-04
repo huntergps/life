@@ -22,11 +22,19 @@ final appRouter = GoRouter(
     if (!noSave.contains(path)) {
       Bootstrap.prefs.setString('last_route', path);
     }
-    // Guard admin routes — redirect non-admins to home
+    // Guard admin routes
     if (path.startsWith('/admin')) {
-      final isAdmin = Bootstrap.prefs.getBool('is_admin') ?? false;
       final isLoggedIn = Supabase.instance.client.auth.currentUser != null;
-      if (!isLoggedIn || !isAdmin) return '/';
+      if (!isLoggedIn) return '/';
+      final isAdmin = Bootstrap.prefs.getBool('is_admin') ?? false;
+      final isCurator = Bootstrap.prefs.getBool('is_curator') ?? false;
+      final isEditor = Bootstrap.prefs.getBool('is_editor') ?? false;
+      // Curator-only route
+      if (path == '/admin/curator' && (isAdmin || isCurator)) return null;
+      // Editor-only route
+      if (path == '/admin/my-proposals' && (isAdmin || isEditor)) return null;
+      // Everything else requires admin
+      if (!isAdmin) return '/';
     }
     // Guard deep link paths that require a numeric :id parameter.
     // If the ID is not a valid integer, redirect to home to prevent

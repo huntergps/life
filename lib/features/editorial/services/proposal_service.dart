@@ -82,7 +82,9 @@ class ProposalService {
   static Future<List<Map<String, dynamic>>> fetchPendingFeedback() async {
     final data = await _db
         .from('species_recognition_feedback')
-        .select()
+        .select('*, '
+            'predicted:species!predicted_species_id(common_name_es, scientific_name), '
+            'correct:species!correct_species_id(common_name_es, scientific_name)')
         .isFilter('is_curator_validated', null)
         .eq('is_correction', true)
         .order('created_at', ascending: false)
