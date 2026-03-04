@@ -232,7 +232,7 @@ class _SpeciesProposalFormSheetState
                   _textArea(_featuresEnCtrl, 'Features in English'),
                   _sectionLabel('Estado de conservación UICN'),
                   DropdownButtonFormField<String?>(
-                    value: _conservationStatus,
+                    initialValue: _conservationStatus,
                     decoration: _inputDecoration('Estado actual: ${s.conservationStatus ?? "—"}'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('Sin cambio')),

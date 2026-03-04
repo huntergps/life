@@ -56,32 +56,6 @@ class SpeciesListCard extends ConsumerWidget {
     );
   }
 
-  // ── AI recognition badge ──────────────────────────────────────────────────
-  static Widget _buildAiBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.teal.shade600.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.auto_awesome, size: 9, color: Colors.white),
-          SizedBox(width: 3),
-          Text(
-            'IA',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   // ── Image + name overlay ──────────────────────────────────────────────────
   Widget _buildImageStack(bool hasAiRecognition) {
@@ -102,12 +76,7 @@ class SpeciesListCard extends ConsumerWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.35, 1.0],
-                colors: [Colors.transparent, Colors.black87],
-              ),
+              gradient: kCardGradient,
             ),
           ),
         ),
@@ -121,7 +90,7 @@ class SpeciesListCard extends ConsumerWidget {
               if (conservationStatus != null) _buildIucnBadge(),
               if (hasAiRecognition) ...[
                 if (conservationStatus != null) const SizedBox(height: 4),
-                _buildAiBadge(),
+                aiBadge(),
               ],
             ],
           ),

@@ -1,6 +1,41 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
+// ── Shared card widgets ───────────────────────────────────────────────────────
+
+/// Bottom-to-top black gradient used on species card images for text legibility.
+const kCardGradient = LinearGradient(
+  begin: Alignment.topCenter,
+  end: Alignment.bottomCenter,
+  stops: [0.35, 1.0],
+  colors: [Colors.transparent, Colors.black87],
+);
+
+/// "IA" badge shown on species cards that support AI recognition.
+Widget aiBadge() => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+      decoration: BoxDecoration(
+        color: Color.fromRGBO(0, 137, 123, 0.9), // teal.shade600
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.auto_awesome, size: 9, color: Colors.white),
+          SizedBox(width: 3),
+          Text(
+            'IA',
+            style: TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+
 /// Central place for display helpers (icons, colors, labels) derived from
 /// species enum-like string fields.  Prevents copy-paste across widgets.
 

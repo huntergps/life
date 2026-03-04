@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 
@@ -17,12 +15,8 @@ enum SpeciesSort { nameAsc, nameDesc, rarityFirst, endemicFirst }
 final speciesSortProvider = StateProvider<SpeciesSort>((ref) => SpeciesSort.nameAsc);
 
 /// All species — fetches from Supabase remote (with local fallback on error).
-/// On web, queries Supabase directly (no local SQLite).
+/// On web/desktop (Brick not initialized), fetchDeduped falls back to Supabase directly.
 final allSpeciesProvider = FutureProvider<List<Species>>((ref) async {
-  if (kIsWeb) {
-    final data = await Supabase.instance.client.from('species').select();
-    return (data as List).map((r) => speciesFromRow(r as Map<String, dynamic>)).toList();
-  }
   return fetchDeduped<Species>(idSelector: (s) => s.id);
 });
 

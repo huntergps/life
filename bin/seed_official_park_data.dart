@@ -363,7 +363,7 @@ Future<void> _step4ImportVisitSites(SupabaseClient client) async {
     // Resolve island_id from master CSV isla field (tourist sites only)
     int? islandId;
     if (isTouristSite) {
-      final islaName = orNull(master!['isla']);
+      final islaName = orNull(master['isla']);
       if (islaName != null) {
         islandId = islandIdByName[normalizeName(islaName)];
         if (islandId == null) {
@@ -385,7 +385,7 @@ Future<void> _step4ImportVisitSites(SupabaseClient client) async {
 
     // Fallback to master CSV coords only if they look like decimal degrees (abs < 200)
     if (lat == null && lng == null && isTouristSite) {
-      final rawLat = parseDouble(master!['latitud']);
+      final rawLat = parseDouble(master['latitud']);
       final rawLng = parseDouble(master['longitud']);
       if (rawLat != null && rawLat.abs() < 200) lat = rawLat;
       if (rawLng != null && rawLng.abs() < 200) lng = rawLng;
@@ -404,16 +404,17 @@ Future<void> _step4ImportVisitSites(SupabaseClient client) async {
       'public_use_zone'   : orNull(sitio['zona_uso_publico']),
       'status'            : status,
       // Tourist-site-only enrichment from master CSV
-      'capacity'     : isTouristSite ? parseInt(master!['carga_aceptable'])       : null,
-      'attraction_es': isTouristSite ? orNull(master!['atractivo_principal'])      : null,
-      'abbreviation' : isTouristSite ? orNull(master!['abreviatura'])              : null,
-      'last_revision': isTouristSite ? orNull(master!['fecha_ultima_revision'])    : null,
+      'capacity'     : isTouristSite ? parseInt(master['carga_aceptable'])       : null,
+      'attraction_es': isTouristSite ? orNull(master['atractivo_principal'])      : null,
+      'abbreviation' : isTouristSite ? orNull(master['abreviatura'])              : null,
+      'last_revision': isTouristSite ? orNull(master['fecha_ultima_revision'])    : null,
     };
 
     try {
       await client.from('visit_sites').insert(data);
-      if (status == 'active')     activeCount++;
-      else if (status == 'inactive') inactiveCount++;
+      if (status == 'active') {
+        activeCount++;
+      } else if (status == 'inactive') inactiveCount++;
       else                        monitoringCount++;
     } catch (e) {
       print('  ✗ Failed: "$nameEs" ($parkId): $e');

@@ -18,7 +18,7 @@ final speciesDetailProvider = FutureProvider.family<Species?, int>((ref, id) asy
         .select()
         .eq('id', id)
         .maybeSingle();
-    return data != null ? speciesFromRow(data as Map<String, dynamic>) : null;
+    return data != null ? speciesFromRow(data) : null;
   }
   final results = await Repository().get<Species>(
     policy: OfflineFirstGetPolicy.localOnly,

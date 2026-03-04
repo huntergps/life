@@ -62,12 +62,7 @@ class SpeciesCard extends ConsumerWidget {
               borderRadius: hasInfoStrip
                   ? const BorderRadius.vertical(top: Radius.circular(16))
                   : BorderRadius.circular(16),
-              gradient: const LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.35, 1.0],
-                colors: [Colors.transparent, Colors.black87],
-              ),
+              gradient: kCardGradient,
             ),
           ),
         ),
@@ -76,29 +71,7 @@ class SpeciesCard extends ConsumerWidget {
           Positioned(
             top: 6,
             left: 6,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.teal.shade600.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.auto_awesome, size: 9, color: Colors.white),
-                  SizedBox(width: 3),
-                  Text(
-                    'IA',
-                    style: TextStyle(
-                      fontSize: 9,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            child: aiBadge(),
           ),
         // Text overlay on gradient (bottom)
         Positioned(

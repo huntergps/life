@@ -72,7 +72,7 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
 
   CameraController? _cameraController;
   bool _cameraInitializing = true;
-  bool _isCapturing = false;
+  final bool _isCapturing = false;
   bool _isAnalyzing = false;
   DateTime? _lastAnalysis;
   String? _cameraError;
@@ -292,11 +292,13 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
     final user = Supabase.instance.client.auth.currentUser;
     final isEs = ref.read(localeProvider.select((l) => l == 'es'));
     if (user == null) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: _hudDark,
         content: Text(isEs ? 'Inicia sesión para registrar' : 'Sign in to register',
             style: const TextStyle(color: _cyan)),
       ));
+      }
       return;
     }
     final location = ref.read(arLocationProvider).asData?.value;
@@ -307,7 +309,8 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
         latitude: location?.lat,
         longitude: location?.lng,
       );
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: _hudDark,
         content: Row(children: [
           const Icon(Icons.check_circle_outline, color: _green, size: 16),
@@ -316,12 +319,15 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
               style: const TextStyle(color: _green, letterSpacing: 1)),
         ]),
       ));
+      }
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         backgroundColor: _hudDark,
         content: Text(isEs ? 'ERROR AL GUARDAR' : 'SAVE FAILED',
             style: TextStyle(color: Colors.red.shade400, letterSpacing: 1)),
       ));
+      }
     }
   }
 

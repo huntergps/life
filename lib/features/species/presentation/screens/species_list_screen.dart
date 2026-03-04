@@ -272,14 +272,14 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                                 ),
                               if (dietFilter != null)
                                 _ActiveFilterChip(
-                                  label: _dietLabel(dietFilter),
+                                  label: dietLabel(dietFilter, spanish: locale == 'es'),
                                   onRemove: () => ref
                                       .read(speciesDietFilterProvider.notifier)
                                       .state = null,
                                 ),
                               if (activityFilter != null)
                                 _ActiveFilterChip(
-                                  label: _activityLabel(activityFilter),
+                                  label: activityLabel(activityFilter, spanish: locale == 'es'),
                                   onRemove: () => ref
                                       .read(speciesActivityFilterProvider.notifier)
                                       .state = null,
@@ -441,23 +441,6 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
     );
   }
 
-  static String _dietLabel(String diet) => switch (diet) {
-    'herbivore'   => 'Herbívoro',
-    'carnivore'   => 'Carnívoro',
-    'omnivore'    => 'Omnívoro',
-    'piscivore'   => 'Piscívoro',
-    'insectivore' => 'Insectívoro',
-    'nectarivore' => 'Nectarívoro',
-    _             => diet,
-  };
-
-  static String _activityLabel(String act) => switch (act) {
-    'diurnal'     => '☀ Diurno',
-    'nocturnal'   => '🌙 Nocturno',
-    'crepuscular' => '🌅 Crepuscular',
-    'cathemeral'  => '🔄 Cathemeral',
-    _             => act,
-  };
 }
 
 // ── Small chip shown in the active filters row ────────────────────────────────

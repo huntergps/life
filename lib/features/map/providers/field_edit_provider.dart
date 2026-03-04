@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -367,7 +366,9 @@ class FieldEditNotifier extends StateNotifier<FieldEditState> {
   /// Resume GPS recording
   void resumeRecording() {
     if (state.mode != FieldEditMode.createTrailGPS &&
-        state.mode != FieldEditMode.editTrailGPS) return;
+        state.mode != FieldEditMode.editTrailGPS) {
+      return;
+    }
     state = state.copyWith(isRecording: true);
   }
 

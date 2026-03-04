@@ -15,10 +15,6 @@ import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 
 final islandsProvider = FutureProvider<List<Island>>((ref) async {
-  if (kIsWeb) {
-    final data = await Supabase.instance.client.from('islands').select();
-    return (data as List).map((r) => islandFromRow(r as Map<String, dynamic>)).toList();
-  }
   return fetchDeduped<Island>(
     idSelector: (i) => i.id,
     policy: OfflineFirstGetPolicy.localOnly,
@@ -26,10 +22,6 @@ final islandsProvider = FutureProvider<List<Island>>((ref) async {
 });
 
 final visitSitesProvider = FutureProvider<List<VisitSite>>((ref) async {
-  if (kIsWeb) {
-    final data = await Supabase.instance.client.from('visit_sites').select();
-    return (data as List).map((r) => visitSiteFromRow(r as Map<String, dynamic>)).toList();
-  }
   return fetchDeduped<VisitSite>(
     idSelector: (s) => s.id,
     awaitRemote: true,

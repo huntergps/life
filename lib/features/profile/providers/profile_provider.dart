@@ -26,7 +26,7 @@ final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
         .eq('id', user.id)
         .maybeSingle();
     if (data == null) return null;
-    return userProfileFromRow(data as Map<String, dynamic>);
+    return userProfileFromRow(data);
   }
 
   final profiles = await Repository().get<UserProfile>(
@@ -55,7 +55,7 @@ Future<void> updateProfile({
         .eq('id', userId)
         .maybeSingle();
     final existingProfile =
-        existing != null ? userProfileFromRow(existing as Map<String, dynamic>) : null;
+        existing != null ? userProfileFromRow(existing) : null;
 
     await Supabase.instance.client.from('profiles').upsert({
       'id': userId,

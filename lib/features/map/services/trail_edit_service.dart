@@ -109,10 +109,10 @@ class TrailEditService {
       await Supabase.instance.client.from('trails').update({
         'name_en': nameEn,
         'name_es': nameEs,
-        if (descriptionEn != null) 'description_en': descriptionEn,
-        if (descriptionEs != null) 'description_es': descriptionEs,
-        if (difficulty != null) 'difficulty': difficulty,
-        if (estimatedMinutes != null) 'estimated_minutes': estimatedMinutes,
+        'description_en': ?descriptionEn,
+        'description_es': ?descriptionEs,
+        'difficulty': ?difficulty,
+        'estimated_minutes': ?estimatedMinutes,
       }).eq('id', trailId);
       await _repository.get<Trail>(
         query: Query.where('id', trailId, limit1: true),
@@ -175,10 +175,10 @@ class TrailEditService {
     final payload = <String, dynamic>{
       'name_en': nameEn,
       'name_es': nameEs,
-      if (descriptionEn != null) 'description_en': descriptionEn,
-      if (descriptionEs != null) 'description_es': descriptionEs,
-      if (islandId != null) 'island_id': islandId,
-      if (visitSiteId != null) 'visit_site_id': visitSiteId,
+      'description_en': ?descriptionEn,
+      'description_es': ?descriptionEs,
+      'island_id': ?islandId,
+      'visit_site_id': ?visitSiteId,
       'difficulty': diff,
       'distance_km': distanceKm,
       'estimated_minutes': estimatedMinutes,

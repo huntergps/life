@@ -401,6 +401,68 @@ class TranslationsSpeciesEn {
 
 	/// en: 'Introduced'
 	String get introduced => 'Introduced';
+
+	/// en: 'Morphology'
+	String get morphology => 'Morphology';
+
+	/// en: 'Behavior'
+	String get behavior => 'Behavior';
+
+	/// en: 'Reproduction'
+	String get reproduction => 'Reproduction';
+
+	/// en: 'Distinguishing Features'
+	String get distinguishingFeatures => 'Distinguishing Features';
+
+	/// en: 'No information'
+	String get noInformation => 'No information';
+
+	/// en: 'Diet'
+	String get diet => 'Diet';
+
+	/// en: 'Activity'
+	String get activity => 'Activity';
+
+	/// en: 'Social'
+	String get social => 'Social';
+
+	/// en: 'Food'
+	String get food => 'Food';
+
+	/// en: 'Web'
+	String get web => 'Web';
+
+	/// en: 'No web (active hunter)'
+	String get noWeb => 'No web (active hunter)';
+
+	/// en: 'Female'
+	String get female => 'Female';
+
+	/// en: 'Male'
+	String get male => 'Male';
+
+	/// en: 'Season'
+	String get season => 'Season';
+
+	/// en: 'Clutch size'
+	String get clutchSize => 'Clutch size';
+
+	/// en: 'Frequency'
+	String get reproFrequency => 'Frequency';
+
+	/// en: 'Sexual dimorphism'
+	String get sexualDimorphism => 'Sexual dimorphism';
+
+	/// en: 'Species with neurotoxic venom. No bite records in Galápagos.'
+	String get venomWarning => 'Species with neurotoxic venom. No bite records in Galápagos.';
+
+	/// en: 'Detailed Information'
+	String get detailedInfoTitle => 'Detailed Information';
+
+	/// en: 'Sign in to access extended information about behavior, reproduction, features and more.'
+	String get loginForDetails => 'Sign in to access extended information about behavior, reproduction, features and more.';
+
+	late final TranslationsSpeciesWebTypeEn webType = TranslationsSpeciesWebTypeEn._(_root);
 }
 
 // Path: conservation
@@ -2686,6 +2748,33 @@ class TranslationsSpeciesFrequencyEn {
 	String get occasional => 'Occasional';
 }
 
+// Path: species.webType
+class TranslationsSpeciesWebTypeEn {
+	TranslationsSpeciesWebTypeEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Orb web'
+	String get orbicular => 'Orb web';
+
+	/// en: 'Cobweb'
+	String get cobweb => 'Cobweb';
+
+	/// en: 'Irregular'
+	String get irregular => 'Irregular';
+
+	/// en: 'Funnel web'
+	String get funnel => 'Funnel web';
+
+	/// en: 'Sheet web'
+	String get sheet => 'Sheet web';
+
+	/// en: 'Tubular'
+	String get tubular => 'Tubular';
+}
+
 /// The flat map containing all translations for locale <en>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -2797,6 +2886,32 @@ extension on Translations {
 			'species.altitudeRange' => 'Altitude Range',
 			'species.native' => 'Native',
 			'species.introduced' => 'Introduced',
+			'species.morphology' => 'Morphology',
+			'species.behavior' => 'Behavior',
+			'species.reproduction' => 'Reproduction',
+			'species.distinguishingFeatures' => 'Distinguishing Features',
+			'species.noInformation' => 'No information',
+			'species.diet' => 'Diet',
+			'species.activity' => 'Activity',
+			'species.social' => 'Social',
+			'species.food' => 'Food',
+			'species.web' => 'Web',
+			'species.noWeb' => 'No web (active hunter)',
+			'species.female' => 'Female',
+			'species.male' => 'Male',
+			'species.season' => 'Season',
+			'species.clutchSize' => 'Clutch size',
+			'species.reproFrequency' => 'Frequency',
+			'species.sexualDimorphism' => 'Sexual dimorphism',
+			'species.venomWarning' => 'Species with neurotoxic venom. No bite records in Galápagos.',
+			'species.detailedInfoTitle' => 'Detailed Information',
+			'species.loginForDetails' => 'Sign in to access extended information about behavior, reproduction, features and more.',
+			'species.webType.orbicular' => 'Orb web',
+			'species.webType.cobweb' => 'Cobweb',
+			'species.webType.irregular' => 'Irregular',
+			'species.webType.funnel' => 'Funnel web',
+			'species.webType.sheet' => 'Sheet web',
+			'species.webType.tubular' => 'Tubular',
 			'conservation.EX' => 'Extinct',
 			'conservation.EW' => 'Extinct in Wild',
 			'conservation.CR' => 'Critically Endangered',
@@ -3180,6 +3295,8 @@ extension on Translations {
 			'admin.speciesByCategory' => 'Species by Category',
 			'admin.noData' => 'No data',
 			'admin.dataCoverage' => 'Data Coverage',
+			_ => null,
+		} ?? switch (path) {
 			'admin.visitSitesSection' => 'Visit Sites',
 			'admin.noVisitSitesForIsland' => 'No visit sites for this island. Use the "Visit Sites" section to create new ones.',
 			'admin.saveIslandFirst' => 'Save the island first to see its visit sites',
@@ -3206,8 +3323,6 @@ extension on Translations {
 			'admin.siteTypeDiving' => 'Diving',
 			'admin.siteTypeViewpoint' => 'Viewpoint',
 			'admin.siteTypeDock' => 'Dock',
-			_ => null,
-		} ?? switch (path) {
 			'admin.uploadPicking' => 'Selecting image...',
 			'admin.uploadCropping' => 'Cropping image...',
 			'admin.uploadCompressing' => 'Compressing image...',

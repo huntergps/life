@@ -58,10 +58,12 @@ class _SoundIdScreenState extends ConsumerState<SoundIdScreen>
           timeLimit: Duration(seconds: 10),
         ),
       );
-      if (mounted) setState(() {
+      if (mounted) {
+        setState(() {
         _lat = pos.latitude;
         _lng = pos.longitude;
       });
+      }
     } catch (_) {
       // Location not available, continue without it
     } finally {

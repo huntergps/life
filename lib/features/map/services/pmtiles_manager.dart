@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:background_downloader/background_downloader.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';

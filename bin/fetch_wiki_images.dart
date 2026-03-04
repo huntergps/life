@@ -7,7 +7,6 @@
 library;
 
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:http/http.dart' as http;
@@ -53,7 +52,9 @@ Future<String?> _findWikiImage(String scientificName) async {
       if (title.toLowerCase().endsWith('.svg') ||
           title.toLowerCase().endsWith('.pdf') ||
           title.toLowerCase().endsWith('.ogg') ||
-          title.toLowerCase().endsWith('.webm')) continue;
+          title.toLowerCase().endsWith('.webm')) {
+        continue;
+      }
 
       // Get the actual image URL
       final infoUrl = Uri.parse(

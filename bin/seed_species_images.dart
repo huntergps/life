@@ -363,7 +363,7 @@ Future<void> main() async {
         'species_id': speciesId,
         'image_url': imageUrl,
         'thumbnail_url': thumbnailUrl,
-        if (cardThumbnailUrl != null) 'card_thumbnail_url': cardThumbnailUrl,
+        'card_thumbnail_url': ?cardThumbnailUrl,
         'sort_order': i,
         'is_primary': i == 0, // first image is primary
       });

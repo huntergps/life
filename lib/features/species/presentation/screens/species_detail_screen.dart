@@ -315,8 +315,13 @@ class _DetailContent extends ConsumerWidget {
 
         // Extended information (only for logged-in users)
         if (isLoggedIn) ...[
-          ..._buildExtendedInfo(context, isDark, threatsAsync, referencesAsync),
-          // Sounds section (after extended info)
+          _ExtendedInfoSection(
+            species: species,
+            locale: locale,
+            isDark: isDark,
+            threatsAsync: threatsAsync,
+            referencesAsync: referencesAsync,
+          ),
           if ((soundsAsync.asData?.value ?? []).isNotEmpty)
             Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -326,378 +331,385 @@ class _DetailContent extends ConsumerWidget {
               ),
             ),
         ]
-        else ..._buildLoginPrompt(context, isDark),
+        else
+          _LoginPromptSection(isDark: isDark),
       ],
     );
   }
 
-  List<Widget> _buildExtendedInfo(
-    BuildContext context,
-    bool isDark,
-    AsyncValue<List<SpeciesThreat>> threatsAsync,
-    AsyncValue<List<SpeciesReference>> referencesAsync,
-  ) {
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Top-level helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+String _formatEnumValue(String value) =>
+    value.split('_').map((w) => w[0].toUpperCase() + w.substring(1)).join(' ');
+
+String _formatMm(double min, double? max) {
+  if (max == null || max == min) return '${min.toStringAsFixed(1)} mm';
+  return '${min.toStringAsFixed(1)}–${max.toStringAsFixed(1)} mm';
+}
+
+String _webTypeLabel(BuildContext context, String type) {
+  final wt = context.t.species.webType;
+  return switch (type) {
+    'orbicular' => wt.orbicular,
+    'cobweb'    => wt.cobweb,
+    'irregular' => wt.irregular,
+    'funnel'    => wt.funnel,
+    'sheet'     => wt.sheet,
+    'tubular'   => wt.tubular,
+    _           => type,
+  };
+}
+
+List<Widget> _localizedSection(
+  BuildContext context, {
+  required String label,
+  String? en,
+  String? es,
+  required String locale,
+}) {
+  final text = locale == 'es' ? (es ?? en) : en;
+  if (text == null) return [];
+  return [
+    Text(label, style: Theme.of(context).textTheme.titleLarge),
+    const SizedBox(height: 8),
+    Text(text, style: Theme.of(context).textTheme.bodyMedium),
+    const SizedBox(height: 20),
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Extended info section (logged-in users)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ExtendedInfoSection extends StatelessWidget {
+  final dynamic species;
+  final String locale;
+  final bool isDark;
+  final AsyncValue<List<SpeciesThreat>> threatsAsync;
+  final AsyncValue<List<SpeciesReference>> referencesAsync;
+
+  const _ExtendedInfoSection({
+    required this.species,
+    required this.locale,
+    required this.isDark,
+    required this.threatsAsync,
+    required this.referencesAsync,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     final emptyColor = isDark ? Colors.grey.shade500 : Colors.grey.shade400;
     final emptyStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
       color: emptyColor,
       fontStyle: FontStyle.italic,
     );
-    final emptyLabel = locale == 'es' ? 'Sin información' : 'No information';
+    Widget emptyValue() => Text(context.t.species.noInformation, style: emptyStyle);
+    final threats = threatsAsync.asData?.value ?? [];
+    final references = referencesAsync.asData?.value ?? [];
 
-    Widget emptyValue() => Text(emptyLabel, style: emptyStyle);
-
-    final widgets = <Widget>[];
-
-    // Venomous warning badge — only for arachnids with venomous_to_humans = true
-    if (species.venomousToHumans == true) {
-      widgets.add(Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.red.shade900.withValues(alpha: 0.15),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.red.shade700, width: 1),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.warning_rounded, color: Colors.red.shade400, size: 18),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                locale == 'es'
-                    ? 'Especie con veneno neurotóxico. Sin registros de mordidas en Galápagos.'
-                    : 'Species with neurotoxic venom. No bite records in Galápagos.',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.red.shade300,
-                  fontWeight: FontWeight.w500,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Venomous warning
+        if (species.venomousToHumans == true) ...[
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.red.shade900.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.red.shade700, width: 1),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.warning_rounded, color: Colors.red.shade400, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    context.t.species.venomWarning,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.red.shade300,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+
+        // Morphology (arachnids)
+        if (species.sizeMmFemaleMin != null || species.sizeMmMaleMin != null) ...[
+          Text(context.t.species.morphology, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          if (species.sizeMmFemaleMin != null) ...[
+            Row(children: [
+              const Icon(Icons.straighten_outlined, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                '${context.t.species.female}: ${_formatMm(species.sizeMmFemaleMin!, species.sizeMmFemaleMax)}',
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-            ),
+            ]),
+            const SizedBox(height: 4),
           ],
-        ),
-      ));
-      widgets.add(const SizedBox(height: 16));
-    }
+          if (species.sizeMmMaleMin != null)
+            Row(children: [
+              const Icon(Icons.straighten_outlined, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                '${context.t.species.male}: ${_formatMm(species.sizeMmMaleMin!, species.sizeMmMaleMax)}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ]),
+          const SizedBox(height: 20),
+        ],
 
-    // Morphology (arachnids) — size by sex, only when data exists
-    if (species.sizeMmFemaleMin != null || species.sizeMmMaleMin != null) {
-      widgets.add(Text(
-        locale == 'es' ? 'Morfología' : 'Morphology',
-        style: Theme.of(context).textTheme.titleLarge,
-      ));
-      widgets.add(const SizedBox(height: 8));
-      if (species.sizeMmFemaleMin != null) {
-        final fMin = species.sizeMmFemaleMin!;
-        final fMax = species.sizeMmFemaleMax;
-        widgets.add(Row(
-          children: [
-            const Icon(Icons.straighten_outlined, size: 16),
-            const SizedBox(width: 8),
-            Text(
-              locale == 'es'
-                  ? 'Hembra: ${_formatMm(fMin, fMax)}'
-                  : 'Female: ${_formatMm(fMin, fMax)}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ));
-        widgets.add(const SizedBox(height: 4));
-      }
-      if (species.sizeMmMaleMin != null) {
-        final mMin = species.sizeMmMaleMin!;
-        final mMax = species.sizeMmMaleMax;
-        widgets.add(Row(
-          children: [
-            const Icon(Icons.straighten_outlined, size: 16),
-            const SizedBox(width: 8),
-            Text(
-              locale == 'es'
-                  ? 'Macho: ${_formatMm(mMin, mMax)}'
-                  : 'Male: ${_formatMm(mMin, mMax)}',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
-        ));
-      }
-      widgets.add(const SizedBox(height: 20));
-    }
+        // Behavior
+        Text(context.t.species.behavior, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        _behaviorWidget(context, emptyValue),
+        const SizedBox(height: 20),
 
-    // Behavior section — always visible
-    widgets.add(Text(
-      locale == 'es' ? 'Comportamiento' : 'Behavior',
-      style: Theme.of(context).textTheme.titleLarge,
-    ));
-    widgets.add(const SizedBox(height: 8));
-    final behaviorInfo = <String>[];
+        // Reproduction
+        Text(context.t.species.reproduction, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        _reproductionWidget(context, emptyValue),
+        const SizedBox(height: 20),
+
+        // Distinguishing Features
+        Text(context.t.species.distinguishingFeatures, style: Theme.of(context).textTheme.titleLarge),
+        const SizedBox(height: 8),
+        _distinguishingWidget(context, emptyValue),
+        if (species.sexualDimorphism != null && (species.sexualDimorphism as String).isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(
+            '${context.t.species.sexualDimorphism}: ${species.sexualDimorphism}',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+        const SizedBox(height: 20),
+
+        // Best Time to Visit
+        if (species.breedingSeason != null || species.activityPattern != null) ...[
+          Text(context.t.species.bestTimeToVisit, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          if (species.breedingSeason != null) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.calendar_today_outlined, size: 16),
+                const SizedBox(width: 8),
+                Expanded(child: Text(
+                  '${context.t.species.breedingSeason}: ${species.breedingSeason}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                )),
+              ],
+            ),
+            const SizedBox(height: 6),
+          ],
+          if (species.activityPattern != null)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.access_time_outlined, size: 16),
+                const SizedBox(width: 8),
+                Expanded(child: Text(
+                  '${context.t.species.activityPattern}: ${_formatEnumValue(species.activityPattern!)}',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                )),
+              ],
+            ),
+          const SizedBox(height: 20),
+        ],
+
+        // Threats
+        if (threats.isNotEmpty) ...[
+          Text(context.t.species.threats, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          for (final threat in threats) ...[
+            _ThreatCard(
+              threat: threat,
+              description: locale == 'es'
+                  ? (threat.descriptionEs ?? threat.descriptionEn)
+                  : threat.descriptionEn,
+              isDark: isDark,
+              locale: locale,
+            ),
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 12),
+        ],
+
+        // References
+        if (references.isNotEmpty) ...[
+          Text(context.t.species.references, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          for (int i = 0; i < references.length; i++) ...[
+            _ReferenceItem(r: references[i], index: i, isDark: isDark),
+            if (i < references.length - 1) const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+
+  Widget _behaviorWidget(BuildContext context, Widget Function() emptyValue) {
+    final parts = <String>[];
     if (species.dietType != null) {
-      behaviorInfo.add('${locale == 'es' ? 'Dieta' : 'Diet'}: ${_formatEnumValue(species.dietType!)}');
+      parts.add('${context.t.species.diet}: ${_formatEnumValue(species.dietType!)}');
     }
     if (species.activityPattern != null) {
-      behaviorInfo.add('${locale == 'es' ? 'Actividad' : 'Activity'}: ${_formatEnumValue(species.activityPattern!)}');
+      parts.add('${context.t.species.activity}: ${_formatEnumValue(species.activityPattern!)}');
     }
     if (species.socialStructure != null) {
-      behaviorInfo.add('${locale == 'es' ? 'Social' : 'Social'}: ${_formatEnumValue(species.socialStructure!)}');
+      parts.add('${context.t.species.social}: ${_formatEnumValue(species.socialStructure!)}');
     }
-    if (species.primaryFoodSources != null && species.primaryFoodSources!.isNotEmpty) {
-      behaviorInfo.add('${locale == 'es' ? 'Alimentación' : 'Food'}: ${species.primaryFoodSources!.join(', ')}');
+    if (species.primaryFoodSources != null && (species.primaryFoodSources as List).isNotEmpty) {
+      parts.add('${context.t.species.food}: ${(species.primaryFoodSources as List).join(', ')}');
     }
-    // Spider web behavior
     if (species.buildsWeb != null) {
       if (species.buildsWeb!) {
         final webLabel = species.webType != null
-            ? _formatWebType(species.webType!, locale)
-            : (locale == 'es' ? 'Sí' : 'Yes');
-        behaviorInfo.add('${locale == 'es' ? 'Telaraña' : 'Web'}: $webLabel');
+            ? _webTypeLabel(context, species.webType!)
+            : context.t.species.web;
+        parts.add('${context.t.species.web}: $webLabel');
       } else {
-        behaviorInfo.add(locale == 'es' ? 'Sin telaraña (cazadora)' : 'No web (active hunter)');
+        parts.add(context.t.species.noWeb);
       }
     }
-    widgets.add(behaviorInfo.isEmpty
+    return parts.isEmpty
         ? emptyValue()
-        : Text(behaviorInfo.join(' • '), style: Theme.of(context).textTheme.bodyMedium));
-    widgets.add(const SizedBox(height: 20));
+        : Text(parts.join(' • '), style: Theme.of(context).textTheme.bodyMedium);
+  }
 
-    // Reproduction section — always visible
-    widgets.add(Text(
-      locale == 'es' ? 'Reproducción' : 'Reproduction',
-      style: Theme.of(context).textTheme.titleLarge,
-    ));
-    widgets.add(const SizedBox(height: 8));
-    final reproInfo = <String>[];
+  Widget _reproductionWidget(BuildContext context, Widget Function() emptyValue) {
+    final parts = <String>[];
     if (species.breedingSeason != null) {
-      reproInfo.add('${locale == 'es' ? 'Temporada' : 'Season'}: ${species.breedingSeason}');
+      parts.add('${context.t.species.season}: ${species.breedingSeason}');
     }
     if (species.clutchSize != null) {
-      reproInfo.add('${locale == 'es' ? 'Tamaño de puesta' : 'Clutch size'}: ${species.clutchSize}');
+      parts.add('${context.t.species.clutchSize}: ${species.clutchSize}');
     }
     if (species.reproductiveFrequency != null) {
-      reproInfo.add('${locale == 'es' ? 'Frecuencia' : 'Frequency'}: ${species.reproductiveFrequency}');
+      parts.add('${context.t.species.reproFrequency}: ${species.reproductiveFrequency}');
     }
-    widgets.add(reproInfo.isEmpty
+    return parts.isEmpty
         ? emptyValue()
-        : Text(reproInfo.join(' • '), style: Theme.of(context).textTheme.bodyMedium));
-    widgets.add(const SizedBox(height: 20));
+        : Text(parts.join(' • '), style: Theme.of(context).textTheme.bodyMedium);
+  }
 
-    // Distinguishing features — always visible
-    widgets.add(Text(
-      locale == 'es' ? 'Características Distintivas' : 'Distinguishing Features',
-      style: Theme.of(context).textTheme.titleLarge,
-    ));
-    widgets.add(const SizedBox(height: 8));
+  Widget _distinguishingWidget(BuildContext context, Widget Function() emptyValue) {
     final features = locale == 'es'
         ? (species.distinguishingFeaturesEs ?? species.distinguishingFeaturesEn)
         : species.distinguishingFeaturesEn;
-    widgets.add((features == null || features.isEmpty)
-        ? emptyValue()
-        : Text(features, style: Theme.of(context).textTheme.bodyMedium));
-    if (species.sexualDimorphism != null && species.sexualDimorphism!.isNotEmpty) {
-      widgets.add(const SizedBox(height: 8));
-      widgets.add(Text(
-        '${locale == 'es' ? 'Dimorfismo sexual' : 'Sexual dimorphism'}: ${species.sexualDimorphism}',
-        style: Theme.of(context).textTheme.bodyMedium,
-      ));
-    }
-    widgets.add(const SizedBox(height: 20));
+    if (features == null || (features as String).isEmpty) return emptyValue();
+    return Text(features, style: Theme.of(context).textTheme.bodyMedium);
+  }
+}
 
-    // Best Time to Visit (H) — from breeding season + activity pattern
-    if (species.breedingSeason != null || species.activityPattern != null) {
-      widgets.add(Text(
-        locale == 'es' ? 'Mejor Epoca para Visitar' : 'Best Time to Visit',
-        style: Theme.of(context).textTheme.titleLarge,
-      ));
-      widgets.add(const SizedBox(height: 8));
-      final bestTimeInfo = <Widget>[];
-      if (species.breedingSeason != null) {
-        bestTimeInfo.add(Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.calendar_today_outlined, size: 16),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '${locale == 'es' ? 'Temporada de cria' : 'Breeding season'}: ${species.breedingSeason}',
-                style: Theme.of(context).textTheme.bodyMedium,
+class _ReferenceItem extends StatelessWidget {
+  final SpeciesReference r;
+  final int index;
+  final bool isDark;
+  const _ReferenceItem({required this.r, required this.index, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    final hasLink = r.url != null || r.doi != null;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('${index + 1}. ', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          fontWeight: FontWeight.bold,
+        )),
+        Expanded(
+          child: GestureDetector(
+            onTap: hasLink ? () async {
+              final url = r.url ?? (r.doi != null ? 'https://doi.org/${r.doi}' : null);
+              if (url != null) {
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            } : null,
+            child: Text(
+              r.citation,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: hasLink ? (isDark ? Colors.lightBlue : Colors.blue.shade700) : null,
+                decoration: hasLink ? TextDecoration.underline : null,
               ),
             ),
-          ],
-        ));
-        bestTimeInfo.add(const SizedBox(height: 6));
-      }
-      if (species.activityPattern != null) {
-        bestTimeInfo.add(Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.access_time_outlined, size: 16),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                '${locale == 'es' ? 'Patron de actividad' : 'Activity pattern'}: ${_formatEnumValue(species.activityPattern!)}',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Login prompt (shown when not logged in)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _LoginPromptSection extends StatelessWidget {
+  final bool isDark;
+  const _LoginPromptSection({required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.primaryLight.withValues(alpha: 0.1)
+                : AppColors.primary.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark
+                  ? AppColors.primaryLight.withValues(alpha: 0.3)
+                  : AppColors.primary.withValues(alpha: 0.2),
             ),
-          ],
-        ));
-      }
-      widgets.addAll(bestTimeInfo);
-      widgets.add(const SizedBox(height: 20));
-    }
-
-    // Threats (B) — from species_threats table
-    final threats = threatsAsync.asData?.value ?? [];
-    if (threats.isNotEmpty) {
-      widgets.add(Text(
-        locale == 'es' ? 'Amenazas' : 'Threats',
-        style: Theme.of(context).textTheme.titleLarge,
-      ));
-      widgets.add(const SizedBox(height: 8));
-      for (final threat in threats) {
-        final description = locale == 'es'
-            ? (threat.descriptionEs ?? threat.descriptionEn)
-            : threat.descriptionEn;
-        widgets.add(_ThreatCard(threat: threat, description: description, isDark: isDark, locale: locale));
-        widgets.add(const SizedBox(height: 8));
-      }
-      widgets.add(const SizedBox(height: 12));
-    }
-
-    // References (C) — from species_references table
-    final references = referencesAsync.asData?.value ?? [];
-    if (references.isNotEmpty) {
-      widgets.add(Text(
-        locale == 'es' ? 'Referencias Cientificas' : 'Scientific References',
-        style: Theme.of(context).textTheme.titleLarge,
-      ));
-      widgets.add(const SizedBox(height: 8));
-      for (int i = 0; i < references.length; i++) {
-        final ref = references[i];
-        final hasLink = ref.url != null || ref.doi != null;
-        widgets.add(Padding(
-          padding: const EdgeInsets.only(bottom: 8),
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('${i + 1}. ', style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              )),
+              Icon(
+                Icons.lock_outline,
+                color: isDark ? AppColors.primaryLight : AppColors.primary,
+                size: 32,
+              ),
+              const SizedBox(width: 16),
               Expanded(
-                child: GestureDetector(
-                  onTap: hasLink ? () async {
-                    final url = ref.url ?? (ref.doi != null ? 'https://doi.org/${ref.doi}' : null);
-                    if (url != null) {
-                      final uri = Uri.parse(url);
-                      if (await canLaunchUrl(uri)) launchUrl(uri, mode: LaunchMode.externalApplication);
-                    }
-                  } : null,
-                  child: Text(
-                    ref.citation,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: hasLink ? (isDark ? Colors.lightBlue : Colors.blue.shade700) : null,
-                      decoration: hasLink ? TextDecoration.underline : null,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.t.species.detailedInfoTitle,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: isDark ? AppColors.primaryLight : AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      context.t.species.loginForDetails,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-        ));
-      }
-      widgets.add(const SizedBox(height: 12));
-    }
-
-    return widgets;
-  }
-
-  List<Widget> _buildLoginPrompt(BuildContext context, bool isDark) {
-    return [
-      const SizedBox(height: 10),
-      Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isDark
-              ? AppColors.primaryLight.withValues(alpha: 0.1)
-              : AppColors.primary.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark
-                ? AppColors.primaryLight.withValues(alpha: 0.3)
-                : AppColors.primary.withValues(alpha: 0.2),
-          ),
         ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.lock_outline,
-              color: isDark ? AppColors.primaryLight : AppColors.primary,
-              size: 32,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    locale == 'es'
-                        ? 'Información Detallada'
-                        : 'Detailed Information',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: isDark ? AppColors.primaryLight : AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    locale == 'es'
-                        ? 'Inicia sesión para acceder a información extendida sobre comportamiento, reproducción, características y más.'
-                        : 'Sign in to access extended information about behavior, reproduction, features and more.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      const SizedBox(height: 20),
-    ];
-  }
-
-  String _formatEnumValue(String value) {
-    return value.split('_').map((word) =>
-      word[0].toUpperCase() + word.substring(1)
-    ).join(' ');
-  }
-
-  String _formatMm(double min, double? max) {
-    if (max == null || max == min) return '${min.toStringAsFixed(1)} mm';
-    return '${min.toStringAsFixed(1)}–${max.toStringAsFixed(1)} mm';
-  }
-
-  String _formatWebType(String type, String locale) {
-    const labels = {
-      'orbicular': {'es': 'Orbicular (rueda)', 'en': 'Orb web'},
-      'cobweb':    {'es': 'Cobweb (irregular)', 'en': 'Cobweb'},
-      'irregular': {'es': 'Irregular', 'en': 'Irregular'},
-      'funnel':    {'es': 'Embudo', 'en': 'Funnel web'},
-      'sheet':     {'es': 'Laminar', 'en': 'Sheet web'},
-      'tubular':   {'es': 'Tubular', 'en': 'Tubular'},
-    };
-    return labels[type]?[locale] ?? type;
-  }
-
-  List<Widget> _localizedSection(
-    BuildContext context, {
-    required String label,
-    String? en,
-    String? es,
-    required String locale,
-  }) {
-    final text = locale == 'es' ? (es ?? en) : en;
-    if (text == null) return [];
-    return [
-      Text(label, style: Theme.of(context).textTheme.titleLarge),
-      const SizedBox(height: 8),
-      Text(text, style: Theme.of(context).textTheme.bodyMedium),
-      const SizedBox(height: 20),
-    ];
+        const SizedBox(height: 20),
+      ],
+    );
   }
 }
 

@@ -229,7 +229,9 @@ Future<List<T>> fetchDeduped<T extends OfflineFirstWithSupabaseModel>({
   if (!Repository.initialized) {
     final raw = await _supabaseGet<T>();
     final deduped = <int, T>{};
-    for (final item in raw) deduped[idSelector(item)] = item;
+    for (final item in raw) {
+      deduped[idSelector(item)] = item;
+    }
     return deduped.values.toList();
   }
 
@@ -284,7 +286,9 @@ Future<Map<int, T>> fetchLookup<T extends OfflineFirstWithSupabaseModel>({
   if (!Repository.initialized) {
     final raw = await _supabaseGet<T>();
     final map = <int, T>{};
-    for (final item in raw) map[idSelector(item)] = item;
+    for (final item in raw) {
+      map[idSelector(item)] = item;
+    }
     return map;
   }
   final raw = await Repository().get<T>(policy: policy, query: query);

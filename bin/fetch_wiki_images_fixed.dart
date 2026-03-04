@@ -52,8 +52,9 @@ Future<String?> _findWikiImage(String scientificName) async {
       if (title.toLowerCase().endsWith('.svg') ||
           title.toLowerCase().endsWith('.pdf') ||
           title.toLowerCase().endsWith('.ogg') ||
-          title.toLowerCase().endsWith('.webm'))
+          title.toLowerCase().endsWith('.webm')) {
         continue;
+      }
 
       // Get the actual image URL
       final infoUrl = Uri.parse(

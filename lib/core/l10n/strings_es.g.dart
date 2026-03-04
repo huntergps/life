@@ -199,6 +199,27 @@ class _TranslationsSpeciesEs implements TranslationsSpeciesEn {
 	@override String get altitudeRange => 'Rango de Altitud';
 	@override String get native => 'Nativa';
 	@override String get introduced => 'Introducida';
+	@override String get morphology => 'Morfología';
+	@override String get behavior => 'Comportamiento';
+	@override String get reproduction => 'Reproducción';
+	@override String get distinguishingFeatures => 'Características Distintivas';
+	@override String get noInformation => 'Sin información';
+	@override String get diet => 'Dieta';
+	@override String get activity => 'Actividad';
+	@override String get social => 'Social';
+	@override String get food => 'Alimentación';
+	@override String get web => 'Telaraña';
+	@override String get noWeb => 'Sin telaraña (cazadora)';
+	@override String get female => 'Hembra';
+	@override String get male => 'Macho';
+	@override String get season => 'Temporada';
+	@override String get clutchSize => 'Tamaño de puesta';
+	@override String get reproFrequency => 'Frecuencia';
+	@override String get sexualDimorphism => 'Dimorfismo sexual';
+	@override String get venomWarning => 'Especie con veneno neurotóxico. Sin registros de mordidas en Galápagos.';
+	@override String get detailedInfoTitle => 'Información Detallada';
+	@override String get loginForDetails => 'Inicia sesión para acceder a información extendida sobre comportamiento, reproducción, características y más.';
+	@override late final _TranslationsSpeciesWebTypeEs webType = _TranslationsSpeciesWebTypeEs._(_root);
 }
 
 // Path: conservation
@@ -1100,6 +1121,21 @@ class _TranslationsSpeciesFrequencyEs implements TranslationsSpeciesFrequencyEn 
 	@override String get occasional => 'Ocasional';
 }
 
+// Path: species.webType
+class _TranslationsSpeciesWebTypeEs implements TranslationsSpeciesWebTypeEn {
+	_TranslationsSpeciesWebTypeEs._(this._root);
+
+	final TranslationsEs _root; // ignore: unused_field
+
+	// Translations
+	@override String get orbicular => 'Orbicular (rueda)';
+	@override String get cobweb => 'Cobweb (irregular)';
+	@override String get irregular => 'Irregular';
+	@override String get funnel => 'Embudo';
+	@override String get sheet => 'Laminar';
+	@override String get tubular => 'Tubular';
+}
+
 /// The flat map containing all translations for locale <es>.
 /// Only for edge cases! For simple maps, use the map function of this library.
 ///
@@ -1211,6 +1247,32 @@ extension on TranslationsEs {
 			'species.altitudeRange' => 'Rango de Altitud',
 			'species.native' => 'Nativa',
 			'species.introduced' => 'Introducida',
+			'species.morphology' => 'Morfología',
+			'species.behavior' => 'Comportamiento',
+			'species.reproduction' => 'Reproducción',
+			'species.distinguishingFeatures' => 'Características Distintivas',
+			'species.noInformation' => 'Sin información',
+			'species.diet' => 'Dieta',
+			'species.activity' => 'Actividad',
+			'species.social' => 'Social',
+			'species.food' => 'Alimentación',
+			'species.web' => 'Telaraña',
+			'species.noWeb' => 'Sin telaraña (cazadora)',
+			'species.female' => 'Hembra',
+			'species.male' => 'Macho',
+			'species.season' => 'Temporada',
+			'species.clutchSize' => 'Tamaño de puesta',
+			'species.reproFrequency' => 'Frecuencia',
+			'species.sexualDimorphism' => 'Dimorfismo sexual',
+			'species.venomWarning' => 'Especie con veneno neurotóxico. Sin registros de mordidas en Galápagos.',
+			'species.detailedInfoTitle' => 'Información Detallada',
+			'species.loginForDetails' => 'Inicia sesión para acceder a información extendida sobre comportamiento, reproducción, características y más.',
+			'species.webType.orbicular' => 'Orbicular (rueda)',
+			'species.webType.cobweb' => 'Cobweb (irregular)',
+			'species.webType.irregular' => 'Irregular',
+			'species.webType.funnel' => 'Embudo',
+			'species.webType.sheet' => 'Laminar',
+			'species.webType.tubular' => 'Tubular',
 			'conservation.EX' => 'Extinta',
 			'conservation.EW' => 'Extinta en Estado Silvestre',
 			'conservation.CR' => 'En Peligro Crítico',
@@ -1594,6 +1656,8 @@ extension on TranslationsEs {
 			'admin.speciesByCategory' => 'Especies por Categoría',
 			'admin.noData' => 'Sin datos',
 			'admin.dataCoverage' => 'Cobertura de Datos',
+			_ => null,
+		} ?? switch (path) {
 			'admin.visitSitesSection' => 'Sitios de Visita',
 			'admin.noVisitSitesForIsland' => 'No hay sitios de visita para esta isla. Usa la sección "Sitios de Visita" para crear nuevos.',
 			'admin.saveIslandFirst' => 'Guarda la isla primero para ver sus sitios de visita',
@@ -1620,8 +1684,6 @@ extension on TranslationsEs {
 			'admin.siteTypeDiving' => 'Buceo',
 			'admin.siteTypeViewpoint' => 'Mirador',
 			'admin.siteTypeDock' => 'Muelle',
-			_ => null,
-		} ?? switch (path) {
 			'admin.uploadPicking' => 'Seleccionando imagen...',
 			'admin.uploadCropping' => 'Recortando imagen...',
 			'admin.uploadCompressing' => 'Comprimiendo imagen...',
