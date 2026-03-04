@@ -55,6 +55,7 @@ class AdminSupabaseService {
 
   // ── Species ──
 
+  Future<Map<String, dynamic>?> getSpeciesById(int id) => species.getSpeciesById(id);
   Future<List<Map<String, dynamic>>> getSpecies() => species.getSpecies();
   Future<Map<String, dynamic>> upsertSpecies(Map<String, dynamic> data) => species.upsertSpecies(data);
   Future<void> updateSpecies(int id, Map<String, dynamic> data) => species.updateSpecies(id, data);

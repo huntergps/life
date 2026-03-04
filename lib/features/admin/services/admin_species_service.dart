@@ -5,6 +5,15 @@ class AdminSpeciesService {
 
   AdminSpeciesService(SupabaseClient client) : _client = client;
 
+  Future<Map<String, dynamic>?> getSpeciesById(int id) async {
+    final response = await _client
+        .from('species')
+        .select('*, categories(name_en)')
+        .eq('id', id)
+        .maybeSingle();
+    return response;
+  }
+
   Future<List<Map<String, dynamic>>> getSpecies() async {
     final response = await _client
         .from('species')
