@@ -123,13 +123,23 @@ class _AdminSpeciesFormScreenState
       _isLoadingSpecies = true;
       WidgetsBinding.instance.addPostFrameCallback((_) async {
         if (!mounted) return;
-        final service = ref.read(adminSupabaseServiceProvider);
-        final data = await service.getSpeciesById(widget.speciesId!);
-        if (!mounted) return;
-        if (data != null) {
-          _populateFields(data);
+        try {
+          final service = ref.read(adminSupabaseServiceProvider);
+          final data = await service.getSpeciesById(widget.speciesId!);
+          if (!mounted) return;
+          if (data != null) {
+            _populateFields(data);
+          }
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error cargando especie: $e'),
+                  backgroundColor: AppColors.error),
+            );
+          }
+        } finally {
+          if (mounted) setState(() => _isLoadingSpecies = false);
         }
-        setState(() => _isLoadingSpecies = false);
       });
     }
 

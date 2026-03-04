@@ -336,7 +336,7 @@ class SpeciesFormNotifier extends StateNotifier<SpeciesFormState> {
       selectedClassId: classId ?? (d != null ? null : null),
       selectedOrderId: orderId,
       selectedFamilyId: familyId,
-      selectedGenusId: genusId ?? (d?['genus_id'] as int?),
+      selectedGenusId: genusId ?? (d?['genus_id'] == null ? null : (d!['genus_id'] as num).toInt()),
       selectedConservationStatus: conservationStatus ?? (d?['conservation_status'] as String?),
       // Text fields
       nameEs: d?['common_name_es'] as String? ?? '',
@@ -361,7 +361,7 @@ class SpeciesFormNotifier extends StateNotifier<SpeciesFormState> {
       depthMin: _numToStr(d?['depth_min_m']),
       depthMax: _numToStr(d?['depth_max_m']),
       // Non-text form state
-      selectedCategoryId: d?['category_id'] as int?,
+      selectedCategoryId: d?['category_id'] == null ? null : (d!['category_id'] as num).toInt(),
       isEndemic: d?['is_endemic'] as bool? ?? false,
       isNative: d?['is_native'] as bool? ?? false,
       isIntroduced: d?['is_introduced'] as bool? ?? false,
