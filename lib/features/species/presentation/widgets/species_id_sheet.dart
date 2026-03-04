@@ -846,11 +846,18 @@ class _NoMatchButtonState extends ConsumerState<_NoMatchButton> {
     if (correctSpecies == null || !mounted) return;
 
     final location = ref.read(arLocationProvider).asData?.value;
+
+    // Upload photo for training data (null if unauthenticated or upload fails)
+    final photoUrl = widget.photoBytes != null
+        ? await RecognitionFeedbackService.uploadFeedbackPhoto(widget.photoBytes!)
+        : null;
+
     unawaited(RecognitionFeedbackService.save(
       predictedSpeciesId:  widget.topSuggestion.matchedSpecies?.id,
       predictedConfidence: widget.topSuggestion.score,
       correctSpeciesId:    correctSpecies.id,
       userSelectedRank:    0,   // 0 = manual correction (not from suggestion list)
+      photoUrl:            photoUrl,
       lat:                 location?.lat,
       lng:                 location?.lng,
     ));
