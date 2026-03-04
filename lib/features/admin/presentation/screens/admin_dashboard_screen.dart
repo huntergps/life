@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
@@ -23,6 +24,13 @@ final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
     service.getCount('site_modality_catalog'),
     service.getCount('site_activity_catalog'),
     service.getCount('profiles'),
+    // Pending proposals count for the dashboard badge
+    Supabase.instance.client
+        .from('species_change_proposals')
+        .select()
+        .eq('status', 'pending')
+        .count(CountOption.exact)
+        .then((r) => r.count),
   ]);
   return {
     'species': results[0],
@@ -33,6 +41,7 @@ final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
     'species_sites': results[5],
     'site_catalogs': results[6] + results[7] + results[8],
     'users': results[9],
+    'proposals': results[10],
   };
 });
 
@@ -170,6 +179,19 @@ class AdminDashboardScreen extends ConsumerWidget {
                         icon: Icons.people_outline,
                         count: counts['users'],
                         onTap: () => context.go('/admin/users'),
+                      ),
+                      AdminEntityTile(
+                        title: 'Propuestas',
+                        subtitle: 'Revisar y aprobar cambios',
+                        icon: Icons.rate_review_outlined,
+                        count: counts['proposals'],
+                        onTap: () => context.go('/admin/proposals'),
+                      ),
+                      AdminEntityTile(
+                        title: 'ML Training',
+                        subtitle: 'Exportar feedback a Drive',
+                        icon: Icons.model_training,
+                        onTap: () => context.go('/admin/ml-training'),
                       ),
                     ],
                   ),

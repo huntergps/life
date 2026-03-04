@@ -13,6 +13,10 @@ import '../../../features/admin/presentation/screens/visit_sites/admin_visit_sit
 import '../../../features/admin/presentation/screens/taxonomy/admin_taxonomy_screen.dart';
 import '../../../features/admin/presentation/screens/site_catalogs/admin_site_catalogs_screen.dart';
 import '../../../features/admin/presentation/screens/users/admin_users_screen.dart';
+import '../../../features/editorial/presentation/screens/admin_proposals_screen.dart';
+import '../../../features/editorial/presentation/screens/curator_screen.dart';
+import '../../../features/editorial/presentation/screens/my_proposals_screen.dart';
+import '../../../features/admin/presentation/screens/admin_ml_training_screen.dart';
 
 List<RouteBase> adminRoutes() => [
       GoRoute(
@@ -127,6 +131,26 @@ List<RouteBase> adminRoutes() => [
             path: 'users',
             name: 'admin-users',
             builder: (context, state) => const AdminUsersScreen(),
+          ),
+          GoRoute(
+            path: 'proposals',
+            name: 'admin-proposals',
+            builder: (context, state) => const AdminProposalsScreen(),
+          ),
+          GoRoute(
+            path: 'curator',
+            name: 'admin-curator',
+            builder: (context, state) => const CuratorScreen(),
+          ),
+          GoRoute(
+            path: 'ml-training',
+            name: 'admin-ml-training',
+            builder: (context, state) => const AdminMlTrainingScreen(),
+          ),
+          GoRoute(
+            path: 'my-proposals',
+            name: 'admin-my-proposals',
+            builder: (context, state) => const MyProposalsScreen(),
           ),
         ],
       ),
