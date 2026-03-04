@@ -5,8 +5,8 @@ import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/utils/error_handler.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
-import '../../../providers/admin_species_provider.dart';
 import '../../../providers/admin_category_provider.dart';
+import '../../../providers/admin_species_provider.dart';
 import '../../../providers/admin_taxonomy_provider.dart';
 import '../../../providers/species_form_provider.dart';
 import '../../../services/admin_form_validator.dart';
@@ -105,6 +105,7 @@ class _AdminSpeciesFormScreenState
 
   String? _heroImageUrl;
   bool _isLoading = false;
+  bool _isLoadingSpecies = false;
   bool _initialized = false;
   bool _isPopulating = false;
   bool _hasUnsavedChanges = false;
@@ -115,6 +116,22 @@ class _AdminSpeciesFormScreenState
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+
+    // Fetch species data once after first frame — avoids calling
+    // ref.read(provider.notifier) inside build() which is an anti-pattern.
+    if (isEditing) {
+      _isLoadingSpecies = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        final service = ref.read(adminSupabaseServiceProvider);
+        final data = await service.getSpeciesById(widget.speciesId!);
+        if (!mounted) return;
+        if (data != null) {
+          _populateFields(data);
+        }
+        setState(() => _isLoadingSpecies = false);
+      });
+    }
 
     // Map each controller to its provider field name so we can sync both
     // the dirty-flag AND the provider state in a single listener per controller.
@@ -389,21 +406,10 @@ class _AdminSpeciesFormScreenState
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final categoriesAsync = ref.watch(adminCategoriesProvider);
 
-    if (isEditing) {
-      final speciesAsync = ref.watch(adminSpeciesProvider(widget.speciesId!));
-      return speciesAsync.when(
-        loading: () => Scaffold(
-          appBar: AppBar(title: Text(context.t.admin.editItem)),
-          body: const Center(child: CircularProgressIndicator()),
-        ),
-        error: (e, _) => Scaffold(
-          appBar: AppBar(title: Text(context.t.admin.editItem)),
-          body: Center(child: Text('${context.t.common.error}: $e')),
-        ),
-        data: (data) {
-          if (data != null) _populateFields(data);
-          return _buildForm(context, isDark, categoriesAsync);
-        },
+    if (isEditing && _isLoadingSpecies) {
+      return Scaffold(
+        appBar: AppBar(title: Text(context.t.admin.editItem)),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
