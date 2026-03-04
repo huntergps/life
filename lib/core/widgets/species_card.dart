@@ -5,6 +5,7 @@ import 'package:galapagos_wildlife/features/species/providers/species_identifica
 import 'cached_species_image.dart';
 import 'conservation_badge.dart';
 import '../theme/app_colors.dart';
+import '../utils/species_display_helpers.dart';
 
 class SpeciesCard extends ConsumerWidget {
   final String commonName;
@@ -173,80 +174,6 @@ class SpeciesCard extends ConsumerWidget {
     );
   }
 
-  // ── Diet icon ──────────────────────────────────────────────────────────────
-  IconData _dietIcon(String diet) {
-    switch (diet) {
-      case 'herbivore':   return Icons.eco_outlined;
-      case 'carnivore':   return Icons.set_meal_outlined;
-      case 'omnivore':    return Icons.restaurant_outlined;
-      case 'piscivore':   return Icons.phishing_outlined;
-      case 'insectivore': return Icons.bug_report_outlined;
-      case 'nectarivore': return Icons.local_florist_outlined;
-      case 'frugivore':   return Icons.apple_outlined;
-      default:            return Icons.restaurant_outlined;
-    }
-  }
-
-  // ── Activity icon ──────────────────────────────────────────────────────────
-  IconData _activityIcon(String pattern) {
-    switch (pattern) {
-      case 'diurnal':    return Icons.wb_sunny_outlined;
-      case 'nocturnal':  return Icons.nightlight_outlined;
-      case 'crepuscular':return Icons.wb_twilight_outlined;
-      default:           return Icons.access_time_outlined;
-    }
-  }
-
-  // ── Population trend ───────────────────────────────────────────────────────
-  IconData _trendIcon(String trend) {
-    switch (trend) {
-      case 'increasing': return Icons.trending_up;
-      case 'stable':     return Icons.trending_flat;
-      case 'decreasing': return Icons.trending_down;
-      default:           return Icons.remove;
-    }
-  }
-
-  Color _trendColor(String trend) {
-    switch (trend) {
-      case 'increasing': return Colors.green;
-      case 'stable':     return Colors.amber;
-      case 'decreasing': return Colors.red;
-      default:           return Colors.grey;
-    }
-  }
-
-  // ── Short labels for info strip ─────────────────────────────────────────
-  String _dietLabel(String diet) {
-    switch (diet) {
-      case 'herbivore':   return 'Herbív.';
-      case 'carnivore':   return 'Carnív.';
-      case 'omnivore':    return 'Omnív.';
-      case 'piscivore':   return 'Piscív.';
-      case 'insectivore': return 'Insect.';
-      case 'nectarivore': return 'Néctar.';
-      case 'frugivore':   return 'Fruqív.';
-      default:            return 'Dieta';
-    }
-  }
-
-  String _activityLabel(String pattern) {
-    switch (pattern) {
-      case 'diurnal':     return 'Diurno';
-      case 'nocturnal':   return 'Noct.';
-      case 'crepuscular': return 'Crepu.';
-      default:            return 'Activ.';
-    }
-  }
-
-  String _trendLabel(String trend) {
-    switch (trend) {
-      case 'increasing': return 'Aumento';
-      case 'stable':     return 'Estable';
-      case 'decreasing': return 'Declive';
-      default:           return 'Tend.';
-    }
-  }
 
   // ── Icon + label chip (icon above text) ─────────────────────────────────
   Widget _buildIconChip(IconData icon, String label, Color color,
@@ -328,21 +255,21 @@ class SpeciesCard extends ConsumerWidget {
                             children: [
                               if (dietType != null)
                                 _buildIconChip(
-                                  _dietIcon(dietType!),
-                                  _dietLabel(dietType!),
+                                  dietIcon(dietType!),
+                                  dietLabel(dietType!),
                                   isDark ? Colors.white60 : Colors.black54,
                                 ),
                               if (activityPattern != null)
                                 _buildIconChip(
-                                  _activityIcon(activityPattern!),
-                                  _activityLabel(activityPattern!),
+                                  activityIcon(activityPattern!),
+                                  activityLabel(activityPattern!),
                                   isDark ? Colors.white60 : Colors.black54,
                                 ),
                               if (populationTrend != null)
                                 _buildIconChip(
-                                  _trendIcon(populationTrend!),
-                                  _trendLabel(populationTrend!),
-                                  _trendColor(populationTrend!),
+                                  trendIcon(populationTrend!),
+                                  trendLabel(populationTrend!),
+                                  trendColor(populationTrend!),
                                 ),
                             ],
                           ),

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/core/utils/species_display_helpers.dart';
 import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import '../../providers/species_list_provider.dart';
 import 'package:galapagos_wildlife/core/widgets/species_list_card.dart';
@@ -265,7 +265,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                               if (selectedConservation != null)
                                 _ActiveFilterChip(
                                   label: selectedConservation,
-                                  color: _statusColor(selectedConservation),
+                                  color: conservationStatusColor(selectedConservation),
                                   onRemove: () => ref
                                       .read(speciesConservationFilterProvider.notifier)
                                       .state = null,
@@ -441,16 +441,6 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
     );
   }
 
-  static Color _statusColor(String status) => switch (status) {
-    'CR' => AppColors.statusCR,
-    'EN' => AppColors.statusEN,
-    'VU' => AppColors.statusVU,
-    'NT' => AppColors.statusNT,
-    'LC' => AppColors.statusLC,
-    'DD' => AppColors.statusDD,
-    _    => AppColors.statusNE,
-  };
-
   static String _dietLabel(String diet) => switch (diet) {
     'herbivore'   => 'Herbívoro',
     'carnivore'   => 'Carnívoro',
@@ -576,7 +566,7 @@ class _FilterSheet extends ConsumerWidget {
                       .state = val ? true : null,
                 ),
                 ..._conservationStatuses.map((status) {
-                  final color = _statusColor(status);
+                  final color = conservationStatusColor(status);
                   return FilterChip(
                     label: Text(status),
                     selected: selectedConservation == status,
@@ -635,16 +625,6 @@ class _FilterSheet extends ConsumerWidget {
   }
 
   static const _conservationStatuses = ['CR', 'EN', 'VU', 'NT', 'LC', 'DD'];
-
-  static Color _statusColor(String status) => switch (status) {
-    'CR' => AppColors.statusCR,
-    'EN' => AppColors.statusEN,
-    'VU' => AppColors.statusVU,
-    'NT' => AppColors.statusNT,
-    'LC' => AppColors.statusLC,
-    'DD' => AppColors.statusDD,
-    _    => AppColors.statusNE,
-  };
 
   static const _dietOptions = [
     ('herbivore',   'Herbívoro',   Icons.eco_outlined),

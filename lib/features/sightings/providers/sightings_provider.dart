@@ -6,6 +6,8 @@ import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
 import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart' show allSpeciesProvider;
+import 'package:galapagos_wildlife/features/map/providers/map_provider.dart' show visitSitesProvider;
 
 /// All sightings for the current user (deduplicated).
 final sightingsProvider = FutureProvider<List<Sighting>>((ref) async {
@@ -34,23 +36,16 @@ final sightingsProvider = FutureProvider<List<Sighting>>((ref) async {
   return list;
 });
 
-/// Lookup map: speciesId → Species (for displaying names in sighting lists).
+/// Lookup map: speciesId → Species. Derived from allSpeciesProvider to avoid
+/// a duplicate fetch when both are used on the same screen.
 final speciesLookupProvider = FutureProvider<Map<int, Species>>((ref) async {
-  if (kIsWeb) {
-    final data = await Supabase.instance.client.from('species').select();
-    return {for (final r in data as List) (r['id'] as int): speciesFromRow(r as Map<String, dynamic>)};
-  }
-  return fetchLookup<Species>(idSelector: (s) => s.id);
+  final list = await ref.watch(allSpeciesProvider.future);
+  return {for (final s in list) s.id: s};
 });
 
-/// Lookup map: visitSiteId → VisitSite (used by the sightings visit-site filter chip).
+/// Lookup map: visitSiteId → VisitSite. Derived from visitSitesProvider to
+/// avoid a duplicate fetch when both are used on the same screen.
 final visitSiteLookupProvider = FutureProvider<Map<int, VisitSite>>((ref) async {
-  if (kIsWeb) {
-    final data = await Supabase.instance.client.from('visit_sites').select();
-    return {
-      for (final r in data as List)
-        (r['id'] as int): visitSiteFromRow(r as Map<String, dynamic>)
-    };
-  }
-  return fetchLookup<VisitSite>(idSelector: (s) => s.id);
+  final list = await ref.watch(visitSitesProvider.future);
+  return {for (final s in list) s.id: s};
 });

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
+import '../utils/species_display_helpers.dart';
 
 class ConservationBadge extends StatelessWidget {
   final String status;
@@ -37,19 +37,7 @@ class ConservationBadge extends StatelessWidget {
     );
   }
 
-  Color get _statusColor {
-    return switch (status) {
-      'EX' => AppColors.statusEX,
-      'EW' => AppColors.statusEW,
-      'CR' => AppColors.statusCR,
-      'EN' => AppColors.statusEN,
-      'VU' => AppColors.statusVU,
-      'NT' => AppColors.statusNT,
-      'LC' => AppColors.statusLC,
-      'DD' => AppColors.statusDD,
-      _ => AppColors.statusNE,
-    };
-  }
+  Color get _statusColor => conservationStatusColor(status);
 
   Color get _textColor {
     return switch (status) {

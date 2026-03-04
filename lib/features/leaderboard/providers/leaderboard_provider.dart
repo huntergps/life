@@ -31,14 +31,17 @@ class LeaderboardEntry {
 }
 
 final leaderboardProvider = FutureProvider<List<LeaderboardEntry>>((ref) async {
-  final response = await Supabase.instance.client.rpc('get_leaderboard');
-
-  final List<dynamic> data = response as List<dynamic>;
-
-  return data.asMap().entries.map((entry) {
-    return LeaderboardEntry.fromJson(
-      entry.value as Map<String, dynamic>,
-      entry.key + 1,
-    );
-  }).toList();
+  try {
+    final response = await Supabase.instance.client.rpc('get_leaderboard');
+    final List<dynamic> data = response as List<dynamic>;
+    return data.asMap().entries.map((entry) {
+      return LeaderboardEntry.fromJson(
+        entry.value as Map<String, dynamic>,
+        entry.key + 1,
+      );
+    }).toList();
+  } catch (_) {
+    // Offline or network error — return empty list gracefully.
+    return [];
+  }
 });

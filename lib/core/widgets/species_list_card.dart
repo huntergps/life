@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/core/widgets/favorite_heart_button.dart';
 import 'cached_species_image.dart';
 import '../theme/app_colors.dart';
+import '../utils/species_display_helpers.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
 
@@ -35,105 +36,8 @@ class SpeciesListCard extends ConsumerWidget {
     this.populationTrend,
   });
 
-  // ── Icon helpers ─────────────────────────────────────────────────────────
-  IconData _dietIcon(String diet) {
-    switch (diet) {
-      case 'herbivore':   return Icons.eco_outlined;
-      case 'carnivore':   return Icons.set_meal_outlined;
-      case 'omnivore':    return Icons.restaurant_outlined;
-      case 'piscivore':   return Icons.phishing_outlined;
-      case 'insectivore': return Icons.bug_report_outlined;
-      case 'nectarivore': return Icons.local_florist_outlined;
-      case 'frugivore':   return Icons.apple_outlined;
-      default:            return Icons.restaurant_outlined;
-    }
-  }
-
-  IconData _activityIcon(String pattern) {
-    switch (pattern) {
-      case 'diurnal':     return Icons.wb_sunny_outlined;
-      case 'nocturnal':   return Icons.nightlight_outlined;
-      case 'crepuscular': return Icons.wb_twilight_outlined;
-      default:            return Icons.access_time_outlined;
-    }
-  }
-
-  IconData _trendIcon(String trend) {
-    switch (trend) {
-      case 'increasing': return Icons.trending_up;
-      case 'stable':     return Icons.trending_flat;
-      case 'decreasing': return Icons.trending_down;
-      default:           return Icons.remove;
-    }
-  }
-
-  Color _trendColor(String trend) {
-    switch (trend) {
-      case 'increasing': return Colors.green;
-      case 'stable':     return Colors.amber;
-      case 'decreasing': return Colors.red;
-      default:           return Colors.grey;
-    }
-  }
-
-  // ── Full value labels (bilingual) ────────────────────────────────────────
-  String _dietValue(String diet, bool isEs) {
-    switch (diet) {
-      case 'herbivore':   return isEs ? 'Herbívoro'   : 'Herbivore';
-      case 'carnivore':   return isEs ? 'Carnívoro'   : 'Carnivore';
-      case 'omnivore':    return isEs ? 'Omnívoro'    : 'Omnivore';
-      case 'piscivore':   return isEs ? 'Piscívoro'   : 'Piscivore';
-      case 'insectivore': return isEs ? 'Insectívoro' : 'Insectivore';
-      case 'nectarivore': return isEs ? 'Nectarívoro' : 'Nectarivore';
-      case 'frugivore':   return isEs ? 'Frugívoro'   : 'Frugivore';
-      default:            return isEs ? 'Dieta'       : 'Diet';
-    }
-  }
-
-  String _activityValue(String pattern, bool isEs) {
-    switch (pattern) {
-      case 'diurnal':     return isEs ? 'Diurno'      : 'Diurnal';
-      case 'nocturnal':   return isEs ? 'Nocturno'    : 'Nocturnal';
-      case 'crepuscular': return isEs ? 'Crepuscular' : 'Crepuscular';
-      default:            return isEs ? 'Activo'      : 'Active';
-    }
-  }
-
-  String _trendValue(String trend, bool isEs) {
-    switch (trend) {
-      case 'increasing': return isEs ? 'En Aumento' : 'Increasing';
-      case 'stable':     return isEs ? 'Estable'    : 'Stable';
-      case 'decreasing': return isEs ? 'En Declive' : 'Decreasing';
-      default:           return isEs ? 'Desconocido': 'Unknown';
-    }
-  }
-
-  String _statusValue(String status, bool isEs) {
-    switch (status) {
-      case 'CR': return isEs ? 'En Peligro Crítico' : 'Critically Endangered';
-      case 'EN': return isEs ? 'En Peligro'         : 'Endangered';
-      case 'VU': return isEs ? 'Vulnerable'         : 'Vulnerable';
-      case 'NT': return isEs ? 'Casi Amenazado'     : 'Near Threatened';
-      case 'LC': return isEs ? 'Menor Preocupación' : 'Least Concern';
-      case 'DD': return isEs ? 'Datos Insuficientes': 'Data Deficient';
-      default:   return isEs ? 'No Evaluado'        : 'Not Evaluated';
-    }
-  }
-
-  Color _statusColor(String status) {
-    switch (status) {
-      case 'CR': return AppColors.statusCR;
-      case 'EN': return AppColors.statusEN;
-      case 'VU': return AppColors.statusVU;
-      case 'NT': return AppColors.statusNT;
-      case 'LC': return AppColors.statusLC;
-      case 'DD': return AppColors.statusDD;
-      default:   return AppColors.statusNE;
-    }
-  }
-
   Widget _buildIucnBadge() {
-    final color = _statusColor(conservationStatus!);
+    final color = conservationStatusColor(conservationStatus!);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
@@ -355,7 +259,7 @@ class SpeciesListCard extends ConsumerWidget {
     required Color labelColor,
     required Color valueColor,
   }) {
-    final color = _statusColor(status);
+    final color = conservationStatusColor(status);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Row(
@@ -395,7 +299,7 @@ class SpeciesListCard extends ConsumerWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _statusValue(status, isEs),
+                  conservationStatusLabel(status, spanish: isEs),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -432,10 +336,10 @@ class SpeciesListCard extends ConsumerWidget {
 
     if (dietType != null) {
       cells.add(_buildCell(
-        icon: _dietIcon(dietType!),
+        icon: dietIcon(dietType!),
         iconColor: iconColor,
         label: isEs ? 'DIETA' : 'DIET',
-        value: _dietValue(dietType!, isEs),
+        value: dietLabel(dietType!, spanish: isEs),
         labelColor: labelColor,
         valueColor: valueColor,
       ));
@@ -443,10 +347,10 @@ class SpeciesListCard extends ConsumerWidget {
 
     if (activityPattern != null) {
       cells.add(_buildCell(
-        icon: _activityIcon(activityPattern!),
+        icon: activityIcon(activityPattern!),
         iconColor: iconColor,
         label: isEs ? 'ACTIVIDAD' : 'ACTIVITY',
-        value: _activityValue(activityPattern!, isEs),
+        value: activityLabel(activityPattern!, spanish: isEs),
         labelColor: labelColor,
         valueColor: valueColor,
       ));
@@ -454,12 +358,12 @@ class SpeciesListCard extends ConsumerWidget {
 
     if (populationTrend != null) {
       cells.add(_buildCell(
-        icon: _trendIcon(populationTrend!),
-        iconColor: _trendColor(populationTrend!),
+        icon: trendIcon(populationTrend!),
+        iconColor: trendColor(populationTrend!),
         label: isEs ? 'TENDENCIA' : 'TREND',
-        value: _trendValue(populationTrend!, isEs),
+        value: trendLabel(populationTrend!, spanish: isEs),
         labelColor: labelColor,
-        valueColor: _trendColor(populationTrend!),
+        valueColor: trendColor(populationTrend!),
       ));
     }
 
