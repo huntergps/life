@@ -45,8 +45,8 @@ dependencies:
   # Camera
   camera: ^0.12.0
 
-  # Google Drive — export training data from admin panel
-  google_sign_in: ^6.2.2
+  # ZIP export for ML training data
+  archive: ^4.0.7
 
   # AI - Offline on-device species identification (open source, no Google deps)
   tflite_flutter: ^0.12.1

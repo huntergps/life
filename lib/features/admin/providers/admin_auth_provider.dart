@@ -5,63 +5,66 @@ import 'package:galapagos_wildlife/bootstrap.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 
-/// Cached admin status — re-checks automatically on login/logout.
-final _adminCheckProvider = FutureProvider<bool>((ref) async {
-  // Watch auth state so this re-runs on login/logout
+// ── Internal: fetch all roles from server ────────────────────────────────────
+
+final _rolesCheckProvider = FutureProvider<Set<String>>((ref) async {
   ref.watch(authStateProvider);
   final user = Supabase.instance.client.auth.currentUser;
-  if (user == null) return false;
-
+  if (user == null) return const {};
   try {
-    final response = await Supabase.instance.client
-        .from('admin_users')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-    return response != null;
+    final data = await Supabase.instance.client.rpc('get_user_roles');
+    return (data as List<dynamic>).map((e) => e as String).toSet();
   } catch (e) {
-    AppLogger.warning('Admin check failed (offline?)', e);
-    return false;
+    AppLogger.warning('Roles check failed (offline?)', e);
+    return const {};
   }
 });
 
-/// Keeps the last known value so UI never flickers.
-/// Initialized from SharedPreferences for offline persistence.
-/// Cache expires after 30 minutes to force a re-check with the server.
-final _adminCacheProvider = StateProvider<bool?>((ref) {
+// ── Internal: read cached roles from SharedPreferences ───────────────────────
+
+Set<String> _cachedRoles() {
   final prefs = Bootstrap.prefs;
-  final cachedAt = prefs.getInt('admin_status_timestamp');
+  final cachedAt = prefs.getInt('roles_cache_ts');
   if (cachedAt != null) {
     final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
     if (age > 30 * 60 * 1000) {
-      // Cache expired — remove stale data so we re-fetch from server.
-      prefs.remove('is_admin');
-      prefs.remove('admin_status_timestamp');
-      return null;
+      prefs.remove('user_roles');
+      prefs.remove('roles_cache_ts');
+      return {};
     }
   }
-  return prefs.getBool('is_admin');
-});
+  final stored = prefs.getString('user_roles') ?? '';
+  return stored.isEmpty ? {} : stored.split(',').toSet();
+}
 
-final isAdminProvider = Provider<AsyncValue<bool>>((ref) {
-  final asyncResult = ref.watch(_adminCheckProvider);
-  final cache = ref.watch(_adminCacheProvider);
+final _rolesCacheProvider = StateProvider<Set<String>?>((ref) => _cachedRoles());
+
+// ── Public: current user's role set ──────────────────────────────────────────
+//
+// Returns AsyncValue<Set<String>> — e.g. {'admin', 'editor'}.
+// Stays at loading until the first server fetch completes; uses cached value
+// in the meantime so the UI never flickers.
+
+final userRolesProvider = Provider<AsyncValue<Set<String>>>((ref) {
+  final asyncResult = ref.watch(_rolesCheckProvider);
+  final cache = ref.watch(_rolesCacheProvider);
 
   return asyncResult.when(
-    data: (value) {
-      // Update cache in memory + SharedPreferences (with timestamp).
+    data: (roles) {
       Future.microtask(() {
-        ref.read(_adminCacheProvider.notifier).state = value;
-        Bootstrap.prefs.setBool('is_admin', value);
+        ref.read(_rolesCacheProvider.notifier).state = roles;
+        Bootstrap.prefs.setString('user_roles', roles.join(','));
         Bootstrap.prefs.setInt(
-          'admin_status_timestamp',
+          'roles_cache_ts',
           DateTime.now().millisecondsSinceEpoch,
         );
+        // Legacy key used by the router guard (synchronous check on cold start)
+        Bootstrap.prefs.setBool('is_admin', roles.contains('admin'));
+        Bootstrap.prefs.setBool('is_staff', roles.isNotEmpty);
       });
-      return AsyncValue.data(value);
+      return AsyncValue.data(roles);
     },
     loading: () {
-      // Return cached value instantly if available
       if (cache != null) return AsyncValue.data(cache);
       return const AsyncValue.loading();
     },
@@ -71,3 +74,31 @@ final isAdminProvider = Provider<AsyncValue<bool>>((ref) {
     },
   );
 });
+
+// ── Convenience role checks ───────────────────────────────────────────────────
+//
+// Admin inherits all lower-tier permissions (editor + curator).
+
+final isAdminProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData((r) => r.contains('admin')));
+
+final isEditorProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData(
+        (r) => r.contains('editor') || r.contains('admin')));
+
+final isCuratorProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData(
+        (r) => r.contains('curator') || r.contains('admin')));
+
+final isStaffProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData((r) => r.isNotEmpty));
+
+// ── Role invalidation helper ──────────────────────────────────────────────────
+//
+// Call after granting/revoking a role so providers re-fetch from server.
+
+void invalidateRoles(Ref ref) {
+  Bootstrap.prefs.remove('user_roles');
+  Bootstrap.prefs.remove('roles_cache_ts');
+  ref.invalidate(_rolesCheckProvider);
+}

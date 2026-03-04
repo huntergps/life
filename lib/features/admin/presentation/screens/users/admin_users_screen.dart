@@ -231,11 +231,15 @@ class _UserCard extends StatelessWidget {
             spacing: 6,
             children: [
               if (user.isAdmin)
-                _Badge(label: 'Administrador', color: AppColors.primary),
+                _Badge(label: 'Admin', color: AppColors.primary),
+              if (user.isEditor)
+                _Badge(label: 'Editor', color: Colors.indigo),
+              if (user.isCurator)
+                _Badge(label: 'Curador', color: Colors.teal),
               if (user.sightingsCount > 0)
                 _Badge(
                   label: '${user.sightingsCount} avistamientos',
-                  color: Colors.teal,
+                  color: Colors.grey,
                 ),
             ],
           ),
@@ -434,15 +438,18 @@ class _TableRow extends StatelessWidget {
                 flex: 2,
                 child: Wrap(
                   spacing: 4,
+                  runSpacing: 4,
                   children: [
                     if (user.isAdmin)
-                      _Badge(
-                          label: 'Administrador',
-                          color: AppColors.primary),
+                      _Badge(label: 'Admin', color: AppColors.primary),
+                    if (user.isEditor)
+                      _Badge(label: 'Editor', color: Colors.indigo),
+                    if (user.isCurator)
+                      _Badge(label: 'Curador', color: Colors.teal),
                     if (user.sightingsCount > 0)
                       _Badge(
                         label: '${user.sightingsCount}',
-                        color: Colors.teal,
+                        color: Colors.grey,
                         icon: Icons.visibility_outlined,
                       ),
                   ],
@@ -752,38 +759,47 @@ class _UserDetailSheet extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          // Admin status
+          // Role management
           if (!isSelf) ...[
             const Divider(),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  user.isAdmin ? Icons.admin_panel_settings : Icons.person_outline,
-                  color: user.isAdmin ? AppColors.primary : Colors.grey,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Acceso de administrador',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        user.isAdmin
-                            ? 'Puede gestionar todo el contenido del app'
-                            : 'Solo tiene acceso de usuario regular',
-                        style: TextStyle(
-                            fontSize: 13,
-                            color: isDark ? Colors.white54 : Colors.black54),
-                      ),
-                    ],
-                  ),
-                ),
-                _AdminToggle(user: user, isDark: isDark, ref: ref),
-              ],
+            const Text('Roles',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+            const SizedBox(height: 12),
+            _RoleRow(
+              icon: Icons.admin_panel_settings_outlined,
+              label: 'Administrador',
+              description: 'Gestiona todo el contenido y aprueba propuestas',
+              hasRole: user.isAdmin,
+              role: 'admin',
+              userId: user.id,
+              isSelf: isSelf,
+              isDark: isDark,
+              ref: ref,
+            ),
+            const SizedBox(height: 8),
+            _RoleRow(
+              icon: Icons.edit_note_outlined,
+              label: 'Editor',
+              description: 'Propone cambios en la info de especies',
+              hasRole: user.isEditor,
+              role: 'editor',
+              userId: user.id,
+              isSelf: false,
+              isDark: isDark,
+              ref: ref,
+            ),
+            const SizedBox(height: 8),
+            _RoleRow(
+              icon: Icons.science_outlined,
+              label: 'Curador',
+              description: 'Revisa propuestas y valida correcciones de IA',
+              hasRole: user.isCurator,
+              role: 'curator',
+              userId: user.id,
+              isSelf: false,
+              isDark: isDark,
+              ref: ref,
             ),
           ],
         ],
@@ -829,6 +845,95 @@ class _StatItem extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Role row for the edit sheet ───────────────────────────────────────────────
+
+class _RoleRow extends StatefulWidget {
+  final IconData icon;
+  final String label;
+  final String description;
+  final bool hasRole;
+  final String role;
+  final String userId;
+  final bool isSelf;
+  final bool isDark;
+  final WidgetRef ref;
+
+  const _RoleRow({
+    required this.icon,
+    required this.label,
+    required this.description,
+    required this.hasRole,
+    required this.role,
+    required this.userId,
+    required this.isSelf,
+    required this.isDark,
+    required this.ref,
+  });
+
+  @override
+  State<_RoleRow> createState() => _RoleRowState();
+}
+
+class _RoleRowState extends State<_RoleRow> {
+  bool _loading = false;
+
+  Future<void> _toggle() async {
+    setState(() => _loading = true);
+    try {
+      if (widget.hasRole) {
+        await adminRevokeRole(widget.userId, widget.role);
+      } else {
+        await adminGrantRole(widget.userId, widget.role);
+      }
+      widget.ref.invalidate(adminUsersProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(widget.icon,
+            color: widget.hasRole ? AppColors.primary : Colors.grey, size: 22),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.label,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text(widget.description,
+                  style: TextStyle(
+                      fontSize: 12,
+                      color: widget.isDark ? Colors.white54 : Colors.black54)),
+            ],
+          ),
+        ),
+        if (_loading)
+          const SizedBox(
+              width: 36,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2))
+        else
+          Switch(
+            value: widget.hasRole,
+            onChanged: widget.isSelf ? null : (_) => _toggle(),
+            activeColor: AppColors.primary,
+          ),
+      ],
     );
   }
 }

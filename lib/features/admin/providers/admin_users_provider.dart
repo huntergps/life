@@ -13,6 +13,7 @@ class AdminUserRecord {
   final String? countryCode;
   final bool isAdmin;
   final int sightingsCount;
+  final List<String> roles;
 
   const AdminUserRecord({
     required this.id,
@@ -25,7 +26,11 @@ class AdminUserRecord {
     this.countryCode,
     required this.isAdmin,
     required this.sightingsCount,
+    this.roles = const [],
   });
+
+  bool get isEditor => roles.contains('editor');
+  bool get isCurator => roles.contains('curator');
 
   String get nameOrEmail => displayName?.isNotEmpty == true ? displayName! : email;
 
@@ -44,6 +49,9 @@ class AdminUserRecord {
         countryCode: m['country_code'] as String?,
         isAdmin: (m['is_admin'] as bool?) ?? false,
         sightingsCount: (m['sightings_count'] as int?) ?? 0,
+        roles: m['roles'] == null
+            ? const []
+            : List<String>.from(m['roles'] as List),
       );
 }
 
@@ -65,6 +73,18 @@ Future<void> adminGrantAdmin(String userId) async {
 Future<void> adminRevokeAdmin(String userId) async {
   await Supabase.instance.client
       .rpc('revoke_admin', params: {'target_user_id': userId});
+}
+
+/// Grants any role ('admin', 'editor', 'curator') to [userId].
+Future<void> adminGrantRole(String userId, String role) async {
+  await Supabase.instance.client
+      .rpc('grant_role', params: {'target_user_id': userId, 'target_role': role});
+}
+
+/// Revokes any role from [userId].
+Future<void> adminRevokeRole(String userId, String role) async {
+  await Supabase.instance.client
+      .rpc('revoke_role', params: {'target_user_id': userId, 'target_role': role});
 }
 
 /// Sends an email invitation via the `invite-user` Edge Function.

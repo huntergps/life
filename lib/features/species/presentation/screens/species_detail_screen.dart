@@ -13,8 +13,11 @@ import 'package:galapagos_wildlife/brick/models/species_reference.model.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:galapagos_wildlife/brick/models/species.model.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
+import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
+import 'package:galapagos_wildlife/features/editorial/presentation/sheets/species_proposal_form_sheet.dart';
 import '../../providers/species_detail_provider.dart';
 import '../../providers/species_sounds_provider.dart';
 import '../widgets/quick_facts_row.dart';
@@ -151,6 +154,17 @@ class _PhoneDetail extends StatelessWidget {
                 ),
                 tooltip: isSeen ? context.t.species.markAsNotSeen : context.t.species.markAsSeen,
                 onPressed: () => toggleSpeciesSeen(ref, speciesId),
+              );
+            }),
+            // Propose-edit button: only visible to editors and admins
+            Consumer(builder: (context, ref, _) {
+              final isEditor = ref.watch(isEditorProvider).asData?.value ?? false;
+              if (!isEditor) return const SizedBox.shrink();
+              return IconButton(
+                icon: const Icon(Icons.edit_note_outlined),
+                tooltip: 'Proponer cambio',
+                onPressed: () => showSpeciesProposalFormSheet(
+                    context, species as Species),
               );
             }),
           ],
