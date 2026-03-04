@@ -4,8 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
-import '../widgets/proposal_status_chip.dart';
-import 'proposal_detail_sheet.dart';
 
 class CuratorScreen extends ConsumerStatefulWidget {
   const CuratorScreen({super.key});
@@ -20,7 +18,7 @@ class _CuratorScreenState extends ConsumerState<CuratorScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -31,11 +29,8 @@ class _CuratorScreenState extends ConsumerState<CuratorScreen>
 
   @override
   Widget build(BuildContext context) {
-    final proposalsAsync = ref.watch(pendingProposalsProvider);
-    final feedbackAsync  = ref.watch(pendingFeedbackProvider);
-
-    final proposalCount = proposalsAsync.asData?.value.length;
-    final feedbackCount  = feedbackAsync.asData?.value.length;
+    final feedbackAsync = ref.watch(pendingFeedbackProvider);
+    final feedbackCount = feedbackAsync.asData?.value.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +40,6 @@ class _CuratorScreenState extends ConsumerState<CuratorScreen>
             icon: const Icon(Icons.refresh),
             tooltip: 'Actualizar',
             onPressed: () {
-              ref.invalidate(pendingProposalsProvider);
               ref.invalidate(pendingFeedbackProvider);
               ref.invalidate(validatedFeedbackProvider);
             },
@@ -54,14 +48,6 @@ class _CuratorScreenState extends ConsumerState<CuratorScreen>
         bottom: TabBar(
           controller: _tabs,
           tabs: [
-            Tab(
-              icon: Badge(
-                isLabelVisible: proposalCount != null && proposalCount > 0,
-                label: Text('$proposalCount'),
-                child: const Icon(Icons.rate_review_outlined),
-              ),
-              text: 'Propuestas',
-            ),
             Tab(
               icon: Badge(
                 isLabelVisible: feedbackCount != null && feedbackCount > 0,
@@ -80,233 +66,11 @@ class _CuratorScreenState extends ConsumerState<CuratorScreen>
       body: TabBarView(
         controller: _tabs,
         children: const [
-          _ProposalsTab(),
           _PendingFeedbackTab(),
           _HistoryTab(),
         ],
       ),
     );
-  }
-}
-
-// ── Proposals tab ─────────────────────────────────────────────────────────────
-
-class _ProposalsTab extends ConsumerWidget {
-  const _ProposalsTab();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(pendingProposalsProvider);
-    return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => _ErrorView(
-          error: e,
-          onRetry: () => ref.invalidate(pendingProposalsProvider)),
-      data: (proposals) {
-        if (proposals.isEmpty) {
-          return const Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.inbox_outlined, size: 72, color: Colors.grey),
-                SizedBox(height: 16),
-                Text('Sin propuestas pendientes',
-                    style: TextStyle(fontSize: 18, color: Colors.grey)),
-              ],
-            ),
-          );
-        }
-        return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(pendingProposalsProvider),
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: proposals.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 10),
-            itemBuilder: (_, i) =>
-                _CuratorProposalTile(proposal: proposals[i], ref: ref),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _CuratorProposalTile extends StatelessWidget {
-  final Map<String, dynamic> proposal;
-  final WidgetRef ref;
-  const _CuratorProposalTile({required this.proposal, required this.ref});
-
-  @override
-  Widget build(BuildContext context) {
-    final species = proposal['species'] as Map<String, dynamic>?;
-    final speciesName = species?['common_name_es'] as String? ??
-        'Especie #${proposal['species_id']}';
-    final changes = proposal['changes'] as Map<String, dynamic>? ?? {};
-    final editorNotes = proposal['editor_notes'] as String?;
-    final curatorStatus =
-        proposal['curator_status'] as String? ?? 'pending_review';
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(speciesName,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 17)),
-                      const SizedBox(height: 2),
-                      Text(
-                        '${changes.length} campo(s): ${changes.keys.join(', ')}',
-                        style: TextStyle(
-                            color: Colors.grey[600], fontSize: 12),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                CuratorStatusBadge(status: curatorStatus),
-              ],
-            ),
-            if (editorNotes != null && editorNotes.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withValues(alpha: 0.07),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text('Editor: $editorNotes',
-                    style: const TextStyle(fontSize: 13),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis),
-              ),
-            ],
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () =>
-                      showProposalDetailSheet(context, proposal),
-                  child: const Text('Ver diff'),
-                ),
-                const Spacer(),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.flag_outlined,
-                      size: 16, color: Colors.orange),
-                  label: const Text('Observar',
-                      style: TextStyle(color: Colors.orange)),
-                  style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.orange)),
-                  onPressed: () => _review(context, 'curator_flagged'),
-                ),
-                const SizedBox(width: 8),
-                FilledButton.icon(
-                  icon: const Icon(Icons.check_circle_outline, size: 16),
-                  label: const Text('Aprobar'),
-                  style: FilledButton.styleFrom(
-                      backgroundColor: Colors.teal),
-                  onPressed: () => _review(context, 'curator_approved'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _review(BuildContext context, String status) async {
-    final notesCtrl = TextEditingController();
-    final isApproval = status == 'curator_approved';
-    final notes = await showDialog<String?>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(isApproval
-            ? 'Aprobar científicamente'
-            : 'Marcar con observación'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(isApproval
-                ? 'El cambio es científicamente correcto. El admin lo verá para aprobación final.'
-                : 'Hay algo que revisar. Explica la observación para el admin.'),
-            const SizedBox(height: 12),
-            TextField(
-              controller: notesCtrl,
-              autofocus: !isApproval,
-              decoration: InputDecoration(
-                hintText: isApproval
-                    ? 'Notas adicionales (opcional)...'
-                    : 'Observación científica...',
-                border: const OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: const Text('Cancelar')),
-          FilledButton(
-            style: FilledButton.styleFrom(
-                backgroundColor:
-                    isApproval ? Colors.teal : Colors.orange),
-            onPressed: () =>
-                Navigator.pop(context, notesCtrl.text.trim()),
-            child: Text(isApproval ? 'Confirmar' : 'Enviar observación'),
-          ),
-        ],
-      ),
-    );
-    if (notes == null) return;
-    if (!isApproval && notes.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('La observación no puede estar vacía.')),
-        );
-      }
-      return;
-    }
-    try {
-      await ProposalService.curatorReview(
-        proposal['id'] as int,
-        status,
-        notes: notes.isEmpty ? null : notes,
-      );
-      ref.invalidate(pendingProposalsProvider);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(isApproval
-                ? 'Propuesta marcada como aprobada por curador.'
-                : 'Observación enviada al admin.'),
-            backgroundColor:
-                isApproval ? Colors.teal : Colors.orange,
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: AppColors.error),
-        );
-      }
-    }
   }
 }
 
@@ -525,12 +289,12 @@ class _FeedbackCard extends StatelessWidget {
                 ],
               ),
             ),
-          Expanded(
+          IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
-                  width: 120,
+                  width: 110,
                   child: _Thumbnail(url: photoUrl, isDark: isDark),
                 ),
                 Expanded(
@@ -539,6 +303,7 @@ class _FeedbackCard extends StatelessWidget {
                         const EdgeInsets.fromLTRB(14, 12, 14, 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         _SpeciesRow(
                           icon: Icons.warning_amber_outlined,
@@ -556,7 +321,7 @@ class _FeedbackCard extends StatelessWidget {
                           scientific: correctSci,
                         ),
                         if (!showUndo) ...[
-                          const Spacer(),
+                          const SizedBox(height: 8),
                           const Text(
                             '¿La corrección es científicamente correcta?',
                             style: TextStyle(
