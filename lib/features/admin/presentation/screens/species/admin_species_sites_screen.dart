@@ -8,7 +8,7 @@ import '../../../providers/admin_visit_site_provider.dart';
 import '../../../providers/admin_category_provider.dart';
 import '../../widgets/admin_delete_dialog.dart';
 
-final _allSpeciesSitesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final _allSpeciesSitesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(adminSupabaseServiceProvider);
   return service.getSpeciesSites();
 });

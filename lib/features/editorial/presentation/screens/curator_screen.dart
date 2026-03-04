@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
+import '../widgets/proposal_status_chip.dart';
 import 'proposal_detail_sheet.dart';
 
 class CuratorScreen extends ConsumerStatefulWidget {
@@ -173,7 +174,7 @@ class _CuratorProposalTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _StatusChip(curatorStatus),
+                CuratorStatusBadge(status: curatorStatus),
               ],
             ),
             if (editorNotes != null && editorNotes.isNotEmpty) ...[
@@ -306,32 +307,6 @@ class _CuratorProposalTile extends StatelessWidget {
         );
       }
     }
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String status;
-  const _StatusChip(this.status);
-  @override
-  Widget build(BuildContext context) {
-    final (label, color, icon) = switch (status) {
-      'curator_approved' =>
-        ('Aprobado', Colors.teal, Icons.check_circle_outline),
-      'curator_flagged' =>
-        ('Observación', Colors.orange, Icons.flag_outlined),
-      _ => ('Sin revisar', Colors.grey, Icons.hourglass_empty),
-    };
-    return Column(
-      children: [
-        Icon(icon, size: 18, color: color),
-        const SizedBox(height: 2),
-        Text(label,
-            style: TextStyle(
-                fontSize: 10,
-                color: color,
-                fontWeight: FontWeight.bold)),
-      ],
-    );
   }
 }
 

@@ -10,6 +10,7 @@ import '../../../providers/admin_island_provider.dart';
 import '../../../providers/admin_category_provider.dart';
 import '../../../providers/admin_species_provider.dart';
 import '../../widgets/admin_form_field.dart';
+import '../../widgets/admin_form_scaffold.dart';
 import '../../widgets/admin_map_picker.dart';
 
 String _frequencyLabel(BuildContext context, String key) {
@@ -185,82 +186,35 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final islandsAsync = ref.watch(adminIslandsProvider);
 
     if (isEditing) {
       final siteAsync = ref.watch(adminVisitSiteProvider(widget.siteId!));
       return siteAsync.when(
-        loading: () => Scaffold(
-          appBar: AppBar(title: Text(context.t.admin.editItem)),
-          body: const Center(child: CircularProgressIndicator()),
-        ),
-        error: (e, _) => Scaffold(
-          appBar: AppBar(title: Text(context.t.admin.editItem)),
-          body: Center(child: Text('${context.t.common.error}: $e')),
-        ),
+        loading: () => const AdminFormLoadingScaffold(),
+        error: (e, _) => AdminFormLoadingScaffold(error: e),
         data: (data) {
           if (data != null) _populateFields(data);
-          return _buildForm(context, isDark, islandsAsync);
+          return _buildForm(context, islandsAsync);
         },
       );
     }
 
-    return _buildForm(context, isDark, islandsAsync);
+    return _buildForm(context, islandsAsync);
   }
 
-  Widget _buildForm(BuildContext context, bool isDark, AsyncValue<List<Map<String, dynamic>>> islandsAsync) {
-    return PopScope(
-      canPop: !_hasUnsavedChanges,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text(context.t.admin.unsavedChangesTitle),
-              content: Text(context.t.admin.unsavedChangesMessage),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(context.t.common.cancel),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.pop(context);
-                  },
-                  child: Text(context.t.admin.discard),
-                ),
-              ],
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(isEditing ? '${context.t.admin.editItem} ${context.t.admin.visitSites}' : '${context.t.admin.newItem} ${context.t.admin.visitSites}'),
-          backgroundColor: isDark ? AppColors.darkBackground : null,
-          actions: [
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-              )
-            else
-              IconButton(icon: const Icon(Icons.check), tooltip: context.t.common.save, onPressed: _save),
-          ],
-        ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 600;
-            return Form(
-              key: _formKey,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 900),
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
+  Widget _buildForm(BuildContext context, AsyncValue<List<Map<String, dynamic>>> islandsAsync) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isWide = MediaQuery.sizeOf(context).width > 600;
+
+    return AdminFormScaffold(
+      formKey: _formKey,
+      isEditing: isEditing,
+      entityLabel: context.t.admin.visitSites,
+      hasUnsavedChanges: _hasUnsavedChanges,
+      isLoading: _isLoading,
+      onSave: _save,
+      children: [
                       // Island dropdown (optional)
                       islandsAsync.when(
                         loading: () => const Padding(
@@ -274,7 +228,7 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                         data: (islands) => Padding(
                           padding: const EdgeInsets.only(bottom: 16),
                           child: DropdownButtonFormField<int>(
-                            value: _selectedIslandId,
+                            initialValue: _selectedIslandId,
                             decoration: InputDecoration(
                               labelText: context.t.admin.island,
                               hintText: 'Sin isla asignada',
@@ -424,14 +378,7 @@ class _AdminVisitSiteFormScreenState extends ConsumerState<AdminVisitSiteFormScr
                             ? () => ref.invalidate(speciesSitesByVisitSiteProvider(widget.siteId!))
                             : null,
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ),
+      ],
     );
   }
 
@@ -552,7 +499,7 @@ class _ClassificationSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: selectedMonitoringType,
+        initialValue: selectedMonitoringType,
         decoration: InputDecoration(
           labelText: 'Tipo de Monitoreo',
           border: const OutlineInputBorder(),
@@ -582,7 +529,7 @@ class _ClassificationSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: selectedDifficulty,
+        initialValue: selectedDifficulty,
         decoration: InputDecoration(
           labelText: 'Dificultad',
           border: const OutlineInputBorder(),
@@ -612,7 +559,7 @@ class _ClassificationSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: selectedConservationZone,
+        initialValue: selectedConservationZone,
         decoration: InputDecoration(
           labelText: 'Zonificación',
           border: const OutlineInputBorder(),
@@ -643,7 +590,7 @@ class _ClassificationSection extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: selectedPublicUseZone,
+        initialValue: selectedPublicUseZone,
         decoration: InputDecoration(
           labelText: 'Zona Uso Público',
           border: const OutlineInputBorder(),
@@ -1294,7 +1241,7 @@ class _InlineAddSpeciesFormState extends ConsumerState<_InlineAddSpeciesForm> {
               loading: () => const LinearProgressIndicator(),
               error: (e, _) => Text('${context.t.common.error}: $e'),
               data: (species) => DropdownButtonFormField<int>(
-                value: _selectedSpeciesId,
+                initialValue: _selectedSpeciesId,
                 decoration: InputDecoration(
                   labelText: context.t.admin.species,
                   border: const OutlineInputBorder(),
@@ -1324,7 +1271,7 @@ class _InlineAddSpeciesFormState extends ConsumerState<_InlineAddSpeciesForm> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _selectedFrequency,
+                    initialValue: _selectedFrequency,
                     decoration: InputDecoration(
                       labelText: context.t.admin.frequency,
                       border: const OutlineInputBorder(),

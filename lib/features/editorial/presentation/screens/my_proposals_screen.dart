@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
+import '../widgets/proposal_status_chip.dart';
 import 'proposal_detail_sheet.dart';
 
 class MyProposalsScreen extends ConsumerWidget {
@@ -108,7 +109,7 @@ class _ProposalTile extends StatelessWidget {
                           fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
-                  _StatusChip(status: status),
+                  ProposalStatusChip(status: status),
                 ],
               ),
               const SizedBox(height: 6),
@@ -201,32 +202,6 @@ class _ProposalTile extends StatelessWidget {
         );
       }
     }
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String status;
-  const _StatusChip({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    final (label, color) = switch (status) {
-      'pending' => ('Pendiente', Colors.orange),
-      'approved' => ('Aprobado', Colors.green),
-      'rejected' => ('Rechazado', Colors.red),
-      'withdrawn' => ('Retirado', Colors.grey),
-      _ => (status, Colors.grey),
-    };
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Text(label,
-          style: TextStyle(
-              fontSize: 12, fontWeight: FontWeight.bold, color: color)),
-    );
   }
 }
 

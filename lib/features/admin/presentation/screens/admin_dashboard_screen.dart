@@ -11,7 +11,7 @@ import '../widgets/admin_entity_tile.dart';
 
 // ── Dashboard tile counts ──
 
-final _dashboardCountsProvider = FutureProvider<Map<String, int>>((ref) async {
+final _dashboardCountsProvider = FutureProvider.autoDispose<Map<String, int>>((ref) async {
   final service = ref.watch(adminSupabaseServiceProvider);
   final results = await Future.wait([
     service.getActiveCount('species'),
@@ -68,7 +68,7 @@ class DashboardStats {
   });
 }
 
-final _dashboardStatsProvider = FutureProvider<DashboardStats>((ref) async {
+final _dashboardStatsProvider = FutureProvider.autoDispose<DashboardStats>((ref) async {
   final service = ref.watch(adminSupabaseServiceProvider);
   final results = await Future.wait([
     service.getSpeciesCountByCategory(),

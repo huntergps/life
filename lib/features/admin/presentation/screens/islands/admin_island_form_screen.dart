@@ -8,6 +8,7 @@ import '../../../providers/admin_island_provider.dart';
 import '../../../providers/admin_category_provider.dart';
 import '../../../providers/admin_visit_site_provider.dart';
 import '../../widgets/admin_form_field.dart';
+import '../../widgets/admin_form_scaffold.dart';
 import '../../widgets/admin_map_picker.dart';
 
 // Icon mapping for site types
@@ -57,14 +58,20 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
 
   bool get isEditing => widget.islandId != null;
 
+  List<TextEditingController> get _controllers => [
+        _nameEsController,
+        _nameEnController,
+        _areaController,
+        _descEsController,
+        _descEnController,
+      ];
+
   @override
   void initState() {
     super.initState();
-    _nameEsController.addListener(_markDirty);
-    _nameEnController.addListener(_markDirty);
-    _areaController.addListener(_markDirty);
-    _descEsController.addListener(_markDirty);
-    _descEnController.addListener(_markDirty);
+    for (final c in _controllers) {
+      c.addListener(_markDirty);
+    }
   }
 
   void _markDirty() {
@@ -75,16 +82,10 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
 
   @override
   void dispose() {
-    _nameEsController.removeListener(_markDirty);
-    _nameEnController.removeListener(_markDirty);
-    _areaController.removeListener(_markDirty);
-    _descEsController.removeListener(_markDirty);
-    _descEnController.removeListener(_markDirty);
-    _nameEsController.dispose();
-    _nameEnController.dispose();
-    _areaController.dispose();
-    _descEsController.dispose();
-    _descEnController.dispose();
+    for (final c in _controllers) {
+      c.removeListener(_markDirty);
+      c.dispose();
+    }
     super.dispose();
   }
 
@@ -118,10 +119,7 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
             ? null
             : _descEnController.text.trim(),
       };
-
-      if (isEditing) {
-        data['id'] = widget.islandId;
-      }
+      if (isEditing) data['id'] = widget.islandId;
 
       final service = ref.read(adminSupabaseServiceProvider);
       await service.upsertIsland(data);
@@ -135,9 +133,7 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
         context.pop();
       }
     } catch (e) {
-      if (mounted) {
-        ErrorHandler.showError(context, e);
-      }
+      if (mounted) ErrorHandler.showError(context, e);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -145,164 +141,97 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     if (isEditing) {
       final islandAsync = ref.watch(adminIslandProvider(widget.islandId!));
       return islandAsync.when(
-        loading: () => Scaffold(
-          appBar: AppBar(title: Text(context.t.admin.editItem)),
-          body: const Center(child: CircularProgressIndicator()),
-        ),
-        error: (e, _) => Scaffold(
-          appBar: AppBar(title: Text(context.t.admin.editItem)),
-          body: Center(child: Text('${context.t.common.error}: $e')),
-        ),
+        loading: () => const AdminFormLoadingScaffold(),
+        error: (e, _) => AdminFormLoadingScaffold(error: e),
         data: (data) {
           if (data != null) _populateFields(data);
-          return _buildForm(context, isDark);
+          return _buildForm(context);
         },
       );
     }
 
-    return _buildForm(context, isDark);
+    return _buildForm(context);
   }
 
-  Widget _buildForm(BuildContext context, bool isDark) {
-    return PopScope(
-      canPop: !_hasUnsavedChanges,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text(context.t.admin.unsavedChangesTitle),
-              content: Text(context.t.admin.unsavedChangesMessage),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(context.t.common.cancel),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.pop(context);
-                  },
-                  child: Text(context.t.admin.discard),
-                ),
-              ],
-            ),
-          );
-        }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(isEditing ? '${context.t.admin.editItem} ${context.t.admin.islands}' : '${context.t.admin.newItem} ${context.t.admin.islands}'),
-          backgroundColor: isDark ? AppColors.darkBackground : null,
-          actions: [
-            if (_isLoading)
-              const Padding(
-                padding: EdgeInsets.all(16),
-                child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)),
-              )
-            else
-              IconButton(icon: const Icon(Icons.check), tooltip: context.t.common.save, onPressed: _save),
-          ],
-        ),
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 600;
-            return Form(
-              key: _formKey,
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 900),
-                  child: ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      AdminBilingualField(
-                        label: context.t.admin.name,
-                        controllerEs: _nameEsController,
-                        controllerEn: _nameEnController,
-                        required: true,
-                        sideBySide: isWide,
-                      ),
-                      const SizedBox(height: 8),
-                      // Map picker replaces manual lat/lng fields
-                      AdminMapPicker(
-                        initialLatitude: _selectedLat,
-                        initialLongitude: _selectedLng,
-                        onLocationChanged: (record) {
-                          setState(() {
-                            _selectedLat = record.$1;
-                            _selectedLng = record.$2;
-                            if (_initialized) _hasUnsavedChanges = true;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      // Area field (separate from map)
-                      if (isWide)
-                        SizedBox(
-                          width: 200,
-                          child: AdminFormField(
-                            label: context.t.admin.areaKm2,
-                            controller: _areaController,
-                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          ),
-                        )
-                      else
-                        AdminFormField(
-                          label: context.t.admin.areaKm2,
-                          controller: _areaController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        ),
-                      AdminBilingualField(
-                        label: context.t.species.description,
-                        controllerEs: _descEsController,
-                        controllerEn: _descEnController,
-                        maxLines: 4,
-                        sideBySide: isWide,
-                      ),
+  Widget _buildForm(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isWide = MediaQuery.sizeOf(context).width > 600;
 
-                      // ── Visit Sites Section ──
-                      const SizedBox(height: 24),
-                      _buildVisitSitesSection(context, isDark, isWide),
-                    ],
-                  ),
-                ),
-              ),
-            );
+    return AdminFormScaffold(
+      formKey: _formKey,
+      isEditing: isEditing,
+      entityLabel: context.t.admin.islands,
+      hasUnsavedChanges: _hasUnsavedChanges,
+      isLoading: _isLoading,
+      onSave: _save,
+      children: [
+        AdminBilingualField(
+          label: context.t.admin.name,
+          controllerEs: _nameEsController,
+          controllerEn: _nameEnController,
+          required: true,
+          sideBySide: isWide,
+        ),
+        const SizedBox(height: 8),
+        AdminMapPicker(
+          initialLatitude: _selectedLat,
+          initialLongitude: _selectedLng,
+          onLocationChanged: (record) {
+            setState(() {
+              _selectedLat = record.$1;
+              _selectedLng = record.$2;
+              if (_initialized) _hasUnsavedChanges = true;
+            });
           },
         ),
-      ),
+        const SizedBox(height: 8),
+        if (isWide)
+          SizedBox(
+            width: 200,
+            child: AdminFormField(
+              label: context.t.admin.areaKm2,
+              controller: _areaController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            ),
+          )
+        else
+          AdminFormField(
+            label: context.t.admin.areaKm2,
+            controller: _areaController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          ),
+        AdminBilingualField(
+          label: context.t.species.description,
+          controllerEs: _descEsController,
+          controllerEn: _descEnController,
+          maxLines: 4,
+          sideBySide: isWide,
+        ),
+        const SizedBox(height: 24),
+        _buildVisitSitesSection(context, isDark, isWide),
+      ],
     );
   }
 
   Widget _buildVisitSitesSection(BuildContext context, bool isDark, bool isWide) {
-    // For new islands that haven't been saved yet
-    if (!isEditing) {
-      return _buildVisitSitesPlaceholder(isDark);
-    }
+    if (!isEditing) return _buildVisitSitesPlaceholder(context, isDark);
 
     final sitesAsync = ref.watch(visitSitesByIslandProvider(widget.islandId!));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section divider
         Divider(color: isDark ? AppColors.darkBorder : Colors.grey[300]),
         const SizedBox(height: 8),
-
-        // Section header with icon and count
         sitesAsync.when(
-          loading: () => _buildSectionHeader(isDark, null),
-          error: (_, _) => _buildSectionHeader(isDark, null),
-          data: (sites) => _buildSectionHeader(isDark, sites.length),
+          loading: () => _buildSectionHeader(context, isDark, null),
+          error: (_, _) => _buildSectionHeader(context, isDark, null),
+          data: (sites) => _buildSectionHeader(context, isDark, sites.length),
         ),
         const SizedBox(height: 12),
-
-        // Sites list (read-only)
         sitesAsync.when(
           loading: () => const Center(
             child: Padding(
@@ -330,11 +259,11 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
                 )
               else
                 ...sites.map((site) => _ReadOnlySiteCard(
-                  key: ValueKey(site['id']),
-                  site: site,
-                  isDark: isDark,
-                  onTap: () => context.go('/admin/visit-sites/${site['id']}/edit'),
-                )),
+                      key: ValueKey(site['id']),
+                      site: site,
+                      isDark: isDark,
+                      onTap: () => context.go('/admin/visit-sites/${site['id']}/edit'),
+                    )),
             ],
           ),
         ),
@@ -342,13 +271,13 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
     );
   }
 
-  Widget _buildVisitSitesPlaceholder(bool isDark) {
+  Widget _buildVisitSitesPlaceholder(BuildContext context, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Divider(color: isDark ? AppColors.darkBorder : Colors.grey[300]),
         const SizedBox(height: 8),
-        _buildSectionHeader(isDark, null),
+        _buildSectionHeader(context, isDark, null),
         const SizedBox(height: 12),
         Container(
           width: double.infinity,
@@ -363,11 +292,8 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.info_outline,
-                size: 18,
-                color: isDark ? Colors.white54 : Colors.grey[600],
-              ),
+              Icon(Icons.info_outline, size: 18,
+                  color: isDark ? Colors.white54 : Colors.grey[600]),
               const SizedBox(width: 8),
               Text(
                 context.t.admin.saveIslandFirst,
@@ -383,14 +309,11 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
     );
   }
 
-  Widget _buildSectionHeader(bool isDark, int? count) {
+  Widget _buildSectionHeader(BuildContext context, bool isDark, int? count) {
     return Row(
       children: [
-        Icon(
-          Icons.place,
-          color: isDark ? AppColors.primaryLight : AppColors.primary,
-          size: 22,
-        ),
+        Icon(Icons.place,
+            color: isDark ? AppColors.primaryLight : AppColors.primary, size: 22),
         const SizedBox(width: 8),
         Text(
           context.t.admin.visitSitesSection,
@@ -404,7 +327,9 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.primary.withValues(alpha: 0.3) : AppColors.primaryLight.withValues(alpha: 0.2),
+              color: isDark
+                  ? AppColors.primary.withValues(alpha: 0.3)
+                  : AppColors.primaryLight.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
@@ -420,7 +345,6 @@ class _AdminIslandFormScreenState extends ConsumerState<AdminIslandFormScreen> {
       ],
     );
   }
-
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -445,7 +369,11 @@ class _ReadOnlySiteCard extends StatelessWidget {
     final icon = _siteTypeIcons[siteType] ?? Icons.place;
     final nameEn = site['name_en'] as String? ?? '';
     final nameEs = site['name_es'] as String? ?? '';
-    final siteName = nameEn.isNotEmpty ? nameEn : nameEs.isNotEmpty ? nameEs : context.t.admin.unnamed;
+    final siteName = nameEn.isNotEmpty
+        ? nameEn
+        : nameEs.isNotEmpty
+            ? nameEs
+            : context.t.admin.unnamed;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -463,23 +391,24 @@ class _ReadOnlySiteCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(
             children: [
-              Icon(icon, color: isDark ? AppColors.primaryLight : AppColors.primary, size: 22),
+              Icon(icon,
+                  color: isDark ? AppColors.primaryLight : AppColors.primary,
+                  size: 22),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      siteName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : null,
-                      ),
-                    ),
+                    Text(siteName,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : null,
+                        )),
                     if (siteType.isNotEmpty)
                       Container(
                         margin: const EdgeInsets.only(top: 4),
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 1),
                         decoration: BoxDecoration(
                           color: isDark
                               ? AppColors.primary.withValues(alpha: 0.2)
@@ -490,18 +419,18 @@ class _ReadOnlySiteCard extends StatelessWidget {
                           _siteTypeLabel(context, siteType),
                           style: TextStyle(
                             fontSize: 11,
-                            color: isDark ? AppColors.primaryLight : AppColors.primaryDark,
+                            color: isDark
+                                ? AppColors.primaryLight
+                                : AppColors.primaryDark,
                           ),
                         ),
                       ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                size: 20,
-                color: isDark ? Colors.white38 : Colors.grey[400],
-              ),
+              Icon(Icons.chevron_right,
+                  size: 20,
+                  color: isDark ? Colors.white38 : Colors.grey[400]),
             ],
           ),
         ),

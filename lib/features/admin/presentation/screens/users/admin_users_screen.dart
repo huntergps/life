@@ -636,7 +636,7 @@ class _AdminToggleState extends State<_AdminToggle> {
     return Switch(
       value: widget.user.isAdmin,
       onChanged: (_) => _toggle(),
-      activeColor: AppColors.accentOrange,
+      activeThumbColor: AppColors.accentOrange,
     );
   }
 }
@@ -932,7 +932,7 @@ class _RoleRowState extends State<_RoleRow> {
           Switch(
             value: widget.hasRole,
             onChanged: widget.isSelf ? null : (_) => _toggle(),
-            activeColor: AppColors.primary,
+            activeThumbColor: AppColors.primary,
           ),
       ],
     );

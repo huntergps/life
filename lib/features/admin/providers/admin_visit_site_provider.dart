@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'admin_category_provider.dart';
 
-final adminVisitSitesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminVisitSitesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(adminSupabaseServiceProvider);
   return service.getVisitSites();
 });
 
-final deletedVisitSitesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final deletedVisitSitesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.read(adminSupabaseServiceProvider);
   return service.getDeletedVisitSites();
 });
@@ -27,17 +27,17 @@ final speciesSitesByVisitSiteProvider = FutureProvider.family<List<Map<String, d
   return service.getSpeciesSitesByVisitSite(visitSiteId);
 });
 
-final siteTypeCatalogProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final siteTypeCatalogProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.read(adminSupabaseServiceProvider);
   return service.getSiteTypeCatalog();
 });
 
-final siteModalityCatalogProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final siteModalityCatalogProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.read(adminSupabaseServiceProvider);
   return service.getSiteModalityCatalog();
 });
 
-final siteActivityCatalogProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final siteActivityCatalogProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.read(adminSupabaseServiceProvider);
   return service.getSiteActivityCatalog();
 });

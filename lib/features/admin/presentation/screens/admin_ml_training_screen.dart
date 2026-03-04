@@ -27,7 +27,7 @@ class _FeedbackStats {
   });
 }
 
-final _feedbackStatsProvider = FutureProvider<_FeedbackStats>((ref) async {
+final _feedbackStatsProvider = FutureProvider.autoDispose<_FeedbackStats>((ref) async {
   final rows = await Supabase.instance.client
       .from('species_recognition_feedback')
       .select('is_correction, photo_url, is_curator_validated, curator_validated_at')
@@ -218,7 +218,7 @@ class _AdminMlTrainingScreenState extends ConsumerState<AdminMlTrainingScreen> {
                           color: isDark ? Colors.white54 : Colors.grey[600]),
                     ),
                     value: _incrementalMode,
-                    activeColor: primary,
+                    activeThumbColor: primary,
                     onChanged: _exporting
                         ? null
                         : (v) => setState(() {

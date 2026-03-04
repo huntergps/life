@@ -397,7 +397,7 @@ class _AdminVisitSiteListScreenState extends ConsumerState<AdminVisitSiteListScr
         final monType = site['monitoring_type'] as String?;
         final subtitleParts = [
           if (site['name_en'] != null && (site['name_en'] as String).isNotEmpty) site['name_en'] as String,
-          if (monType != null) monType,
+          ?monType,
         ];
         return AdminActiveListTile(
           title: site['name_es'] ?? site['name_en'] ?? '',

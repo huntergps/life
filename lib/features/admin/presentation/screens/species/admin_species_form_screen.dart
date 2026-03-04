@@ -855,7 +855,7 @@ class _TabGeneralState extends ConsumerState<_TabGeneral>
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        value: p._populationTrend,
+        initialValue: p._populationTrend,
         decoration: InputDecoration(
           labelText: context.t.admin.populationTrend,
           border: const OutlineInputBorder(),
@@ -924,7 +924,7 @@ class _TabGeneralState extends ConsumerState<_TabGeneral>
         const SizedBox(height: 8),
         // Endemism level dropdown
         DropdownButtonFormField<String>(
-          value: p._endemismLevel,
+          initialValue: p._endemismLevel,
           decoration: InputDecoration(
             labelText: context.t.admin.endemismLevel,
             border: const OutlineInputBorder(),
@@ -1335,7 +1335,7 @@ class _TabDetallesState extends State<_TabDetalles>
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: DropdownButtonFormField<String>(
-            value: p._socialStructure,
+            initialValue: p._socialStructure,
             decoration: InputDecoration(
               labelText: context.t.admin.socialStructure,
               border: const OutlineInputBorder(),
@@ -1365,7 +1365,7 @@ class _TabDetallesState extends State<_TabDetalles>
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: DropdownButtonFormField<String>(
-            value: p._activityPattern,
+            initialValue: p._activityPattern,
             decoration: InputDecoration(
               labelText: context.t.admin.activityPattern,
               border: const OutlineInputBorder(),
@@ -1393,7 +1393,7 @@ class _TabDetallesState extends State<_TabDetalles>
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: DropdownButtonFormField<String>(
-            value: p._dietType,
+            initialValue: p._dietType,
             decoration: InputDecoration(
               labelText: context.t.admin.dietType,
               border: const OutlineInputBorder(),

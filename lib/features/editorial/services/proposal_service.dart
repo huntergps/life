@@ -156,23 +156,23 @@ class ProposalService {
 // ── Riverpod providers ────────────────────────────────────────────────────────
 
 final myProposalsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final user = Supabase.instance.client.auth.currentUser;
   if (user == null) return [];
   return ProposalService.fetchMyProposals();
 });
 
 final pendingProposalsProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   return ProposalService.fetchPendingProposals();
 });
 
 final pendingFeedbackProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   return ProposalService.fetchPendingFeedback();
 });
 
 final validatedFeedbackProvider =
-    FutureProvider<List<Map<String, dynamic>>>((ref) async {
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   return ProposalService.fetchValidatedFeedback();
 });

@@ -5,12 +5,12 @@ final adminSupabaseServiceProvider = Provider<AdminSupabaseService>((ref) {
   return AdminSupabaseService();
 });
 
-final adminCategoriesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminCategoriesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(adminSupabaseServiceProvider);
   return service.getCategories();
 });
 
-final deletedCategoriesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final deletedCategoriesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.read(adminSupabaseServiceProvider);
   return service.getDeletedCategories();
 });

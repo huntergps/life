@@ -56,7 +56,7 @@ class AdminUserRecord {
 }
 
 /// Fetches all users via the `get_all_users()` RPC (admin-only).
-final adminUsersProvider = FutureProvider<List<AdminUserRecord>>((ref) async {
+final adminUsersProvider = FutureProvider.autoDispose<List<AdminUserRecord>>((ref) async {
   final data = await Supabase.instance.client.rpc('get_all_users');
   return (data as List)
       .map((r) => AdminUserRecord.fromMap(r as Map<String, dynamic>))

@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'admin_category_provider.dart';
 
-final adminIslandsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final adminIslandsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.watch(adminSupabaseServiceProvider);
   return service.getIslands();
 });
 
-final deletedIslandsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+final deletedIslandsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
   final service = ref.read(adminSupabaseServiceProvider);
   return service.getDeletedIslands();
 });
