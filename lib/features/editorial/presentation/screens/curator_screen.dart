@@ -3,219 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
-import 'proposal_detail_sheet.dart';
 
-class CuratorScreen extends ConsumerStatefulWidget {
+class CuratorScreen extends ConsumerWidget {
   const CuratorScreen({super.key});
-  @override
-  ConsumerState<CuratorScreen> createState() => _CuratorScreenState();
-}
-
-class _CuratorScreenState extends ConsumerState<CuratorScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabs;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabs = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Panel del curador'),
-        bottom: TabBar(
-          controller: _tabs,
-          tabs: const [
-            Tab(icon: Icon(Icons.edit_document), text: 'Propuestas'),
-            Tab(icon: Icon(Icons.psychology_outlined), text: 'IA Feedback'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabs,
-        children: const [
-          _CuratorProposalsTab(),
-          _CuratorFeedbackTab(),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Tab 1: Pending proposals ──────────────────────────────────────────────────
-
-class _CuratorProposalsTab extends ConsumerWidget {
-  const _CuratorProposalsTab();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(pendingProposalsProvider);
-    return async.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => _ErrorRetry(error: e, onRetry: () => ref.invalidate(pendingProposalsProvider)),
-      data: (proposals) {
-        if (proposals.isEmpty) {
-          return const _EmptyState(
-            icon: Icons.check_circle_outline,
-            message: 'No hay propuestas pendientes de revisión.',
-          );
-        }
-        return RefreshIndicator(
-          onRefresh: () async => ref.invalidate(pendingProposalsProvider),
-          child: ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: proposals.length,
-            separatorBuilder: (_, _) => const SizedBox(height: 8),
-            itemBuilder: (_, i) =>
-                _CuratorProposalTile(proposal: proposals[i], ref: ref),
-          ),
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Validar correcciones de IA'),
+      ),
+      body: const _CuratorFeedbackTab(),
     );
   }
 }
 
-class _CuratorProposalTile extends StatelessWidget {
-  final Map<String, dynamic> proposal;
-  final WidgetRef ref;
-  const _CuratorProposalTile({required this.proposal, required this.ref});
-
-  @override
-  Widget build(BuildContext context) {
-    final curatorStatus = proposal['curator_status'] as String? ?? 'pending_review';
-    final species = proposal['species'] as Map<String, dynamic>?;
-    final speciesName = species?['common_name_es'] as String? ?? 'Especie #${proposal['species_id']}';
-    final changes = proposal['changes'] as Map<String, dynamic>? ?? {};
-    final reviewed = curatorStatus != 'pending_review';
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(speciesName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                if (reviewed)
-                  _CuratorStatusChip(curatorStatus),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              '${changes.length} campo(s) modificado(s): ${changes.keys.join(', ')}',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-            if (proposal['editor_notes'] != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Editor: ${proposal['editor_notes']}',
-                style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () =>
-                      showProposalDetailSheet(context, proposal),
-                  child: const Text('Ver diff'),
-                ),
-                const Spacer(),
-                if (!reviewed) ...[
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.flag_outlined, size: 16,
-                        color: Colors.orange),
-                    label: const Text('Observar',
-                        style: TextStyle(color: Colors.orange)),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Colors.orange),
-                    ),
-                    onPressed: () =>
-                        _review(context, 'curator_flagged'),
-                  ),
-                  const SizedBox(width: 8),
-                  FilledButton.icon(
-                    icon: const Icon(Icons.check, size: 16),
-                    label: const Text('Aprobar'),
-                    style: FilledButton.styleFrom(
-                        backgroundColor: Colors.teal),
-                    onPressed: () =>
-                        _review(context, 'curator_approved'),
-                  ),
-                ],
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _review(BuildContext context, String status) async {
-    final notesCtrl = TextEditingController();
-    final notes = await showDialog<String?>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(status == 'curator_approved'
-            ? 'Aprobar propuesta'
-            : 'Marcar con observaciones'),
-        content: TextField(
-          controller: notesCtrl,
-          decoration: const InputDecoration(
-            hintText: 'Notas científicas (opcional)...',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: const Text('Cancelar')),
-          FilledButton(
-              onPressed: () => Navigator.pop(context, notesCtrl.text.trim()),
-              child: const Text('Confirmar')),
-        ],
-      ),
-    );
-    if (notes == null) return;
-    try {
-      await ProposalService.curatorReview(
-        proposal['id'] as int,
-        status,
-        notes: notes.isEmpty ? null : notes,
-      );
-      ref.invalidate(pendingProposalsProvider);
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error: $e'),
-              backgroundColor: AppColors.error),
-        );
-      }
-    }
-  }
-}
-
-// ── Tab 2: AI Feedback validation ─────────────────────────────────────────────
+// ── AI Feedback validation ─────────────────────────────────────────────────────
 
 class _CuratorFeedbackTab extends ConsumerWidget {
   const _CuratorFeedbackTab();
@@ -225,7 +28,8 @@ class _CuratorFeedbackTab extends ConsumerWidget {
     final async = ref.watch(pendingFeedbackProvider);
     return async.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => _ErrorRetry(error: e, onRetry: () => ref.invalidate(pendingFeedbackProvider)),
+      error: (e, _) => _ErrorRetry(
+          error: e, onRetry: () => ref.invalidate(pendingFeedbackProvider)),
       data: (items) {
         if (items.isEmpty) {
           return const _EmptyState(
@@ -287,6 +91,7 @@ class _FeedbackTile extends StatelessWidget {
                 ),
               ),
             const SizedBox(height: 10),
+            // Predicted species
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -315,6 +120,7 @@ class _FeedbackTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
+            // Correct species (user selection)
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -380,12 +186,14 @@ class _FeedbackTile extends StatelessWidget {
 
   Future<void> _validate(BuildContext context, bool isValid) async {
     final notesCtrl = TextEditingController();
+    // Use dialogCtx (not outer context) for Navigator.pop so only the dialog closes
     final notes = await showDialog<String?>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         title: Text(isValid ? 'Confirmar corrección válida' : 'Marcar como inválida'),
         content: TextField(
           controller: notesCtrl,
+          autofocus: true,
           decoration: const InputDecoration(
             hintText: 'Notas (opcional)...',
             border: OutlineInputBorder(),
@@ -394,10 +202,11 @@ class _FeedbackTile extends StatelessWidget {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context, null),
+              onPressed: () => Navigator.pop(dialogCtx, null),
               child: const Text('Cancelar')),
           FilledButton(
-              onPressed: () => Navigator.pop(context, notesCtrl.text.trim()),
+              onPressed: () =>
+                  Navigator.pop(dialogCtx, notesCtrl.text.trim()),
               child: const Text('Confirmar')),
         ],
       ),
@@ -425,7 +234,7 @@ class _FeedbackTile extends StatelessWidget {
 // ── Fullscreen image viewer ────────────────────────────────────────────────────
 
 void _openFullscreen(BuildContext context, String url) {
-  Navigator.of(context).push(
+  Navigator.of(context, rootNavigator: true).push(
     MaterialPageRoute(
       fullscreenDialog: true,
       builder: (_) => Scaffold(
@@ -447,27 +256,6 @@ void _openFullscreen(BuildContext context, String url) {
 }
 
 // ── Shared widgets ────────────────────────────────────────────────────────────
-
-class _CuratorStatusChip extends StatelessWidget {
-  final String status;
-  const _CuratorStatusChip(this.status);
-  @override
-  Widget build(BuildContext context) {
-    final (label, color) = status == 'curator_approved'
-        ? ('Aprobado', Colors.teal)
-        : ('Observado', Colors.orange);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(label,
-          style: TextStyle(
-              fontSize: 11, fontWeight: FontWeight.bold, color: color)),
-    );
-  }
-}
 
 class _EmptyState extends StatelessWidget {
   final IconData icon;
