@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
@@ -11,9 +10,10 @@ import 'core/services/initial_sync_service.dart';
 Future<void> main() async {
   await Bootstrap.init();
 
-  // On web, Brick/SQLite is not used — skip local sync check and show app directly.
+  // Brick/SQLite is only used on mobile (iOS/Android). On web and desktop,
+  // skip local sync check and show app directly using Supabase directly.
   bool needsSync = false;
-  if (!kIsWeb) {
+  if (Bootstrap.isMobile) {
     final syncService = InitialSyncService(Repository());
     needsSync = !await syncService.isSyncComplete();
   }
