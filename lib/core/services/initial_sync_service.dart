@@ -16,13 +16,17 @@ class InitialSyncService {
 
   InitialSyncService(this._repo);
 
-  /// Check if initial sync has been completed by checking local data.
+  /// Check if initial sync has been completed by checking local data quality.
+  /// Returns false if species are missing OR if none have thumbnail URLs
+  /// (which indicates stale/incomplete data that needs a fresh sync).
   Future<bool> isSyncComplete() async {
     try {
       final species = await _repo.get<Species>(
         policy: OfflineFirstGetPolicy.localOnly,
       );
-      return species.isNotEmpty;
+      if (species.isEmpty) return false;
+      // Data quality check: if no species have thumbnails, cache is stale
+      return species.any((s) => s.thumbnailUrl != null);
     } catch (_) {
       return false;
     }

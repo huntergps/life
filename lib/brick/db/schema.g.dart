@@ -36,7 +36,7 @@ final migrations = <Migration>{
 
 /// A consumable database structure including the latest generated migration.
 final schema = Schema(
-  20260301221322,
+  20260303163824,
   generatorVersion: 1,
   tables: <SchemaTable>{
     SchemaTable(

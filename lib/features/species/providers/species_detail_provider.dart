@@ -24,7 +24,17 @@ final speciesDetailProvider = FutureProvider.family<Species?, int>((ref, id) asy
     policy: OfflineFirstGetPolicy.localOnly,
     query: Query(where: [Where('id').isExactly(id)]),
   );
-  return results.isNotEmpty ? results.last : null;
+  if (results.isNotEmpty) return results.last;
+  // Fallback: fetch from Supabase when not found locally (e.g. stale cache)
+  try {
+    final remote = await Repository().get<Species>(
+      policy: OfflineFirstGetPolicy.awaitRemote,
+      query: Query(where: [Where('id').isExactly(id)]),
+    );
+    return remote.isNotEmpty ? remote.last : null;
+  } catch (_) {
+    return null;
+  }
 });
 
 final speciesImagesProvider = FutureProvider.family<List<SpeciesImage>, int>((ref, speciesId) async {
