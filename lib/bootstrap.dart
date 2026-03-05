@@ -19,10 +19,13 @@ class Bootstrap {
   /// Whether Supabase connected successfully during init.
   static bool supabaseConnected = false;
 
+  /// True on all native platforms where Brick + SQLite is supported:
+  /// iOS, Android, and macOS (sqflite_darwin). Excludes web and Linux/Windows.
   static bool get isMobile =>
       !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.macOS);
 
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();

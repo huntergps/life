@@ -10,8 +10,8 @@ import 'core/services/initial_sync_service.dart';
 Future<void> main() async {
   await Bootstrap.init();
 
-  // Brick/SQLite is only used on mobile (iOS/Android). On web and desktop,
-  // skip local sync check and show app directly using Supabase directly.
+  // Brick/SQLite runs on iOS, Android and macOS (sqflite_darwin).
+  // Web is Supabase-direct with no local DB.
   bool needsSync = false;
   if (Bootstrap.isMobile) {
     final syncService = InitialSyncService(Repository());

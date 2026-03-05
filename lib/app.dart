@@ -41,7 +41,7 @@ class _GalapagosWildlifeAppState extends ConsumerState<GalapagosWildlifeApp> {
   }
 
   Future<void> _checkSync() async {
-    // Brick/SQLite is only used on mobile (iOS/Android). On web and desktop, skip sync.
+    // Brick/SQLite runs on iOS, Android and macOS. Web uses Supabase-direct.
     if (!Bootstrap.isMobile) {
       setState(() {
         _syncChecked = true;
