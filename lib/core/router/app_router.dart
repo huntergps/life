@@ -22,6 +22,12 @@ final appRouter = GoRouter(
     if (!noSave.contains(path)) {
       Bootstrap.prefs.setString('last_route', path);
     }
+    // Beta-only routes: redirect to home when user is not a beta tester
+    const betaRoutes = {'/map', '/photo-id', '/field-camera'};
+    if (betaRoutes.contains(path)) {
+      final isBeta = Bootstrap.prefs.getBool('is_beta_tester') ?? false;
+      if (!isBeta) return '/';
+    }
     // Guard admin routes
     if (path.startsWith('/admin')) {
       final isLoggedIn = Supabase.instance.client.auth.currentUser != null;

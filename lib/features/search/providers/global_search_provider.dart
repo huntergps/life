@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:galapagos_wildlife/brick/models/island.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/models/island.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 
 /// The current search query entered by the user.
 final searchQueryProvider = StateProvider<String>((ref) => '');

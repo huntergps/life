@@ -24,15 +24,6 @@ final _rolesCheckProvider = FutureProvider<Set<String>>((ref) async {
 
 Set<String> _cachedRoles() {
   final prefs = Bootstrap.prefs;
-  final cachedAt = prefs.getInt('roles_cache_ts');
-  if (cachedAt != null) {
-    final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
-    if (age > 30 * 60 * 1000) {
-      prefs.remove('user_roles');
-      prefs.remove('roles_cache_ts');
-      return {};
-    }
-  }
   final stored = prefs.getString('user_roles') ?? '';
   return stored.isEmpty ? {} : stored.split(',').toSet();
 }
@@ -63,6 +54,7 @@ final userRolesProvider = Provider<AsyncValue<Set<String>>>((ref) {
         Bootstrap.prefs.setBool('is_curator', roles.contains('curator') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_editor', roles.contains('editor') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_staff', roles.isNotEmpty);
+        Bootstrap.prefs.setBool('is_beta_tester', roles.contains('beta_tester') || roles.contains('admin'));
       });
       return AsyncValue.data(roles);
     },
@@ -94,6 +86,10 @@ final isCuratorProvider = Provider<AsyncValue<bool>>((ref) =>
 
 final isStaffProvider = Provider<AsyncValue<bool>>((ref) =>
     ref.watch(userRolesProvider).whenData((r) => r.isNotEmpty));
+
+final isBetaTesterProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData(
+        (r) => r.contains('beta_tester') || r.contains('admin')));
 
 // ── Role invalidation helper ──────────────────────────────────────────────────
 //

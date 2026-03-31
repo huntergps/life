@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
+import 'package:galapagos_wildlife/models/sighting.model.dart';
 import 'package:galapagos_wildlife/features/favorites/providers/favorites_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 

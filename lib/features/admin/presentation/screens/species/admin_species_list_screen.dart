@@ -38,9 +38,7 @@ class _AdminSpeciesListScreenState extends ConsumerState<AdminSpeciesListScreen>
   @override
   void dispose() {
     _searchController.dispose();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      resetAdminListState(ref);
-    });
+    resetAdminListState(ref);
     super.dispose();
   }
 
@@ -415,6 +413,7 @@ class _AdminSpeciesListScreenState extends ConsumerState<AdminSpeciesListScreen>
           title: name,
           subtitle: scientificName,
           icon: Icons.pets,
+          imageUrl: s['thumbnail_url'] as String?,
           isSelected: isSelected,
           selectionMode: selectionMode,
           isDark: isDark,

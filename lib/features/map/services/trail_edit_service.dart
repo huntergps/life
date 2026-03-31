@@ -1,12 +1,12 @@
 import 'dart:convert';
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../bootstrap.dart';
-import '../../../brick/models/trail.model.dart';
-import '../../../brick/repository.dart';
+import '../../../models/trail.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import '../../../drift/drift.dart';
 import '../../../core/services/app_logger.dart';
 import '../../../core/services/location/geo_utils.dart';
 
@@ -15,12 +15,12 @@ import '../../../core/services/location/geo_utils.dart';
 class TrailEditService {
   static const _pendingTrailsKey = 'pending_trails_v1';
 
-  final Repository _repository;
+  final WildlifeRepository _repository;
   // ignore: unused_field
   final WidgetRef? _ref;
 
-  TrailEditService({Repository? repository, WidgetRef? ref})
-      : _repository = repository ?? Repository(),
+  TrailEditService({WildlifeRepository? repository, WidgetRef? ref})
+      : _repository = repository ?? WildlifeRepository.instance,
         _ref = ref;
 
   // ============================================================================
@@ -36,7 +36,7 @@ class TrailEditService {
   }) async {
     try {
       final trails = await _repository.get<Trail>(
-        query: Query.where('id', trailId, limit1: true),
+        query: Query.where('id', trailId),
         policy: OfflineFirstGetPolicy.localOnly,
       );
 
@@ -63,7 +63,7 @@ class TrailEditService {
 
       // Re-fetch via Brick to correctly update the existing SQLite row.
       final fresh = await _repository.get<Trail>(
-        query: Query.where('id', trailId, limit1: true),
+        query: Query.where('id', trailId),
         policy: OfflineFirstGetPolicy.awaitRemote,
       );
 
@@ -78,7 +78,7 @@ class TrailEditService {
 
   /// Get a trail by ID — tries remote first; falls back to local SQLite when offline.
   Future<Trail?> getTrail(int trailId) async {
-    final query = Query.where('id', trailId, limit1: true);
+    final query = Query.where('id', trailId);
     try {
       final trails = await _repository.get<Trail>(
         query: query,
@@ -115,7 +115,7 @@ class TrailEditService {
         'estimated_minutes': ?estimatedMinutes,
       }).eq('id', trailId);
       await _repository.get<Trail>(
-        query: Query.where('id', trailId, limit1: true),
+        query: Query.where('id', trailId),
         policy: OfflineFirstGetPolicy.awaitRemote,
       );
       return true;
@@ -210,7 +210,7 @@ class TrailEditService {
         userId: userId,
       );
 
-      await _repository.upsertSqlite<Trail>(newTrail);
+      await WildlifeRepository.instance.upsertLocal<Trail>(newTrail);
 
       AppLogger.info(
           'Trail "$nameEn" created (id=$realId, $distanceKm km, ${simplified.length} pts)');
@@ -274,8 +274,6 @@ class TrailEditService {
 
       AppLogger.info('Syncing ${list.length} pending trail(s)…');
       final remaining = <dynamic>[];
-      final repo = Repository();
-
       for (final item in list) {
         final data = Map<String, dynamic>.from(item as Map);
         data.remove('_queued_at');
@@ -301,7 +299,7 @@ class TrailEditService {
             coordinates: data['coordinates'] as String? ?? '[]',
             userId: data['user_id'] as String?,
           );
-          await repo.upsertSqlite<Trail>(trail);
+          await WildlifeRepository.instance.upsertLocal<Trail>(trail);
           synced++;
           AppLogger.info(
               'Pending trail synced (id=$realId, "${trail.nameEn}")');

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:galapagos_wildlife/brick/models/species_sound.model.dart';
+import 'package:galapagos_wildlife/models/species_sound.model.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 
 class SpeciesSoundPlayer extends StatefulWidget {

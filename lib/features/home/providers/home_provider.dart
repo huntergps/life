@@ -1,10 +1,10 @@
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:galapagos_wildlife/brick/models/category.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/models/category.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 
 final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   if (kIsWeb) {

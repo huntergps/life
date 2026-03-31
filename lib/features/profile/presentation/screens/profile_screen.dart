@@ -17,9 +17,9 @@ import 'package:galapagos_wildlife/features/profile/providers/profile_provider.d
 import 'package:galapagos_wildlife/features/profile/providers/profile_stats_provider.dart';
 import 'package:galapagos_wildlife/features/profile/presentation/widgets/badge_progress_section.dart';
 import 'package:galapagos_wildlife/features/profile/presentation/widgets/recent_activity_section.dart';
-import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
+import 'package:galapagos_wildlife/models/sighting.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/user_profile.model.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/profile/presentation/screens/visit_summary_screen.dart';
 

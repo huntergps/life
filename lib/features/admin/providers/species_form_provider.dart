@@ -352,7 +352,12 @@ class SpeciesFormNotifier extends StateNotifier<SpeciesFormState> {
       habitatEn: d?['habitat_en'] as String? ?? '',
       distinguishingFeaturesEs: d?['distinguishing_features_es'] as String? ?? '',
       distinguishingFeaturesEn: d?['distinguishing_features_en'] as String? ?? '',
-      primaryFoodSources: d?['primary_food_sources'] as String? ?? '',
+      primaryFoodSources: () {
+        final pfs = d?['primary_food_sources'];
+        if (pfs == null) return '';
+        if (pfs is List) return pfs.join(', ');
+        return pfs.toString();
+      }(),
       breedingSeason: d?['breeding_season'] as String? ?? '',
       clutchSize: _numToStr(d?['clutch_size']),
       reproductiveFrequency: d?['reproductive_frequency'] as String? ?? '',
@@ -370,7 +375,12 @@ class SpeciesFormNotifier extends StateNotifier<SpeciesFormState> {
       socialStructure: d?['social_structure'] as String?,
       activityPattern: d?['activity_pattern'] as String?,
       dietType: d?['diet_type'] as String?,
-      sexualDimorphism: d?['sexual_dimorphism'] as bool? ?? false,
+      sexualDimorphism: () {
+        final sd = d?['sexual_dimorphism'];
+        if (sd == null) return false;
+        if (sd is bool) return sd;
+        return sd.toString().isNotEmpty && sd.toString() != 'false';
+      }(),
       // UI state — mark as initialized, no unsaved changes yet
       initialized: d != null ? true : false,
       hasUnsavedChanges: false,

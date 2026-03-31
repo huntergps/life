@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/features/profile/providers/profile_provider.dart';
-import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
+import 'package:galapagos_wildlife/models/user_profile.model.dart';
 
 // ---------------------------------------------------------------------------
 // Model
@@ -62,16 +62,21 @@ class CelebrationEvent {
 // ---------------------------------------------------------------------------
 
 /// Fetches all active celebration events from the `celebration_events` table.
+/// Returns empty list if the table doesn't exist (404) or any other error.
 final celebrationEventsProvider =
     FutureProvider<List<CelebrationEvent>>((ref) async {
-  final data = await Supabase.instance.client
-      .from('celebration_events')
-      .select()
-      .eq('is_active', true);
+  try {
+    final data = await Supabase.instance.client
+        .from('celebration_events')
+        .select()
+        .eq('is_active', true);
 
-  return (data as List<dynamic>)
-      .map((row) => CelebrationEvent.fromJson(row as Map<String, dynamic>))
-      .toList();
+    return (data as List<dynamic>)
+        .map((row) => CelebrationEvent.fromJson(row as Map<String, dynamic>))
+        .toList();
+  } catch (_) {
+    return [];
+  }
 });
 
 /// Returns the list of celebration events that are active **today**, filtered

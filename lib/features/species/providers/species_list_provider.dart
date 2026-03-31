@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 
 final speciesCategoryFilterProvider = StateProvider<int?>((ref) => null);
 final speciesSearchQueryProvider = StateProvider<String>((ref) => '');

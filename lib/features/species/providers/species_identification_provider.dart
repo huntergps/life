@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, compute;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +6,11 @@ import 'package:image/image.dart' as img;
 import 'package:latlong2/latlong.dart';
 import 'package:tflite_flutter/tflite_flutter.dart'
     if (dart.library.html) '_tflite_stub.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species_site.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 
 // ── Constantes del modelo ────────────────────────────────────────────
 const _modelAsset  = 'assets/ml/galapagos_classifier.tflite';

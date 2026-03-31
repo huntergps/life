@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'bootstrap.dart';
-import 'brick/repository.dart';
+import 'drift/repository/wildlife_repository.dart';
 import 'core/l10n/strings.g.dart';
 import 'core/presentation/screens/sync_screen.dart';
 import 'core/services/initial_sync_service.dart';
@@ -14,7 +14,7 @@ Future<void> main() async {
   // Web is Supabase-direct with no local DB.
   bool needsSync = false;
   if (Bootstrap.isMobile) {
-    final syncService = InitialSyncService(Repository());
+    final syncService = InitialSyncService(WildlifeRepository.instance);
     needsSync = !await syncService.isSyncComplete();
   }
 

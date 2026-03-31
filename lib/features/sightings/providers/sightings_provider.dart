@@ -1,11 +1,11 @@
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/models/sighting.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart' show allSpeciesProvider;
 import 'package:galapagos_wildlife/features/map/providers/map_provider.dart' show visitSitesProvider;
 

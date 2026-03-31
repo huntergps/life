@@ -1,20 +1,20 @@
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../brick/models/visit_site.model.dart';
-import '../../../brick/repository.dart';
+import '../../../models/visit_site.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import '../../../drift/drift.dart';
 import '../../../core/services/app_logger.dart';
 
 /// Service for offline field editing of visit sites.
 /// All changes are saved to SQLite first, then synced to Supabase when online.
 class SiteEditService {
-  final Repository _repository;
+  final WildlifeRepository _repository;
   // ignore: unused_field
   final WidgetRef? _ref;
 
-  SiteEditService({Repository? repository, WidgetRef? ref})
-      : _repository = repository ?? Repository(),
+  SiteEditService({WildlifeRepository? repository, WidgetRef? ref})
+      : _repository = repository ?? WildlifeRepository.instance,
         _ref = ref;
 
   /// Update the location of a visit site (offline-first).
@@ -26,7 +26,7 @@ class SiteEditService {
   }) async {
     try {
       final sites = await _repository.get<VisitSite>(
-        query: Query.where('id', siteId, limit1: true),
+        query: Query.where('id', siteId),
         policy: OfflineFirstGetPolicy.localOnly,
       );
 
@@ -54,7 +54,7 @@ class SiteEditService {
           .update({'latitude': newLatitude, 'longitude': newLongitude})
           .eq('id', siteId);
 
-      await _repository.upsertSqlite<VisitSite>(updated);
+      await WildlifeRepository.instance.upsertLocal<VisitSite>(updated);
 
       AppLogger.info(
           'Site $siteId location updated: ($newLatitude, $newLongitude)');
@@ -68,7 +68,7 @@ class SiteEditService {
   /// Get a visit site by ID.
   Future<VisitSite?> getVisitSite(int siteId) async {
     final sites = await _repository.get<VisitSite>(
-      query: Query.where('id', siteId, limit1: true),
+      query: Query.where('id', siteId),
       policy: OfflineFirstGetPolicy.localOnly,
     );
     return sites.isNotEmpty ? sites.first : null;

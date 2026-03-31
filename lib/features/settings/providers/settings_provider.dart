@@ -164,3 +164,4 @@ class TextScaleNotifier extends Notifier<double> {
     await Bootstrap.prefs.setDouble(_key, clamped);
   }
 }
+

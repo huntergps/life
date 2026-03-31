@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart' show StateNotifier, StateNotifierProvider;
-import 'package:galapagos_wildlife/brick/repository.dart';
+import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/services/image_preload_service.dart';
 
 /// State for image preloading progress
@@ -92,7 +92,7 @@ class ImagePreloadNotifier extends StateNotifier<ImagePreloadState> {
 
 /// Provider for image preload service
 final imagePreloadServiceProvider = Provider<ImagePreloadService>((ref) {
-  return ImagePreloadService(Repository());
+  return ImagePreloadService(WildlifeRepository.instance);
 });
 
 /// Provider for image preload state

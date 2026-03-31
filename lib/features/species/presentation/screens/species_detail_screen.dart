@@ -8,12 +8,12 @@ import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
-import 'package:galapagos_wildlife/brick/models/species_threat.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_reference.model.dart';
+import 'package:galapagos_wildlife/models/species_threat.model.dart';
+import 'package:galapagos_wildlife/models/species_reference.model.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
@@ -983,7 +983,7 @@ class _ThreatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _severityColor(threat.severity);
+    final color = _severityColor(threat.severity ?? '');
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1014,7 +1014,7 @@ class _ThreatCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  threat.severity.toUpperCase(),
+                  (threat.severity ?? '').toUpperCase(),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w800,

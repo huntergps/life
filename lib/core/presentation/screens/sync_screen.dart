@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
+import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/services/initial_sync_service.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
@@ -63,7 +63,7 @@ class _SyncScreenState extends ConsumerState<SyncScreen> {
   }
 
   Future<void> _startSync() async {
-    final syncService = InitialSyncService(Repository());
+    final syncService = InitialSyncService(WildlifeRepository.instance);
     final notifier = ref.read(_syncProgressProvider.notifier);
 
     void updateProgress(int step, int total, String table) {

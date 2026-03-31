@@ -3,12 +3,14 @@ import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'
+    show sqfliteFfiInit, databaseFactoryFfi, databaseFactory;
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/constants/supabase_constants.dart';
-import 'brick/repository.dart';
+import 'drift/repository/wildlife_repository.dart';
 import 'features/map/services/field_edit_service.dart';
 import 'features/map/services/pmtiles_manager.dart';
 
@@ -20,15 +22,20 @@ class Bootstrap {
   static bool supabaseConnected = false;
 
   /// True on all native platforms where Brick + SQLite is supported:
-  /// iOS, Android, and macOS (sqflite_darwin). Excludes web and Linux/Windows.
-  static bool get isMobile =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS ||
-          defaultTargetPlatform == TargetPlatform.macOS);
+  /// iOS, Android, macOS (sqflite_darwin), Linux and Windows (sqflite_common_ffi).
+  /// Excludes web only.
+  static bool get isMobile => !kIsWeb;
 
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
+
+    // Initialize sqflite FFI for Linux and Windows (sqflite_darwin handles macOS natively)
+    if (!kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.linux ||
+            defaultTargetPlatform == TargetPlatform.windows)) {
+      sqfliteFfiInit();
+      databaseFactory = databaseFactoryFfi;
+    }
 
     // Load SharedPreferences early so providers can read synchronously
     prefs = await SharedPreferences.getInstance();
@@ -72,36 +79,11 @@ class Bootstrap {
       debugPrint('Supabase init failed (offline mode): $e');
     }
 
-    // Configure Brick repository (offline-first, mobile only — desktop/web use Supabase directly)
-    if (isMobile) {
-      Repository.configure(
-        supabaseUrl: SupabaseConstants.url,
-        supabaseAnonKey: SupabaseConstants.anonKey,
-      );
-
-      await Repository().initialize();
-
-      // Clear any offline queue requests that have failed too many times
-      try {
-        final queueManager =
-            Repository().offlineRequestQueue.client.requestManager;
-        final pending = await queueManager.unprocessedRequests();
-        int cleared = 0;
-        for (final req in pending) {
-          final id = req[queueManager.primaryKeyColumn] as int?;
-          final attempts = req['attempts'] as int? ?? 0;
-          if (id != null && attempts > 10) {
-            await queueManager.deleteUnprocessedRequest(id);
-            cleared++;
-          }
-        }
-        if (cleared > 0) {
-          debugPrint('🧹 Cleared $cleared stuck offline queue request(s)');
-        }
-      } catch (e) {
-        debugPrint('⚠️ Could not clear offline queue: $e');
-      }
-    }
+    // Configure WildlifeRepository (Drift local DB + Supabase remote sync).
+    await WildlifeRepository.configure(
+      supabaseUrl: SupabaseConstants.url,
+      supabaseKey: SupabaseConstants.anonKey,
+    );
 
     // Record sync timestamp if Supabase connected
     if (supabaseConnected) {

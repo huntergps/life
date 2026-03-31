@@ -1,16 +1,16 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:galapagos_wildlife/brick/models/user_profile.model.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/models/user_profile.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:galapagos_wildlife/drift/drift.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/admin/services/image_processing_service.dart';
 
@@ -29,7 +29,7 @@ final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
     return userProfileFromRow(data);
   }
 
-  final profiles = await Repository().get<UserProfile>(
+  final profiles = await WildlifeRepository.instance.get<UserProfile>(
     policy: OfflineFirstGetPolicy.awaitRemote,
     query: Query(where: [Where('id').isExactly(user.id)]),
   );
@@ -71,7 +71,7 @@ Future<void> updateProfile({
   }
 
   // Get existing profile first to preserve unmodified fields
-  final existing = await Repository().get<UserProfile>(
+  final existing = await WildlifeRepository.instance.get<UserProfile>(
     policy: OfflineFirstGetPolicy.localOnly,
     query: Query(where: [Where('id').isExactly(userId)]),
   );
@@ -90,7 +90,7 @@ Future<void> updateProfile({
     updatedAt: DateTime.now(),
   );
 
-  await Repository().upsert<UserProfile>(profile);
+  await WildlifeRepository.instance.upsert<UserProfile>(profile);
 }
 
 /// Picks, crops (1:1 square), compresses, and uploads avatar image.

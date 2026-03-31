@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
+import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
@@ -93,7 +93,7 @@ class WatchDataSync {
   /// Llamar cuando el usuario abre el mapa o hace login.
   Future<void> syncSpeciesToWatch() async {
     try {
-      final species = await Repository().get<Species>();
+      final species = await WildlifeRepository.instance.get<Species>();
       final payload = species
           .map((s) => {
                 'id': s.id,

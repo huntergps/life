@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:galapagos_wildlife/bootstrap.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
@@ -34,6 +35,8 @@ class ScaffoldWithNav extends StatelessWidget {
     return GoRouterState.of(context).uri.path.startsWith('/admin');
   }
 
+  static bool get _isBeta => Bootstrap.prefs.getBool('is_beta_tester') ?? false;
+
   static int calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
     if (location.startsWith('/admin')) {
@@ -44,12 +47,23 @@ class ScaffoldWithNav extends StatelessWidget {
       if (location.startsWith('/admin/species-sites')) return 5;
       return 0;
     }
-    if (location.startsWith('/species')) return 1;
-    if (location.startsWith('/map')) return 2;
-    if (location.startsWith('/favorites')) return 3;
-    if (location.startsWith('/sightings')) return 4;
-    if (location.startsWith('/settings')) return 5;
-    return 0;
+    if (_isBeta) {
+      // Full 6-item nav: Home, Species, Map, Favorites, Sightings, Settings
+      if (location.startsWith('/species')) return 1;
+      if (location.startsWith('/map')) return 2;
+      if (location.startsWith('/favorites')) return 3;
+      if (location.startsWith('/sightings')) return 4;
+      if (location.startsWith('/settings')) return 5;
+      return 0;
+    } else {
+      // 5-item nav: Home, Species, Favorites, Sightings, Settings
+      if (location.startsWith('/species')) return 1;
+      if (location.startsWith('/favorites')) return 2;
+      if (location.startsWith('/sightings')) return 3;
+      if (location.startsWith('/settings')) return 4;
+      if (location.startsWith('/map')) return 0; // redirect to home
+      return 0;
+    }
   }
 
   static void onItemTapped(int index, BuildContext context) {
@@ -72,19 +86,34 @@ class ScaffoldWithNav extends StatelessWidget {
       }
       return;
     }
-    switch (index) {
-      case 0:
-        context.goNamed('home');
-      case 1:
-        context.goNamed('species');
-      case 2:
-        context.goNamed('map');
-      case 3:
-        context.goNamed('favorites');
-      case 4:
-        context.goNamed('sightings');
-      case 5:
-        context.goNamed('settings');
+    if (_isBeta) {
+      switch (index) {
+        case 0:
+          context.goNamed('home');
+        case 1:
+          context.goNamed('species');
+        case 2:
+          context.goNamed('map');
+        case 3:
+          context.goNamed('favorites');
+        case 4:
+          context.goNamed('sightings');
+        case 5:
+          context.goNamed('settings');
+      }
+    } else {
+      switch (index) {
+        case 0:
+          context.goNamed('home');
+        case 1:
+          context.goNamed('species');
+        case 2:
+          context.goNamed('favorites');
+        case 3:
+          context.goNamed('sightings');
+        case 4:
+          context.goNamed('settings');
+      }
     }
   }
 }
@@ -107,12 +136,12 @@ class _PhoneLayout extends StatelessWidget {
             ScaffoldWithNav.onItemTapped(index, context),
         destinations: isAdmin
             ? _adminDestinations(tr)
-            : _appDestinations(tr),
+            : _appDestinations(tr, ScaffoldWithNav._isBeta),
       ),
     );
   }
 
-  static List<NavigationDestination> _appDestinations(Translations tr) => [
+  static List<NavigationDestination> _appDestinations(Translations tr, bool isBeta) => [
     NavigationDestination(
       icon: const Icon(Icons.home_outlined),
       selectedIcon: const Icon(Icons.home),
@@ -123,11 +152,12 @@ class _PhoneLayout extends StatelessWidget {
       selectedIcon: const Icon(Icons.pets),
       label: tr.nav.species,
     ),
-    NavigationDestination(
-      icon: const Icon(Icons.map_outlined),
-      selectedIcon: const Icon(Icons.map),
-      label: tr.nav.map,
-    ),
+    if (isBeta)
+      NavigationDestination(
+        icon: const Icon(Icons.map_outlined),
+        selectedIcon: const Icon(Icons.map),
+        label: tr.nav.map,
+      ),
     NavigationDestination(
       icon: const Icon(Icons.favorite_outline),
       selectedIcon: const Icon(Icons.favorite),
@@ -247,7 +277,7 @@ class _TabletLayoutState extends ConsumerState<_TabletLayout> {
                         backgroundColor: isDark ? AppColors.darkSurface : null,
                         destinations: ScaffoldWithNav.isAdminRoute(context)
                             ? _adminRailDestinations(tr)
-                            : _appRailDestinations(tr),
+                            : _appRailDestinations(tr, ScaffoldWithNav._isBeta),
                         trailing: _RailTrailingActions(
                           collapsed: collapsed,
                           showExtended: showExtended,
@@ -272,7 +302,7 @@ class _TabletLayoutState extends ConsumerState<_TabletLayout> {
     );
   }
 
-  static List<NavigationRailDestination> _appRailDestinations(Translations tr) => [
+  static List<NavigationRailDestination> _appRailDestinations(Translations tr, bool isBeta) => [
     NavigationRailDestination(
       icon: const Icon(Icons.home_outlined),
       selectedIcon: const Icon(Icons.home),
@@ -283,11 +313,12 @@ class _TabletLayoutState extends ConsumerState<_TabletLayout> {
       selectedIcon: const Icon(Icons.pets),
       label: Text(tr.nav.species),
     ),
-    NavigationRailDestination(
-      icon: const Icon(Icons.map_outlined),
-      selectedIcon: const Icon(Icons.map),
-      label: Text(tr.nav.map),
-    ),
+    if (isBeta)
+      NavigationRailDestination(
+        icon: const Icon(Icons.map_outlined),
+        selectedIcon: const Icon(Icons.map),
+        label: Text(tr.nav.map),
+      ),
     NavigationRailDestination(
       icon: const Icon(Icons.favorite_outline),
       selectedIcon: const Icon(Icons.favorite),

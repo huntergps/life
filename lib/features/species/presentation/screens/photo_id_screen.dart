@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 import 'package:galapagos_wildlife/core/widgets/cached_species_image.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
@@ -62,21 +63,42 @@ class _PhotoIdScreenState extends ConsumerState<PhotoIdScreen>
 
   Future<void> _pick(ImageSource source) async {
     if (_isProcessing) return;
-    final xFile = await ImagePicker().pickImage(
-      source: source,
-      imageQuality: 85,
-    );
-    if (xFile == null || !mounted) return;
-    final bytes = await xFile.readAsBytes();
-    ref.read(speciesIdProvider.notifier).reset();
-    setState(() { _photo = bytes; _isProcessing = true; });
-    final location = ref.read(arLocationProvider).asData?.value;
-    await ref.read(speciesIdProvider.notifier).identify(
-      bytes,
-      lat: location?.lat,
-      lng: location?.lng,
-    );
-    if (mounted) setState(() => _isProcessing = false);
+    try {
+      final xFile = await ImagePicker().pickImage(
+        source: source,
+        imageQuality: 85,
+      );
+      if (xFile == null || !mounted) return;
+      final bytes = await xFile.readAsBytes();
+      ref.read(speciesIdProvider.notifier).reset();
+      setState(() { _photo = bytes; _isProcessing = true; });
+      final location = ref.read(arLocationProvider).asData?.value;
+      await ref.read(speciesIdProvider.notifier).identify(
+        bytes,
+        lat: location?.lat,
+        lng: location?.lng,
+      );
+      if (mounted) setState(() => _isProcessing = false);
+    } on PlatformException catch (e) {
+      debugPrint('PhotoID PlatformException: code=${e.code} message=${e.message} details=${e.details}');
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Camera: ${e.code} — ${e.message}'),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('PhotoID _pick error: $e');
+      if (mounted) {
+        setState(() => _isProcessing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 
   void _reset() {

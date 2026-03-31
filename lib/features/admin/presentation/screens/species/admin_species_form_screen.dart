@@ -146,6 +146,7 @@ class _AdminSpeciesFormScreenState
       final controller = entry.key;
       final fieldName = entry.value;
       controller.addListener(() {
+        if (_isPopulating) return;
         _markDirty();
         // Keep provider state in sync so it can be read from outside the widget.
         ref.read(speciesFormProvider.notifier).updateField(fieldName, controller.text);
@@ -208,7 +209,10 @@ class _AdminSpeciesFormScreenState
     _habitatEnController.text = data['habitat_en'] ?? '';
     _distinguishingFeaturesEsController.text = data['distinguishing_features_es'] ?? '';
     _distinguishingFeaturesEnController.text = data['distinguishing_features_en'] ?? '';
-    _primaryFoodSourcesController.text = data['primary_food_sources'] ?? '';
+    final pfs = data['primary_food_sources'];
+    _primaryFoodSourcesController.text = pfs == null
+        ? ''
+        : (pfs is List ? pfs.join(', ') : pfs.toString());
     _breedingSeasonController.text = data['breeding_season'] ?? '';
     _clutchSizeController.text = '${data['clutch_size'] ?? ''}';
     _reproductiveFrequencyController.text = data['reproductive_frequency'] ?? '';
@@ -226,7 +230,8 @@ class _AdminSpeciesFormScreenState
     _socialStructure = data['social_structure'];
     _activityPattern = data['activity_pattern'];
     _dietType = data['diet_type'];
-    _sexualDimorphism = data['sexual_dimorphism'] ?? false;
+    final sd = data['sexual_dimorphism'];
+    _sexualDimorphism = sd is bool ? sd : (sd != null && sd.toString().isNotEmpty && sd.toString() != 'false');
 
     _isPopulating = false;
 
@@ -304,7 +309,7 @@ class _AdminSpeciesFormScreenState
             : _distinguishingFeaturesEnController.text.trim(),
         'primary_food_sources': _primaryFoodSourcesController.text.trim().isEmpty
             ? null
-            : _primaryFoodSourcesController.text.trim(),
+            : _primaryFoodSourcesController.text.trim().split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
         'breeding_season': _breedingSeasonController.text.trim().isEmpty
             ? null
             : _breedingSeasonController.text.trim(),
@@ -937,8 +942,13 @@ class _TabGeneralState extends ConsumerState<_TabGeneral>
           ),
           dropdownColor: isDark ? AppColors.darkCard : null,
           items: [
+            DropdownMenuItem(value: 'endemic', child: Text(context.t.admin.endemic)),
+            DropdownMenuItem(value: 'endemic_galapagos', child: const Text('Galápagos Endemic')),
+            DropdownMenuItem(value: 'endemic_ecuador', child: const Text('Ecuador Endemic')),
             DropdownMenuItem(value: 'archipelago', child: Text(context.t.admin.endemismArchipelago)),
             DropdownMenuItem(value: 'island_specific', child: Text(context.t.admin.endemismIslandSpecific)),
+            DropdownMenuItem(value: 'native', child: Text(context.t.admin.native)),
+            DropdownMenuItem(value: 'introduced', child: Text(context.t.admin.introduced)),
           ],
           onChanged: (v) {
             p.setState(() => p._endemismLevel = v);
@@ -1350,9 +1360,13 @@ class _TabDetallesState extends State<_TabDetalles>
             items: [
               DropdownMenuItem(value: 'solitary', child: Text(context.t.admin.socialSolitary)),
               DropdownMenuItem(value: 'pair', child: Text(context.t.admin.socialPair)),
+              DropdownMenuItem(value: 'pairs', child: const Text('Pairs')),
               DropdownMenuItem(value: 'small_group', child: Text(context.t.admin.socialSmallGroup)),
+              DropdownMenuItem(value: 'small_groups', child: const Text('Small Groups')),
               DropdownMenuItem(value: 'colony', child: Text(context.t.admin.socialColony)),
+              DropdownMenuItem(value: 'large_colonies', child: const Text('Large Colonies')),
               DropdownMenuItem(value: 'harem', child: Text(context.t.admin.socialHarem)),
+              DropdownMenuItem(value: 'variable', child: const Text('Variable')),
             ],
             onChanged: (v) {
               p.setState(() => p._socialStructure = v);
@@ -1381,6 +1395,7 @@ class _TabDetallesState extends State<_TabDetalles>
               DropdownMenuItem(value: 'diurnal', child: Text(context.t.admin.activityDiurnal)),
               DropdownMenuItem(value: 'nocturnal', child: Text(context.t.admin.activityNocturnal)),
               DropdownMenuItem(value: 'crepuscular', child: Text(context.t.admin.activityCrepuscular)),
+              DropdownMenuItem(value: 'variable', child: const Text('Variable')),
             ],
             onChanged: (v) {
               p.setState(() => p._activityPattern = v);

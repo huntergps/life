@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:developer' as dev;
-import 'package:brick_offline_first/brick_offline_first.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:galapagos_wildlife/brick/models/category.model.dart';
-import 'package:galapagos_wildlife/brick/models/island.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_image.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
-import 'package:galapagos_wildlife/brick/models/trail.model.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
+import 'package:galapagos_wildlife/models/category.model.dart';
+import 'package:galapagos_wildlife/models/island.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species_image.model.dart';
+import 'package:galapagos_wildlife/models/species_site.model.dart';
+import 'package:galapagos_wildlife/models/trail.model.dart';
+import 'package:galapagos_wildlife/drift/drift.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_category_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_island_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_visit_site_provider.dart';
@@ -148,7 +148,7 @@ class RealtimeService {
 
   Future<void> _onCategoriesChange() async {
     try {
-      await Repository().get<Category>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<Category>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: categories sync error: $e');
     }
@@ -158,7 +158,7 @@ class RealtimeService {
 
   Future<void> _onIslandsChange() async {
     try {
-      await Repository().get<Island>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<Island>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: islands sync error: $e');
     }
@@ -168,7 +168,7 @@ class RealtimeService {
 
   Future<void> _onVisitSitesChange() async {
     try {
-      await Repository().get<VisitSite>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<VisitSite>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: visit_sites sync error: $e');
     }
@@ -178,7 +178,7 @@ class RealtimeService {
 
   Future<void> _onSpeciesChange() async {
     try {
-      await Repository().get<Species>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<Species>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: species sync error: $e');
     }
@@ -189,7 +189,7 @@ class RealtimeService {
 
   Future<void> _onSpeciesImagesChange(PostgresChangePayload payload) async {
     try {
-      await Repository().get<SpeciesImage>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<SpeciesImage>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: species_images sync error: $e');
     }
@@ -212,7 +212,7 @@ class RealtimeService {
 
   Future<void> _onTrailsChange() async {
     try {
-      await Repository().get<Trail>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<Trail>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: trails sync error: $e');
     }
@@ -222,7 +222,7 @@ class RealtimeService {
 
   Future<void> _onSpeciesSitesChange() async {
     try {
-      await Repository().get<SpeciesSite>(policy: OfflineFirstGetPolicy.awaitRemote);
+      await WildlifeRepository.instance.get<SpeciesSite>(policy: OfflineFirstGetPolicy.awaitRemote);
     } catch (e) {
       dev.log('Realtime: species_sites sync error: $e');
     }

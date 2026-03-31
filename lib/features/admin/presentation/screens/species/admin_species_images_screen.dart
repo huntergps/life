@@ -1,5 +1,7 @@
 import 'dart:io';
-import 'package:brick_offline_first/brick_offline_first.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:drift_offline_first_with_supabase/drift_offline_first_with_supabase.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,9 +11,10 @@ import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import 'package:galapagos_wildlife/core/constants/supabase_constants.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_image.model.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species_image.model.dart';
+import 'package:drift_offline_first_with_supabase/drift_offline_first_with_supabase.dart';
+import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_detail_provider.dart';
@@ -58,9 +61,9 @@ class _AdminSpeciesImagesScreenState extends ConsumerState<AdminSpeciesImagesScr
   /// Sync Brick cache from server and invalidate all related providers.
   /// Called after any image change so BOTH admin and user-facing UI update.
   Future<void> _syncAllProviders() async {
-    // Sync Brick cache (species row may have changed via trigger)
-    await Repository().get<Species>(policy: OfflineFirstGetPolicy.awaitRemote);
-    await Repository().get<SpeciesImage>(policy: OfflineFirstGetPolicy.awaitRemote);
+    // Sync local cache (species row may have changed via trigger)
+    await WildlifeRepository.instance.get<Species>(policy: OfflineFirstGetPolicy.awaitRemote);
+    await WildlifeRepository.instance.get<SpeciesImage>(policy: OfflineFirstGetPolicy.awaitRemote);
     // Admin providers (direct Supabase)
     ref.invalidate(adminSpeciesImagesProvider(widget.speciesId));
     ref.invalidate(adminSpeciesListProvider);

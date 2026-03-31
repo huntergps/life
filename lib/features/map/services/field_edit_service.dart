@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../../brick/models/trail.model.dart';
-import '../../../brick/models/visit_site.model.dart';
-import '../../../brick/repository.dart';
+import '../../../models/trail.model.dart';
+import '../../../models/visit_site.model.dart';
+import 'package:galapagos_wildlife/drift/drift.dart';
 import 'site_edit_service.dart';
 import 'trail_edit_service.dart';
 
@@ -16,7 +16,7 @@ class FieldEditService {
   final SiteEditService site;
   final TrailEditService trail;
 
-  FieldEditService({Repository? repository, WidgetRef? ref})
+  FieldEditService({WildlifeRepository? repository, WidgetRef? ref})
       : site = SiteEditService(repository: repository, ref: ref),
         trail = TrailEditService(repository: repository, ref: ref);
 

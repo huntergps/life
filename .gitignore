@@ -1,3 +1,6 @@
+# Local drift_offline path overrides (developer-specific, never commit)
+pubspec_overrides.yaml
+
 # Miscellaneous
 *.class
 *.log

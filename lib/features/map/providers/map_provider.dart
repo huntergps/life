@@ -1,17 +1,17 @@
-import 'package:brick_offline_first/brick_offline_first.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/services/location/location_permission_service.dart';
-import 'package:galapagos_wildlife/brick/models/island.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
+import 'package:galapagos_wildlife/models/island.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species_site.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
-import 'package:galapagos_wildlife/core/utils/brick_helpers.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 
 final islandsProvider = FutureProvider<List<Island>>((ref) async {

@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
+import 'package:galapagos_wildlife/models/sighting.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';

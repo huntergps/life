@@ -9,7 +9,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:galapagos_wildlife/core/services/location/location_permission_service.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/utils/error_handler.dart';
@@ -119,7 +119,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
               children: [
                 const Icon(Icons.check_circle, color: Colors.white, size: 20),
                 const SizedBox(width: 8),
-                Text(context.t.location.locationObtained ?? 'Location obtained'),
+                Text(context.t.location.locationObtained),
               ],
             ),
             backgroundColor: Colors.green.shade700,
@@ -239,7 +239,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
           children: [
             const Icon(Icons.check_circle, color: Colors.white, size: 20),
             const SizedBox(width: 8),
-            Text(context.t.sightings.photoAdded ?? 'Photo added'),
+            Text(context.t.sightings.photoAdded),
           ],
         ),
         backgroundColor: Colors.green.shade700,
@@ -634,7 +634,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
                   ),
             title: Text(
               _isProcessingPhoto
-                  ? (context.t.sightings.processingPhoto ?? 'Processing photo...')
+                  ? context.t.sightings.processingPhoto
                   : (_photoBytes != null
                       ? context.t.sightings.changePhoto
                       : context.t.sightings.addPhoto),

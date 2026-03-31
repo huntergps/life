@@ -1,18 +1,18 @@
-import 'package:brick_offline_first/brick_offline_first.dart';
-import 'package:flutter/foundation.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
-import 'package:galapagos_wildlife/brick/models/category.model.dart' as brick;
-import 'package:galapagos_wildlife/brick/models/island.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_image.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_site.model.dart';
-import 'package:galapagos_wildlife/brick/models/trail.model.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
+import 'package:flutter/foundation.dart' hide Category;
+import 'package:galapagos_wildlife/drift/drift.dart';
+import 'package:galapagos_wildlife/models/category.model.dart';
+import 'package:galapagos_wildlife/models/island.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species_image.model.dart';
+import 'package:galapagos_wildlife/models/species_site.model.dart';
+import 'package:galapagos_wildlife/models/trail.model.dart';
 import 'seed_data_service.dart';
 import 'image_preload_service.dart';
 
 class InitialSyncService {
-  final Repository _repo;
+  final WildlifeRepository _repo;
 
   InitialSyncService(this._repo);
 
@@ -29,24 +29,6 @@ class InitialSyncService {
       return species.any((s) => s.thumbnailUrl != null);
     } catch (_) {
       return false;
-    }
-  }
-
-  /// Clears all pending offline queue requests to avoid blocking new syncs.
-  Future<void> _clearOfflineQueue() async {
-    try {
-      final queueManager =
-          _repo.offlineRequestQueue.client.requestManager;
-      final pending = await queueManager.unprocessedRequests();
-      for (final req in pending) {
-        final id = req[queueManager.primaryKeyColumn] as int?;
-        if (id != null) await queueManager.deleteUnprocessedRequest(id);
-      }
-      if (pending.isNotEmpty) {
-        debugPrint('🧹 Cleared ${pending.length} offline queue requests before sync');
-      }
-    } catch (e) {
-      debugPrint('⚠️ Could not clear offline queue: $e');
     }
   }
 
@@ -67,13 +49,10 @@ class InitialSyncService {
     final total = tables.length;
     const timeout = Duration(seconds: 60);
 
-    // Clear any stale queued requests that would block new syncs
-    await _clearOfflineQueue();
-
     try {
       // 1. Categories
       onProgress?.call(1, total, tables[0]);
-      await _repo.get<brick.Category>(
+      await _repo.get<Category>(
         policy: OfflineFirstGetPolicy.awaitRemote,
       ).timeout(timeout);
 

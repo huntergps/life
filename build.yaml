@@ -1,0 +1,13 @@
+targets:
+  $default:
+    builders:
+      # Drift code generator for AppDatabase
+      drift_dev:
+        enabled: true
+
+      # drift_offline_first builders disabled — adapters are hand-written.
+      # Re-enable once source_gen compatibility is resolved.
+      drift_offline_first_with_supabase_build|supabase_adapters_builder:
+        enabled: false
+      drift_offline_first_with_supabase_build|supabase_aggregate_builder:
+        enabled: false

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'bootstrap.dart';
@@ -11,7 +12,7 @@ import 'core/services/initial_sync_service.dart';
 import 'core/services/realtime_service.dart';
 import 'core/providers/connectivity_provider.dart';
 import 'core/widgets/offline_banner.dart';
-import 'brick/repository.dart';
+import 'drift/repository/wildlife_repository.dart';
 import 'features/settings/providers/settings_provider.dart';
 import 'core/presentation/screens/sync_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -49,7 +50,7 @@ class _GalapagosWildlifeAppState extends ConsumerState<GalapagosWildlifeApp> {
       });
       return;
     }
-    final syncService = InitialSyncService(Repository());
+    final syncService = InitialSyncService(WildlifeRepository.instance);
     final complete = await syncService.isSyncComplete();
     if (!mounted) return;
     setState(() {
@@ -80,8 +81,8 @@ class _GalapagosWildlifeAppState extends ConsumerState<GalapagosWildlifeApp> {
     // Auto-refresh data providers when connectivity returns
     ref.watch(connectivityRefreshProvider);
 
-    // Activate Apple Watch connectivity (WCSession)
-    ref.watch(watchDataSyncProvider);
+    // Activate Apple Watch connectivity (WCSession) — native only
+    if (!kIsWeb) ref.watch(watchDataSyncProvider);
 
     // Show loading or sync screen BEFORE the router is created
     if (!_syncChecked) {

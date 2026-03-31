@@ -1,17 +1,17 @@
 import 'dart:async';
-import 'package:brick_offline_first/brick_offline_first.dart';
+import 'package:drift_offline_first/drift_offline_first.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
-import 'package:galapagos_wildlife/brick/models/species.model.dart';
-import 'package:galapagos_wildlife/brick/models/species_image.model.dart';
+import 'package:galapagos_wildlife/drift/drift.dart';
+import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/models/species_image.model.dart';
 import 'package:galapagos_wildlife/core/services/species_cache_manager.dart';
 
 /// Service to preload all species images into the HTTP cache for offline use.
 /// Downloads thumbnails only to save storage space.
 class ImagePreloadService {
-  final Repository _repo;
+  final WildlifeRepository _repo;
 
   ImagePreloadService(this._repo);
 

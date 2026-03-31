@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:galapagos_wildlife/brick/models/trail.model.dart';
+import 'package:galapagos_wildlife/models/trail.model.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import '../../providers/field_edit_provider.dart';
 import '../../utils/route_utils.dart';

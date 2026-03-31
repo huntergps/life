@@ -709,6 +709,7 @@ class AdminActiveListTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String? imageUrl;
   final bool isSelected;
   final bool selectionMode;
   final VoidCallback onTap;
@@ -726,6 +727,7 @@ class AdminActiveListTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
+    this.imageUrl,
     required this.isSelected,
     required this.selectionMode,
     required this.onTap,
@@ -783,7 +785,12 @@ class AdminActiveListTile extends StatelessWidget {
               )
             : CircleAvatar(
                 backgroundColor: accentColor.withValues(alpha: 0.1),
-                child: Icon(icon, color: accentColor),
+                backgroundImage: imageUrl != null
+                    ? NetworkImage(imageUrl!)
+                    : null,
+                child: imageUrl == null
+                    ? Icon(icon, color: accentColor)
+                    : null,
               ),
         title: Text(
           title,

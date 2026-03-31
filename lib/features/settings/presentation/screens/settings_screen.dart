@@ -9,9 +9,10 @@ import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import '../../providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
-import 'package:galapagos_wildlife/brick/repository.dart';
+import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/services/initial_sync_service.dart';
+import 'package:galapagos_wildlife/bootstrap.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/map_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/trail_provider.dart';
@@ -249,6 +250,34 @@ class SettingsScreen extends ConsumerWidget {
         onChanged: (_) => ref.read(badgeNotificationsProvider.notifier).toggle(),
       ),
       const Divider(),
+      // Beta Features (server-controlled via roles)
+      _SectionHeader(title: 'Beta'),
+      Builder(builder: (context) {
+        final isEs = locale == 'es';
+        final isBetaAsync = ref.watch(isBetaTesterProvider);
+        final isBeta = isBetaAsync.asData?.value ?? (Bootstrap.prefs.getBool('is_beta_tester') ?? false);
+        return SwitchListTile(
+          secondary: CircleAvatar(
+            backgroundColor: isDark
+                ? Colors.purple.withValues(alpha: 0.15)
+                : Colors.purple.withValues(alpha: 0.1),
+            child: Icon(
+              Icons.science_outlined,
+              color: isDark ? Colors.purpleAccent : Colors.purple,
+            ),
+          ),
+          title: Text(isEs ? 'Funciones Beta' : 'Beta Features'),
+          subtitle: Text(
+            isEs
+                ? isBeta ? 'Habilitado por el administrador' : 'Contacta al administrador para activar'
+                : isBeta ? 'Enabled by administrator' : 'Contact administrator to enable',
+            style: TextStyle(color: isDark ? Colors.white54 : null),
+          ),
+          value: isBeta,
+          onChanged: null, // Read-only — controlled from server
+        );
+      }),
+      const Divider(),
       // Offline Data
       _SectionHeader(title: context.t.settings.offlineImages),
       _SyncDataTile(isDark: isDark),
@@ -316,7 +345,7 @@ class _SyncDataTileState extends ConsumerState<_SyncDataTile> {
     if (_isSyncing) return;
     setState(() => _isSyncing = true);
     try {
-      final syncService = InitialSyncService(Repository());
+      final syncService = InitialSyncService(WildlifeRepository.instance);
       await syncService.syncAll();
       await ref.read(lastSyncedProvider.notifier).recordSync();
       ref.invalidate(islandsProvider);

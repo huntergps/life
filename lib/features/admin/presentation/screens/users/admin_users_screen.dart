@@ -375,7 +375,7 @@ class _TableRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUid = Supabase.instance.client.auth.currentUser?.id;
     final isSelf = user.id == currentUid;
-    final isLast = false; // handled by separator
+
 
     return Column(
       children: [

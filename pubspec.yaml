@@ -14,14 +14,30 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Brick Offline-First
-  brick_offline_first_with_supabase: ^2.1.0
-  brick_core: ^2.1.0
-  brick_supabase: ^2.1.0
-  brick_offline_first: ^4.0.0
-  brick_sqlite: ^4.0.0
-  sqflite: ^2.4.0
   sqflite_common: ^2.5.0
+  sqflite_common_ffi: ^2.3.4
+  sqflite_common_ffi_web: ^0.4.5
+
+  # Drift offline-first — offline queue + Supabase sync layer built on Drift.
+  drift_offline_first_with_supabase:
+    git:
+      url: https://github.com/huntergps/drift_offline
+      ref: 652d63b66a6e5e0ad4114e6903470b19dfb25713
+      path: packages/drift_offline_first_with_supabase
+  drift_offline_first:
+    git:
+      url: https://github.com/huntergps/drift_offline
+      ref: 652d63b66a6e5e0ad4114e6903470b19dfb25713
+      path: packages/drift_offline_first
+  drift_supabase:
+    git:
+      url: https://github.com/huntergps/drift_offline
+      ref: 652d63b66a6e5e0ad4114e6903470b19dfb25713
+      path: packages/drift_supabase
+
+  # Drift ORM
+  drift: ">=2.0.0 <3.0.0"
+  sqlite3: ">=2.0.0 <3.0.0"
 
   # Supabase
   supabase_flutter: ^2.12.0
@@ -87,6 +103,7 @@ dependencies:
   background_downloader: ^8.5.7
   flutter_watch_os_connectivity: ^1.0.0
   screenshot: ^3.0.0
+  drift_flutter: ^0.2.8
 
 dev_dependencies:
   flutter_test:
@@ -94,8 +111,10 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
   build_runner: ^2.4.14
-  brick_offline_first_with_supabase_build: ^2.1.0
   slang_build_runner: ^4.12.1
+  # drift_dev generates app_database.g.dart from @DriftDatabase
+  drift_dev: ">=2.0.0 <3.0.0"
+  source_gen: ^4.0.0
   flutter_launcher_icons: ^0.14.4
 
 flutter_launcher_icons:

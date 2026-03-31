@@ -1,4 +1,4 @@
-import 'package:galapagos_wildlife/brick/models/sighting.model.dart';
+import 'package:galapagos_wildlife/models/sighting.model.dart';
 
 /// Groups sightings by "yyyy-MM" key (year-month), ordered newest first.
 ///

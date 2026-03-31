@@ -15,9 +15,9 @@ import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/constants/mapbox_constants.dart'; // Now SatelliteMapConstants
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
-import 'package:galapagos_wildlife/brick/models/island.model.dart';
-import 'package:galapagos_wildlife/brick/models/trail.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
+import 'package:galapagos_wildlife/models/island.model.dart';
+import 'package:galapagos_wildlife/models/trail.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import '../../providers/map_download_provider.dart';
 import '../../providers/map_filters_provider.dart';
@@ -378,7 +378,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
     final islandsData = ref.read(islandsProvider).asData?.value ?? [];
     final isEs = LocaleSettings.currentLocale == AppLocale.es;
     final islandName = selectedIslandId != null
-        ? islandsData.where((i) => i.id == selectedIslandId).map((i) => isEs ? i.nameEs : (i.nameEn ?? i.nameEs)).firstOrNull
+        ? islandsData.where((i) => i.id == selectedIslandId).map((i) => isEs ? i.nameEs : i.nameEn).firstOrNull
         : null;
 
     final parts = <String>[];
@@ -435,7 +435,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         icon = Icons.map;
         break;
       case MapTileMode.street:
-      default:
         icon = Icons.map_outlined;
     }
 
@@ -477,8 +476,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         .where((i) => activeIslandIds.contains(i.id))
         .toList()
       ..sort((a, b) {
-        final nA = isEs ? a.nameEs : (a.nameEn ?? a.nameEs);
-        final nB = isEs ? b.nameEs : (b.nameEn ?? b.nameEs);
+        final nA = isEs ? a.nameEs : a.nameEn;
+        final nB = isEs ? b.nameEs : b.nameEn;
         return nA.compareTo(nB);
       });
 
@@ -627,7 +626,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                       // Per-island tiles
                       ...relevantIslands.map((island) {
-                        final name = isEs ? island.nameEs : (island.nameEn ?? island.nameEs);
+                        final name = isEs ? island.nameEs : island.nameEn;
                         final isSelected = ref.read(mapFiltersProvider).selectedIslandId == island.id;
                         return _islandTile(
                           ctx2,
@@ -872,11 +871,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                           .where((Island i) {
                             final searchQuery = ref.watch(mapFiltersProvider.select((f) => f.searchQuery));
                             if (searchQuery.isEmpty) return true;
-                            final islandName = isEs ? (i.nameEs ?? i.nameEn) : i.nameEn;
+                            final islandName = isEs ? i.nameEs : i.nameEn;
                             return islandName.toLowerCase().contains(searchQuery.toLowerCase());
                           })
                           .map((island) {
-                            final islandName = isEs ? (island.nameEs ?? island.nameEn) : island.nameEn;
+                            final islandName = isEs ? island.nameEs : island.nameEn;
                             final selectedIslandId = ref.watch(mapFiltersProvider.select((f) => f.selectedIslandId));
                             final isSelected = selectedIslandId == island.id;
                             return ListTile(

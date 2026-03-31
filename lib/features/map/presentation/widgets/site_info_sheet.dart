@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:galapagos_wildlife/brick/models/island.model.dart';
-import 'package:galapagos_wildlife/brick/models/visit_site.model.dart';
+import 'package:galapagos_wildlife/models/island.model.dart';
+import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/theme/app_colors.dart';
@@ -43,7 +43,7 @@ class SiteInfoSheet extends ConsumerWidget {
     final islandName = site.islandId != null
         ? islands
             .where((i) => i.id == site.islandId)
-            .map((i) => isEs ? i.nameEs : (i.nameEn ?? i.nameEs))
+            .map((i) => isEs ? i.nameEs : i.nameEn)
             .firstOrNull
         : null;
 

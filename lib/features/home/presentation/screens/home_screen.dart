@@ -11,6 +11,7 @@ import '../widgets/category_grid.dart';
 import '../../providers/home_provider.dart';
 import 'package:galapagos_wildlife/core/widgets/species_card.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
+import 'package:galapagos_wildlife/bootstrap.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart';
 
@@ -681,7 +682,8 @@ class _QuickActionsRow extends StatelessWidget {
         children: [
           if (!kIsWeb &&
               (defaultTargetPlatform == TargetPlatform.android ||
-                  defaultTargetPlatform == TargetPlatform.iOS))
+                  defaultTargetPlatform == TargetPlatform.iOS) &&
+              (Bootstrap.prefs.getBool('is_beta_tester') ?? false))
             _ActionBtn(
               icon:  Icons.image_search_outlined,
               label: t.home.photoId,
