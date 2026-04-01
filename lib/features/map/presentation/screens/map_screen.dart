@@ -4,10 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/constants/app_constants.dart';
-import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
-import 'package:galapagos_wildlife/models/trail.model.dart';
 import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import '../../providers/map_download_provider.dart';
@@ -18,28 +15,20 @@ import '../../providers/trail_provider.dart';
 import '../../providers/tracking_provider.dart';
 import '../../providers/field_edit_provider.dart';
 import '../../providers/gps_tracking_provider.dart';
-import '../../services/field_edit_service.dart';
 import '../../themes/protomaps_theme.dart';
-import 'package:galapagos_wildlife/core/services/app_logger.dart';
-import '../../utils/route_utils.dart';
-import '../../utils/viewport_helpers.dart';
-import '../widgets/map_layer_builders.dart';
 import '../widgets/map_mode_selector.dart';
 import '../widgets/field_edit_toolbar.dart';
 import '../widgets/trail_recording_panel.dart';
 import '../widgets/site_info_sheet.dart';
 // Extracted modules
-import '../../controls/zoom_controls.dart';
 import '../../controls/off_route_banner.dart';
 import '../../controls/map_fabs.dart';
-import '../../layers/tile_layers.dart';
-import '../../layers/site_markers_layer.dart';
 import '../../layers/field_editing_layer.dart';
 import '../../sheets/trail_info_sheet.dart';
-import '../../sheets/sighting_info_sheet.dart';
-import '../../sheets/island_info_sheet.dart';
 import '../../shell/map_phone_layout.dart';
 import '../../shell/map_tablet_layout.dart';
+import '../../shell/map_builder.dart';
+import '../../editing/field_tap_handler.dart';
 import '../../tracking/tracking_controller.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
@@ -53,6 +42,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   final MapController _mapController = MapController();
   bool _movedToUser = false;
   late final TrackingController _trackingCtrl;
+  late final FieldTapHandler _fieldTapHandler;
 
   // Cached vector tile themes (created once)
   vtr.Theme? _lightTheme;
@@ -73,6 +63,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void initState() {
     super.initState();
     _trackingCtrl = TrackingController(ref: ref, mapController: _mapController);
+    _fieldTapHandler = FieldTapHandler(
+      ref: ref,
+      fieldEditBuilder: _fieldEditBuilder,
+      showSnackBar: _showSnackBar,
+      onResetRotateHandle: () =>
+          setState(() => _fieldEditBuilder.rotateHandlePos = null),
+    );
   }
 
   @override
@@ -137,10 +134,39 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       }
     });
 
-    final mapWidget = _buildMap(
-      isDark, isEs, islandsAsync, sitesAsync, locationAsync,
-      sightingsAsync, speciesLookupAsync, trailsAsync,
-      isTracking, trackPoints, editState, tileMode, pmtilesAsync,
+    final mapWidget = MapBuilder(
+      mapController: _mapController,
+      isDark: isDark,
+      isEs: isEs,
+      islandsAsync: islandsAsync,
+      sitesAsync: sitesAsync,
+      locationAsync: locationAsync,
+      sightingsAsync: sightingsAsync,
+      speciesLookupAsync: speciesLookupAsync,
+      trailsAsync: trailsAsync,
+      isTracking: isTracking,
+      trackPoints: trackPoints,
+      editState: editState,
+      tileMode: tileMode,
+      pmtilesAsync: pmtilesAsync,
+      fieldEditBuilder: _fieldEditBuilder,
+      ref: ref,
+      onMapTap: _fieldTapHandler.handleMapTap,
+      onShowSiteInfo: (site) => _showSiteInfo(context, site),
+      onShowTrailInfo: (trail) => showTrailInfoSheet(
+        context: context,
+        trail: trail,
+        onStartTracking: () => _trackingCtrl.startTrackingTrail(trail.coordinates),
+        onEditTrail: () => _fieldTapHandler.loadTrailForEditing(trail.id),
+      ),
+      onLoadTrailForEditing: _fieldTapHandler.loadTrailForEditing,
+      onViewportChanged: () => setState(() {}),
+      lightTheme: _cachedLightTheme,
+      darkTheme: _cachedDarkTheme,
+      sitePositionOverrides: _sitePositionOverrides,
+      onSiteDragged: (siteId, newPos) {
+        setState(() => _sitePositionOverrides[siteId] = newPos);
+      },
     );
 
     final mapWithOverlays = _buildMapWithOverlays(
@@ -232,291 +258,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // Map builder
-  // ---------------------------------------------------------------------------
-
-  Widget _buildMap(
-    bool isDark,
-    bool isEs,
-    AsyncValue<dynamic> islandsAsync,
-    AsyncValue<dynamic> sitesAsync,
-    AsyncValue<dynamic> locationAsync,
-    AsyncValue<dynamic> sightingsAsync,
-    AsyncValue<dynamic> speciesLookupAsync,
-    AsyncValue<List<Trail>> trailsAsync,
-    bool isTracking,
-    List<({LatLng point, DateTime time})> trackPoints,
-    FieldEditState editState,
-    MapTileMode tileMode,
-    AsyncValue<PmTilesVectorProvider?> pmtilesAsync,
-  ) {
-    final tileModeStr = tileMode.name; // 'vector'|'satellite'|'hybrid'|'street'
-
-    bool viewportCheck(double? lat, double? lng) =>
-        isWithinViewport(_mapController, lat, lng);
-
-    final flutterMap = FlutterMap(
-      mapController: _mapController,
-      options: MapOptions(
-        initialCenter: const LatLng(
-          AppConstants.galapagosDefaultLat,
-          AppConstants.galapagosDefaultLng,
-        ),
-        initialZoom: AppConstants.galapagosDefaultZoom,
-        minZoom: 6,
-        maxZoom: 19,
-        interactionOptions: const InteractionOptions(
-          flags: InteractiveFlag.all,
-          enableMultiFingerGestureRace: true,
-        ),
-        onMapEvent: (event) {
-          if (event is MapEventMove || event is MapEventRotate) {
-            setState(() {});
-          }
-        },
-        onTap: (tapPosition, point) => _handleMapTap(point),
-      ),
-      children: [
-        // Tile base layers
-        ...buildTileLayers(
-          tileMode: tileModeStr,
-          isDark: isDark,
-          lightTheme: _cachedLightTheme,
-          darkTheme: _cachedDarkTheme,
-          pmtilesProvider: pmtilesAsync.asData?.value,
-        ),
-        // User location marker
-        if (locationAsync.asData?.value case final userPos?)
-          MarkerLayer(
-            markers: [
-              Marker(
-                point: LatLng(userPos.latitude, userPos.longitude),
-                width: 24, height: 24,
-                child: Semantics(
-                  label: context.t.map.yourLocation,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3),
-                      boxShadow: [
-                        BoxShadow(color: Colors.blue.withValues(alpha: 0.3), blurRadius: 8, spreadRadius: 2),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        // Island markers
-        _buildIslandMarkers(islandsAsync, isEs, isDark),
-        // Visit site markers
-        if (ref.watch(mapFiltersProvider.select((f) => f.showSites)))
-          buildSiteMarkersLayer(
-            sitesAsync: sitesAsync,
-            isEs: isEs,
-            editState: editState,
-            ref: ref,
-            context: context,
-            isWithinViewport: viewportCheck,
-            onShowSiteInfo: (site) => _showSiteInfo(context, site),
-          ),
-        // Trail polylines
-        if (ref.watch(mapFiltersProvider.select((f) => f.showTrails)))
-          MapLayerBuilders.buildTrailPolylinesLayer(
-            trailsAsync: trailsAsync,
-            editingTrailId: ref.watch(fieldEditProvider.select((s) => s.selectedTrailId)),
-            isEditing: ref.watch(fieldEditProvider.select((s) => s.mode == FieldEditMode.editTrailManual)),
-          ),
-        // Trail midpoint markers (normal mode)
-        if (ref.watch(mapFiltersProvider.select((f) => f.showTrails)) &&
-            editState.mode != FieldEditMode.selectTrailForEdit &&
-            editState.mode != FieldEditMode.editTrailManual)
-          _buildTrailMarkers(trailsAsync, isEs),
-        // User tracking polyline
-        if (isTracking && trackPoints.isNotEmpty)
-          PolylineLayer(polylines: [
-            Polyline(
-              points: trackPoints.map((tp) => tp.point).toList(),
-              color: Colors.blue,
-              strokeWidth: 4,
-              borderColor: Colors.white,
-              borderStrokeWidth: 1,
-            ),
-          ]),
-        // Sighting markers
-        if (ref.watch(mapFiltersProvider.select((f) => f.showSightings)))
-          MapLayerBuilders.buildSightingsLayer(
-            context: context,
-            isEs: isEs,
-            sightingsAsync: sightingsAsync,
-            speciesLookupAsync: speciesLookupAsync,
-            isWithinViewport: viewportCheck,
-            onSightingTap: (sighting, species) => showSightingInfoSheet(
-              context: context,
-              sighting: sighting,
-              species: species,
-            ),
-          ),
-        // Field editing layer
-        _fieldEditBuilder.build(ref),
-        // Trail markers in selectTrailForEdit mode (rendered last for tap priority)
-        if (ref.watch(mapFiltersProvider.select((f) => f.showTrails)) && editState.mode == FieldEditMode.selectTrailForEdit)
-          _buildTrailMarkers(trailsAsync, isEs),
-        // Site DragMarkers rendered LAST in moveSitesDrag mode
-        if (ref.watch(mapFiltersProvider.select((f) => f.showSites)) && editState.mode == FieldEditMode.moveSitesDrag)
-          buildSiteDragMarkersLayer(
-            sitesAsync: sitesAsync,
-            isEs: isEs,
-            ref: ref,
-            context: context,
-            sitePositionOverrides: _sitePositionOverrides,
-            onSiteDragged: (siteId, newPos) {
-              setState(() => _sitePositionOverrides[siteId] = newPos);
-            },
-          ),
-      ],
-    );
-
-    // Wrap FlutterMap with UI controls in a Stack
-    final zoom = safeGetZoom(_mapController);
-    final rotation = safeGetRotation(_mapController);
-
-    return Stack(
-      children: [
-        flutterMap,
-        // Zoom controls
-        Positioned(
-          bottom: MediaQuery.viewPaddingOf(context).bottom + 130,
-          right: 16,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ZoomButton(
-                icon: Icons.add,
-                onPressed: zoom >= 19 ? null : () {
-                  try {
-                    final z = safeGetZoom(_mapController);
-                    _mapController.move(_mapController.camera.center, (z + 1).clamp(6, 19));
-                  } catch (e) {
-                    AppLogger.warning('Zoom in failed: map controller not ready', e);
-                  }
-                },
-              ),
-              const SizedBox(height: 8),
-              ZoomButton(
-                icon: Icons.remove,
-                onPressed: zoom <= 6 ? null : () {
-                  try {
-                    final z = safeGetZoom(_mapController);
-                    _mapController.move(_mapController.camera.center, (z - 1).clamp(6, 19));
-                  } catch (e) {
-                    AppLogger.warning('Zoom out failed: map controller not ready', e);
-                  }
-                },
-              ),
-            ],
-          ),
-        ),
-        // Compass indicator
-        if (rotation != 0)
-          Positioned(
-            top: 16,
-            right: 16,
-            child: GestureDetector(
-              onTap: () {
-                try { _mapController.rotate(0); } catch (e) { /* not ready */ }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.grey.shade900.withValues(alpha: 0.9) : Colors.white.withValues(alpha: 0.9),
-                  shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4)],
-                ),
-                child: Transform.rotate(
-                  angle: rotation * (3.14159 / 180),
-                  child: Icon(Icons.navigation, color: AppColors.primary, size: 24),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Island markers layer
-  // ---------------------------------------------------------------------------
-
-  Widget _buildIslandMarkers(AsyncValue<dynamic> islandsAsync, bool isEs, bool isDark) {
-    return islandsAsync.when(
-      data: (islands) => MarkerLayer(
-        markers: islands
-            .where((island) => island.latitude != null && island.longitude != null)
-            .where((island) => isWithinViewport(_mapController, island.latitude, island.longitude))
-            .map((island) {
-              final islandName = isEs ? (island.nameEs ?? island.nameEn) : island.nameEn;
-              return Marker(
-                point: LatLng(island.latitude!, island.longitude!),
-                width: 120, height: 40,
-                child: Semantics(
-                  button: true,
-                  label: context.t.map.islandLabel(name: islandName),
-                  child: GestureDetector(
-                    onTap: () => showIslandInfoSheet(context: context, island: island),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.darkSurface.withValues(alpha: 0.9)
-                            : AppColors.primaryDark.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(8),
-                        border: isDark
-                            ? Border.all(color: AppColors.primaryLight.withValues(alpha: 0.3))
-                            : null,
-                      ),
-                      child: Text(
-                        islandName,
-                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            })
-            .toList().cast<Marker>(),
-      ),
-      loading: () => const MarkerLayer(markers: []),
-      error: (_, _) => const MarkerLayer(markers: []),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Trail markers
-  // ---------------------------------------------------------------------------
-
-  Widget _buildTrailMarkers(AsyncValue<List<Trail>> trailsAsync, bool isEs) {
-    final isSelectingForEdit = ref.watch(
-        fieldEditProvider.select((s) => s.mode == FieldEditMode.selectTrailForEdit));
-    return MapLayerBuilders.buildTrailMarkers(
-      context: context,
-      trailsAsync: trailsAsync,
-      isEs: isEs,
-      isSelectingForEdit: isSelectingForEdit,
-      onShowTrailInfo: (trail) => showTrailInfoSheet(
-        context: context,
-        trail: trail,
-        onStartTracking: () => _trackingCtrl.startTrackingTrail(trail.coordinates),
-        onEditTrail: () => _loadTrailForEditing(trail.id),
-      ),
-      onSelectTrailForEdit: (id) => _loadTrailForEditing(id),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
   // Bottom sheet helpers
   // ---------------------------------------------------------------------------
 
@@ -531,62 +272,6 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       ),
       builder: (_) => SiteInfoSheet(site: site, islands: islands),
     );
-  }
-
-  // ---------------------------------------------------------------------------
-  // Field editing
-  // ---------------------------------------------------------------------------
-
-  void _handleMapTap(LatLng point) {
-    final editState = ref.read(fieldEditProvider);
-    if ((editState.mode == FieldEditMode.createTrailManual ||
-            editState.mode == FieldEditMode.editTrailManual) &&
-        editState.trailEditSubMode == TrailEditSubMode.points) {
-      final notifier = ref.read(fieldEditProvider.notifier);
-      notifier.clearSelection();
-      notifier.pushUndoState();
-      final pts = editState.recordingPoints;
-
-      if (pts.length < 2) {
-        notifier.addRecordingPoint(point);
-      } else {
-        final result = distanceToPolyline(point, pts);
-        final atStart = haversineDistance(result.nearest, pts.first) < 1.0;
-        final atEnd   = haversineDistance(result.nearest, pts.last)  < 1.0;
-
-        final int insertIdx;
-        if (atEnd) {
-          insertIdx = pts.length;
-        } else if (atStart) {
-          insertIdx = 0;
-        } else {
-          insertIdx = result.segmentIndex + 1;
-        }
-
-        final newPts = List<LatLng>.from(pts)..insert(insertIdx, point);
-        notifier.setRecordingPoints(newPts);
-      }
-      notifier.markUnsaved();
-    }
-  }
-
-  Future<void> _loadTrailForEditing(int trailId) async {
-    _showSnackBar('Loading trail...');
-    setState(() => _fieldEditBuilder.rotateHandlePos = null);
-    try {
-      final service = FieldEditService(ref: ref);
-      final trail = await service.getTrail(trailId);
-      if (!mounted) return;
-      if (trail == null) { _showSnackBar('Trail not found (id $trailId)'); return; }
-      final coords = parseTrailCoordinates(trail.coordinates);
-      if (coords.isEmpty) { _showSnackBar('Trail has no coordinates'); return; }
-      final editNotifier = ref.read(fieldEditProvider.notifier);
-      editNotifier.startEditingTrailManual(trailId);
-      editNotifier.loadPoints(coords);
-      _showSnackBar('Trail loaded -- use Points / Move / Rotate to edit');
-    } catch (e) {
-      if (mounted) _showSnackBar('Error loading trail: $e');
-    }
   }
 
   void _showSnackBar(String message) {

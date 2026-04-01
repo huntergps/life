@@ -1,5 +1,8 @@
 # Galapagos Wildlife App -- Architecture
 
+> **See also**: `docs/architecture/current-state.md` for a concise structural overview
+> and `docs/architecture/target-architecture.md` for the roadmap.
+
 ## App Overview
 
 Galapagos Wildlife is an offline-first fauna guide for the Galapagos Islands. It provides species identification (photo and sound), an interactive map with trails and visit sites, sighting logging, gamification (badges and leaderboard), and a full admin/editorial system for managing content.
