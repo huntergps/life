@@ -1,7 +1,5 @@
 import 'dart:io';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import 'package:drift_offline_first_with_supabase/drift_offline_first_with_supabase.dart';
-import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,7 +11,6 @@ import 'package:galapagos_wildlife/core/constants/supabase_constants.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/models/species_image.model.dart';
-import 'package:drift_offline_first_with_supabase/drift_offline_first_with_supabase.dart';
 import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
