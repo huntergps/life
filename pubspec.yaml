@@ -22,17 +22,17 @@ dependencies:
   drift_offline_first_with_supabase:
     git:
       url: https://github.com/huntergps/drift_offline
-      ref: 652d63b66a6e5e0ad4114e6903470b19dfb25713
+      ref: 5a5b542af434671b8ba2af7e3402d78b4d4ce731
       path: packages/drift_offline_first_with_supabase
   drift_offline_first:
     git:
       url: https://github.com/huntergps/drift_offline
-      ref: 652d63b66a6e5e0ad4114e6903470b19dfb25713
+      ref: 5a5b542af434671b8ba2af7e3402d78b4d4ce731
       path: packages/drift_offline_first
   drift_supabase:
     git:
       url: https://github.com/huntergps/drift_offline
-      ref: 652d63b66a6e5e0ad4114e6903470b19dfb25713
+      ref: 5a5b542af434671b8ba2af7e3402d78b4d4ce731
       path: packages/drift_supabase
 
   # Drift ORM

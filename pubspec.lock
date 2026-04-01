@@ -452,23 +452,29 @@ packages:
   drift_offline_first:
     dependency: "direct main"
     description:
-      path: "../offline/drift_offline/packages/drift_offline_first"
-      relative: true
-    source: path
+      path: "packages/drift_offline_first"
+      ref: "5a5b542af434671b8ba2af7e3402d78b4d4ce731"
+      resolved-ref: "5a5b542af434671b8ba2af7e3402d78b4d4ce731"
+      url: "https://github.com/huntergps/drift_offline"
+    source: git
     version: "0.1.0"
   drift_offline_first_with_supabase:
     dependency: "direct main"
     description:
-      path: "../offline/drift_offline/packages/drift_offline_first_with_supabase"
-      relative: true
-    source: path
+      path: "packages/drift_offline_first_with_supabase"
+      ref: "5a5b542af434671b8ba2af7e3402d78b4d4ce731"
+      resolved-ref: "5a5b542af434671b8ba2af7e3402d78b4d4ce731"
+      url: "https://github.com/huntergps/drift_offline"
+    source: git
     version: "0.1.0"
   drift_supabase:
     dependency: "direct main"
     description:
-      path: "../offline/drift_offline/packages/drift_supabase"
-      relative: true
-    source: path
+      path: "packages/drift_supabase"
+      ref: "5a5b542af434671b8ba2af7e3402d78b4d4ce731"
+      resolved-ref: "5a5b542af434671b8ba2af7e3402d78b4d4ce731"
+      url: "https://github.com/huntergps/drift_offline"
+    source: git
     version: "0.1.0"
   ed25519_edwards:
     dependency: transitive
