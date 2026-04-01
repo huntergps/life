@@ -111,7 +111,7 @@ class NearbySpeciesPanel extends ConsumerWidget {
                       controller: scrollController,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       itemCount: species.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1, indent: 56),
+                      separatorBuilder: (_, _) => const Divider(height: 1, indent: 56),
                       itemBuilder: (context, i) {
                         final entry = species[i];
                         final sp = entry.species;
@@ -128,7 +128,7 @@ class NearbySpeciesPanel extends ConsumerWidget {
                                     width: 40,
                                     height: 40,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => _speciesIcon(sp),
+                                    errorBuilder: (_, _, _) => _speciesIcon(sp),
                                   )
                                 : _speciesIcon(sp),
                           ),
@@ -163,7 +163,7 @@ class NearbySpeciesPanel extends ConsumerWidget {
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (_, __) => Center(
+                  error: (_, _) => Center(
                     child: Text(isEs ? 'Error al cargar' : 'Failed to load'),
                   ),
                 ),

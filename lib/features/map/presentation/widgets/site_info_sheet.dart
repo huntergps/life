@@ -224,7 +224,7 @@ class SiteInfoSheet extends ConsumerWidget {
                 // ── Clasificaciones (Tipos / Modalidades / Actividades) ──
                 classAsync.when(
                   loading: () => const SizedBox.shrink(),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                   data: (cls) {
                     final types = cls['types'] ?? [];
                     final modalities = cls['modalities'] ?? [];
@@ -295,7 +295,7 @@ class SiteInfoSheet extends ConsumerWidget {
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Center(child: CircularProgressIndicator()),
                   ),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                   data: (list) {
                     if (list.isEmpty) {
                       return Padding(

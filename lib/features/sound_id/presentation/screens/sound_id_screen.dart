@@ -220,7 +220,7 @@ class _SoundIdScreenState extends ConsumerState<SoundIdScreen>
             children: List.generate(12, (i) {
               return AnimatedBuilder(
                 animation: _pulseController,
-                builder: (_, __) {
+                builder: (_, _) {
                   final phase = (i / 12 * 2 * math.pi + _pulseController.value * 2 * math.pi);
                   final h = 20.0 + 40.0 * math.sin(phase).abs();
                   return Container(

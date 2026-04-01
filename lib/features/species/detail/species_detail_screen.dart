@@ -1244,7 +1244,7 @@ class _VisitSitesStrip extends ConsumerWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: sites.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
               itemBuilder: (context, i) {
                 final entry = sites[i];
                 final siteName = locale == 'es'

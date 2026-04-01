@@ -49,6 +49,8 @@ Future<void> exportSightingsCsv({
   final file = File('${dir.path}/sightings_$dateStamp.csv');
   await file.writeAsString(buf.toString());
 
+  if (!context.mounted) return;
+
   // Share
   final box = context.findRenderObject() as RenderBox?;
   await SharePlus.instance.share(

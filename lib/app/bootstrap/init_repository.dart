@@ -1,3 +1,4 @@
+// ignore_for_file: invalid_use_of_protected_member
 import 'dart:async' show unawaited;
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' show databaseFactory;

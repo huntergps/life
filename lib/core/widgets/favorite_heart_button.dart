@@ -120,7 +120,7 @@ class _FavoriteHeartButtonState extends ConsumerState<FavoriteHeartButton>
     try {
       final wasFavorite = isFavorite;
       await toggleFavorite(ref, widget.speciesId);
-      if (mounted) {
+      if (context.mounted) {
         _scaleCtrl.forward(from: 0);
         setState(() {
           _heartKey++; // Force new HeartBubbleOverlay instance
@@ -129,11 +129,10 @@ class _FavoriteHeartButtonState extends ConsumerState<FavoriteHeartButton>
         });
       }
     } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.t.common.error)),
-        );
-      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.t.common.error)),
+      );
     }
   }
 }

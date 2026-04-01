@@ -398,7 +398,7 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
           if (!yoloAvailable)
             AnimatedBuilder(
               animation: _scanCtrl,
-              builder: (_, __) => CustomPaint(
+              builder: (_, _) => CustomPaint(
                 painter: _ScanLinePainter(_scanCtrl.value),
               ),
             ),
@@ -406,7 +406,7 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
           // ── HUD corner frame ──────────────────────────────────────────────
           AnimatedBuilder(
             animation: _cornerCtrl,
-            builder: (_, __) => CustomPaint(
+            builder: (_, _) => CustomPaint(
               painter: _HudFramePainter(
                 progress: _cornerCtrl.value,
                 locked: hasDetection,
@@ -418,7 +418,7 @@ class _ArCameraScreenState extends ConsumerState<ArCameraScreen>
           if (hasDetection && !yoloAvailable)
             AnimatedBuilder(
               animation: _pulseCtrl,
-              builder: (_, __) => CustomPaint(
+              builder: (_, _) => CustomPaint(
                 painter: _TargetLockPainter(_pulseCtrl.value),
               ),
             ),
@@ -766,7 +766,7 @@ class _HudBottomControls extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: list.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (_, i) => _HudSpeciesChip(
                       species: list[i].species,
                       isEs: isEs,
@@ -777,7 +777,7 @@ class _HudBottomControls extends StatelessWidget {
             );
           },
           loading: () => const SizedBox.shrink(),
-          error: (_, __) => const SizedBox.shrink(),
+          error: (_, _) => const SizedBox.shrink(),
         ),
 
         const SizedBox(height: 16),
