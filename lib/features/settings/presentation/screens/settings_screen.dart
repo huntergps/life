@@ -316,7 +316,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: const Icon(Icons.description),
         title: Text(context.t.settings.credits),
         subtitle: Text(
-          'Galapagos Wildlife Team',
+          'GalapagosTech — Elmer Salazar',
           style: TextStyle(color: isDark ? Colors.white54 : null),
         ),
         onTap: () {},
