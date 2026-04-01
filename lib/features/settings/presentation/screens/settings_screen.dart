@@ -17,6 +17,8 @@ import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/map_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/trail_provider.dart';
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
+import 'package:galapagos_wildlife/features/auth/services/account_deletion_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -57,6 +59,22 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(context.t.auth.signInSubtitle, style: TextStyle(color: isDark ? Colors.white54 : null)),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.pushNamed('login'),
+          ),
+        // Delete Account (only when authenticated)
+        if (isAuthenticated)
+          ListTile(
+            leading: const Icon(Icons.delete_forever, color: Colors.red),
+            title: Text(
+              locale == 'es' ? 'Eliminar cuenta' : 'Delete Account',
+              style: const TextStyle(color: Colors.red),
+            ),
+            subtitle: Text(
+              locale == 'es'
+                  ? 'Elimina permanentemente tu cuenta y todos tus datos'
+                  : 'Permanently delete your account and all data',
+              style: TextStyle(color: isDark ? Colors.white54 : null),
+            ),
+            onTap: () => _showDeleteAccountDialog(context, ref, locale == 'es'),
           ),
         // Admin Panel (admin users) / Staff Panel (curator/editor)
         if (isAuthenticated)
@@ -298,6 +316,16 @@ class SettingsScreen extends ConsumerWidget {
         ),
         onTap: () {},
       ),
+      ListTile(
+        leading: const Icon(Icons.privacy_tip_outlined),
+        title: Text(context.t.settings.privacyPolicy),
+        onTap: () => launchUrl(Uri.parse('https://huntergps.github.io/life/privacy-policy')),
+      ),
+      ListTile(
+        leading: const Icon(Icons.description_outlined),
+        title: Text(context.t.settings.termsOfService),
+        onTap: () => launchUrl(Uri.parse('https://huntergps.github.io/life/terms-of-service')),
+      ),
     ];
 
     if (isTablet) {
@@ -326,6 +354,89 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         children: settingsContent,
       ),
+    );
+  }
+}
+
+Future<void> _showDeleteAccountDialog(
+    BuildContext context, WidgetRef ref, bool isEs) async {
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(isEs ? 'Eliminar cuenta' : 'Delete Account'),
+      content: Text(isEs
+          ? 'Esta accion es IRREVERSIBLE. Se eliminaran todos tus avistamientos, favoritos, perfil y datos. ¿Estas seguro?'
+          : 'This action is IRREVERSIBLE. All your sightings, favorites, profile, and data will be deleted. Are you sure?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(isEs ? 'Cancelar' : 'Cancel'),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: Text(isEs ? 'Si, eliminar' : 'Yes, delete'),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+
+  // Second confirmation: type DELETE / ELIMINAR
+  final controller = TextEditingController();
+  final keyword = isEs ? 'ELIMINAR' : 'DELETE';
+  final typed = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(isEs ? 'Confirmar eliminacion' : 'Confirm Deletion'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(isEs
+              ? 'Escribe "$keyword" para confirmar:'
+              : 'Type "$keyword" to confirm:'),
+          const SizedBox(height: 12),
+          TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(hintText: keyword),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: Text(isEs ? 'Cancelar' : 'Cancel'),
+        ),
+        TextButton(
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
+          onPressed: () {
+            if (controller.text.trim().toUpperCase() == keyword) {
+              Navigator.pop(ctx, true);
+            }
+          },
+          child: Text(isEs ? 'Eliminar cuenta' : 'Delete Account'),
+        ),
+      ],
+    ),
+  );
+  if (typed != true || !context.mounted) return;
+
+  // Execute deletion
+  try {
+    await AccountDeletionService.deleteAccount();
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+          content: Text(
+              isEs ? 'Cuenta eliminada' : 'Account deleted')),
+    );
+    ref.invalidate(isAdminProvider);
+    context.go('/');
+  } catch (e) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
     );
   }
 }
