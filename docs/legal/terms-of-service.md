@@ -38,4 +38,4 @@ Galapagos Wildlife is an offline-first mobile guide for the fauna of the Galapag
 - These terms are governed by the laws of Ecuador
 
 ## Contact
-- Email: esalazargps@gmail.com
+- Email: admin@galapagos.tech

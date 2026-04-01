@@ -36,7 +36,7 @@ Last updated: April 1, 2026
 - The app does not knowingly collect data from children under 13
 
 ## Contact
-- Email: esalazargps@gmail.com
+- Email: admin@galapagos.tech
 
 ## Changes
 - We may update this policy. Changes will be noted with a new "Last updated" date.
