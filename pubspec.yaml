@@ -68,6 +68,9 @@ dependencies:
   tflite_flutter: ^0.12.1
   image: ^4.5.2
 
+  # In-App Purchases
+  in_app_purchase: ^3.2.0
+
   # Images & UI
   cached_network_image: ^3.4.1
   flutter_svg: ^2.0.16

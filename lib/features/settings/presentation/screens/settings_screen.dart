@@ -19,6 +19,8 @@ import 'package:galapagos_wildlife/features/map/providers/trail_provider.dart';
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 import 'package:galapagos_wildlife/features/auth/services/account_deletion_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -201,6 +203,9 @@ class SettingsScreen extends ConsumerWidget {
         ),
         const Divider(),
       ],
+      // Premium
+      _PremiumSettingsTile(isDark: isDark),
+      const Divider(),
       // Language
       _SectionHeader(title: context.t.settings.language),
       RadioGroup<String>(
@@ -541,6 +546,65 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+
+class _PremiumSettingsTile extends ConsumerWidget {
+  final bool isDark;
+  const _PremiumSettingsTile({required this.isDark});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasPack = ref.watch(hasPackProvider);
+    final hasPro = ref.watch(hasProProvider);
+    final isEs = ref.watch(localeProvider) == 'es';
+
+    final String statusText;
+    final IconData statusIcon;
+    final Color statusColor;
+
+    if (hasPro) {
+      statusText = isEs ? 'Pro activo' : 'Pro active';
+      statusIcon = Icons.star;
+      statusColor = Colors.amber.shade700;
+    } else if (hasPack) {
+      statusText = isEs ? 'Pack activo' : 'Pack active';
+      statusIcon = Icons.check_circle;
+      statusColor = AppColors.primary;
+    } else {
+      statusText = isEs ? 'Desbloquea funciones premium' : 'Unlock premium features';
+      statusIcon = Icons.lock_outline;
+      statusColor = isDark ? Colors.white54 : Colors.grey;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(title: 'Premium'),
+        ListTile(
+          leading: CircleAvatar(
+            backgroundColor: isDark
+                ? statusColor.withValues(alpha: 0.15)
+                : statusColor.withValues(alpha: 0.1),
+            child: Icon(statusIcon, color: statusColor),
+          ),
+          title: Text(
+            hasPro ? 'Galapagos Pro' : hasPack ? 'Galapagos Pack' : (isEs ? 'Galapagos Premium' : 'Galapagos Premium'),
+            style: TextStyle(color: isDark ? Colors.white : null),
+          ),
+          subtitle: Text(
+            statusText,
+            style: TextStyle(color: isDark ? Colors.white54 : null),
+          ),
+          trailing: (hasPro)
+              ? null
+              : const Icon(Icons.chevron_right),
+          onTap: (hasPro)
+              ? null
+              : () => showPaywall(context),
+        ),
+      ],
+    );
+  }
+}
 
 class _TextSizeSlider extends ConsumerWidget {
   final bool isDark;

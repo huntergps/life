@@ -22,11 +22,14 @@ final appRouter = GoRouter(
     if (!noSave.contains(path)) {
       Bootstrap.prefs.setString('last_route', path);
     }
-    // Beta-only routes: redirect to home when user is not a beta tester
+    // Premium routes: accessible to beta testers OR users who purchased Pack/Pro
     const betaRoutes = {'/map', '/photo-id', '/field-camera'};
     if (betaRoutes.contains(path)) {
-      final isBeta = Bootstrap.prefs.getBool('is_beta_tester') ?? false;
-      if (!isBeta) return '/';
+      final prefs = Bootstrap.prefs;
+      final canAccess = (prefs.getBool('is_beta_tester') ?? false)
+          || (prefs.getBool('has_pack') ?? false)
+          || (prefs.getBool('has_pro') ?? false);
+      if (!canAccess) return '/';
     }
     // Guard admin routes
     if (path.startsWith('/admin')) {

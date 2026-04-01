@@ -6,6 +6,7 @@ import 'package:galapagos_wildlife/data/sync/realtime_service.dart';
 import 'package:galapagos_wildlife/core/providers/connectivity_provider.dart';
 import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/features/watch/sync/watch_data_sync_provider.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Startup phase enum
@@ -82,4 +83,7 @@ void activateBackgroundProviders(WidgetRef ref) {
 
   // Activate Apple Watch connectivity (WCSession) — native only
   if (!kIsWeb) ref.watch(watchDataSyncProvider);
+
+  // Initialize in-app purchases
+  ref.watch(purchaseInitProvider);
 }

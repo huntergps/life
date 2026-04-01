@@ -35,7 +35,12 @@ class ScaffoldWithNav extends StatelessWidget {
     return GoRouterState.of(context).uri.path.startsWith('/admin');
   }
 
-  static bool get _isBeta => Bootstrap.prefs.getBool('is_beta_tester') ?? false;
+  static bool get _isBeta {
+    final prefs = Bootstrap.prefs;
+    return (prefs.getBool('is_beta_tester') ?? false)
+        || (prefs.getBool('has_pack') ?? false)
+        || (prefs.getBool('has_pro') ?? false);
+  }
 
   static int calculateSelectedIndex(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
