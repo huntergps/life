@@ -5,6 +5,7 @@ import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import '../providers/purchase_provider.dart';
 import '../services/purchase_service.dart';
 
+
 /// Shows the paywall as a bottom sheet
 Future<void> showPaywall(BuildContext context) {
   return showModalBottomSheet(
@@ -95,13 +96,10 @@ class PaywallSheet extends ConsumerWidget {
             isPurchased: hasPack,
             onBuy: hasPack
                 ? null
-                : () async {
-                    if (PurchaseService.isNativeIAP) {
-                      await PurchaseService.instance.buyPack();
-                    } else {
-                      await PurchaseService.instance.buyPackWeb();
-                    }
-                  },
+                : PurchaseService.isNativeIAP
+                    ? () => PurchaseService.instance.buyPack()
+                    : null,
+            iapUnavailable: !PurchaseService.isNativeIAP && !hasPack,
             color: AppColors.primary,
             isDark: isDark,
           ),
@@ -128,41 +126,49 @@ class PaywallSheet extends ConsumerWidget {
             isPurchased: hasPro,
             onBuy: hasPro
                 ? null
-                : () async {
-                    if (PurchaseService.isNativeIAP) {
-                      await PurchaseService.instance.buyPro();
-                    } else {
-                      await PurchaseService.instance.buyProWeb();
-                    }
-                  },
+                : PurchaseService.isNativeIAP
+                    ? () => PurchaseService.instance.buyPro()
+                    : null,
+            iapUnavailable: !PurchaseService.isNativeIAP && !hasPro,
             color: Colors.amber.shade700,
             isDark: isDark,
             highlighted: true,
           ),
           const SizedBox(height: 16),
 
-          // Restore purchases
-          TextButton(
-            onPressed: () async {
-              if (PurchaseService.isNativeIAP) {
+          // Restore purchases (native IAP only)
+          if (PurchaseService.isNativeIAP)
+            TextButton(
+              onPressed: () async {
                 await PurchaseService.instance.restore();
-              } else {
-                // On web/desktop, re-check Supabase for Stripe purchases
-                await ref.read(serverPurchaseProvider.future);
-              }
-              ref.read(hasPackProvider.notifier).refresh();
-              ref.read(hasProProvider.notifier).refresh();
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content: Text(isEs
-                          ? 'Compras restauradas'
-                          : 'Purchases restored')),
-                );
-              }
-            },
-            child: Text(isEs ? 'Restaurar compras' : 'Restore purchases'),
-          ),
+                ref.read(hasPackProvider.notifier).refresh();
+                ref.read(hasProProvider.notifier).refresh();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content: Text(isEs
+                            ? 'Compras restauradas'
+                            : 'Purchases restored')),
+                  );
+                }
+              },
+              child: Text(isEs ? 'Restaurar compras' : 'Restore purchases'),
+            ),
+          // On web/desktop, show info message
+          if (!PurchaseService.isNativeIAP)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                isEs
+                    ? 'Compras disponibles en la app movil (iOS/Android). Contacta al administrador para acceso patrocinado.'
+                    : 'Purchases available on mobile app (iOS/Android). Contact admin for sponsored access.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ),
           const SizedBox(height: 24),
         ],
       ),
@@ -180,6 +186,7 @@ class _PurchaseTile extends StatelessWidget {
   final Color color;
   final bool isDark;
   final bool highlighted;
+  final bool iapUnavailable;
 
   const _PurchaseTile({
     required this.title,
@@ -191,6 +198,7 @@ class _PurchaseTile extends StatelessWidget {
     required this.color,
     required this.isDark,
     this.highlighted = false,
+    this.iapUnavailable = false,
   });
 
   @override
@@ -259,15 +267,26 @@ class _PurchaseTile extends StatelessWidget {
                     icon: const Icon(Icons.check),
                     label: Text(isEs ? 'Comprado' : 'Purchased'),
                   )
-                : FilledButton(
-                    onPressed: onBuy,
-                    style: FilledButton.styleFrom(backgroundColor: color),
-                    child: Text(
-                      isEs ? 'Comprar' : 'Buy',
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                : iapUnavailable
+                    ? OutlinedButton(
+                        onPressed: null,
+                        child: Text(
+                          isEs
+                              ? 'Disponible en iOS/Android'
+                              : 'Available on iOS/Android',
+                        ),
+                      )
+                    : FilledButton(
+                        onPressed: onBuy,
+                        style:
+                            FilledButton.styleFrom(backgroundColor: color),
+                        child: Text(
+                          isEs ? 'Comprar' : 'Buy',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
           ),
         ],
       ),

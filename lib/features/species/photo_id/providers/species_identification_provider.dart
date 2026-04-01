@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
@@ -67,13 +66,6 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
     double? lat,
     double? lng,
   }) async {
-    if (kIsWeb) {
-      state = const AsyncValue.data(SpeciesIdState(
-        error: 'La identificación requiere un dispositivo móvil',
-      ));
-      return;
-    }
-
     state = const AsyncValue.loading();
     try {
       final allSpecies = await fetchDeduped<Species>(idSelector: (s) => s.id);
@@ -88,9 +80,14 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
       List<SpeciesIdSuggestion> suggestions;
 
       if (_classifier.isAvailable) {
-        suggestions = await _runClassification(
-          imageBytes, allSpecies, nearbySpecies,
-        );
+        try {
+          suggestions = await _runClassification(
+            imageBytes, allSpecies, nearbySpecies,
+          );
+        } catch (_) {
+          // TFLite failed at runtime (e.g. web stub) — fall back to location
+          suggestions = _locationFallback(nearbySpecies ?? allSpecies.take(6).toList());
+        }
       } else {
         suggestions = _locationFallback(nearbySpecies ?? allSpecies.take(6).toList());
       }
@@ -158,7 +155,6 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
     List<Species> allSpecies,
     List<Species>? nearbySpecies,
   ) async {
-    if (kIsWeb) return null;
     if (!_classifier.isAvailable) return null;
 
     try {

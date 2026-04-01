@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -680,13 +678,10 @@ class _QuickActionsRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 4),
       child: Row(
         children: [
-          if (!kIsWeb &&
-              (defaultTargetPlatform == TargetPlatform.android ||
-                  defaultTargetPlatform == TargetPlatform.iOS) &&
-              ((Bootstrap.prefs.getBool('has_premium_role') ?? false)
+          if ((Bootstrap.prefs.getBool('has_premium_role') ?? false)
                   || (Bootstrap.prefs.getBool('is_beta_tester') ?? false)
                   || (Bootstrap.prefs.getBool('has_pack') ?? false)
-                  || (Bootstrap.prefs.getBool('has_pro') ?? false)))
+                  || (Bootstrap.prefs.getBool('has_pro') ?? false))
             _ActionBtn(
               icon:  Icons.image_search_outlined,
               label: t.home.photoId,
