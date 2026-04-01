@@ -94,15 +94,9 @@ Para guías, naturalistas recurrentes, residentes.
 - Priority sync
 - Export GeoJSON
 
-### Fase 4 — Enterprise (mes 7-9) — US$49-99/mes por organización
-**Para:** Operadores turísticos, Parque Nacional Galápagos, ONGs.
-
-**Incluye todo de Pro +:**
-- Backoffice editorial (ya construido: 15 pantallas)
-- Roles multi-usuario (ya construido: admin/editor/curator)
-- Workflow de propuestas (ya construido)
-- Distribución privada (Apple Custom Apps / Managed Google Play)
-- Soporte dedicado
+### Enterprise (futuro — no implementado aún)
+Requiere features que no existen: calendario, reservas, gestión de guías, facturación.
+Se evaluará cuando haya tracción demostrada y demanda real de operadores.
 
 ---
 
@@ -111,9 +105,8 @@ Para guías, naturalistas recurrentes, residentes.
 | Tier | Precio | Benchmark |
 |---|---|---|
 | Free | $0 | Merlin, Seek, iNaturalist |
-| Pack Galápagos | $9.99 one-time | Galápagos Wildlife Guide ($14.99) |
-| Pro | $29.99/año | AllTrails ($35.99/año), más barato por ser destino único |
-| Enterprise | $49-99/mes | Avenza ($169.99/año/device), más accesible |
+| Pack Galápagos | $9.99 one-time IAP | Galápagos Wildlife Guide ($14.99) |
+| Pro | $29.99/año suscripción IAP | AllTrails ($35.99/año), más barato por ser destino único |
 
 ---
 
@@ -139,7 +132,7 @@ Lo que NINGÚN competidor actual ofrece juntos:
 
 3. **AI de 30% cobertura.** Si el turista prueba Photo ID y no reconoce su especie, la percepción es "no funciona". Prioridad: entrenar modelo con más clases.
 
-4. **Un solo desarrollador.** Escalar features + soporte + contenido es difícil solo. El modelo enterprise requiere SLA y soporte.
+4. **Un solo desarrollador.** Escalar features + soporte + contenido es difícil solo.
 
 ---
 
@@ -155,4 +148,17 @@ Lo que NINGÚN competidor actual ofrece juntos:
 | **Licenciar al PNG/CDF** | Alineado con misión. Presupuesto institucional. | Ciclos de compra largos. Burocracia. |
 | **White-label para otros parques** | Escala horizontal (otros parques nacionales). | Requiere abstraer el contenido del código. |
 
-**Mi recomendación:** Lanzar gratis → demostrar tracción → vender Pack a $9.99 → con métricas reales, negociar enterprise con operadores y/o licenciar al PNG. La tracción demostrada multiplica 10x tu poder de negociación vs vender ahora "en frío".
+**Mi recomendación:** Lanzar gratis en stores → demostrar tracción → activar Pack IAP a $9.99 → con métricas reales, activar Pro suscripción a $29.99/año. Enterprise se evalúa solo cuando existan features de operación (calendario, reservas, facturación).
+
+## Estrategia de stores
+
+La app se publica como **gratuita con compras in-app** desde el día 1. NUNCA cambiar a "app de pago" porque:
+- Pierdes rankings y reviews acumuladas
+- Los usuarios existentes se sienten traicionados
+- Apple y Google penalizan el cambio
+
+**Ruta:**
+1. Publicar gratis → medir descargas, retención, uso de features
+2. Activar IAP Pack ($9.99 one-time) cuando haya ~1000 descargas
+3. Activar IAP Pro ($29.99/año suscripción) cuando haya ~100 compradores del Pack
+4. Evaluar Enterprise solo con demanda real demostrada
