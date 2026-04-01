@@ -324,12 +324,12 @@ class SettingsScreen extends ConsumerWidget {
       ListTile(
         leading: const Icon(Icons.privacy_tip_outlined),
         title: Text(context.t.settings.privacyPolicy),
-        onTap: () => launchUrl(Uri.parse('https://huntergps.github.io/life/privacy-policy')),
+        onTap: () => launchUrl(Uri.parse('https://galapagos.tech/wildlife-privacy')),
       ),
       ListTile(
         leading: const Icon(Icons.description_outlined),
         title: Text(context.t.settings.termsOfService),
-        onTap: () => launchUrl(Uri.parse('https://huntergps.github.io/life/terms-of-service')),
+        onTap: () => launchUrl(Uri.parse('https://galapagos.tech/wildlife-terms')),
       ),
     ];
 
