@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy - Galapagos Wildlife</title>
+  <title>Privacy Policy / Política de Privacidad - Galapagos Wildlife</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 24px 16px; background: #fafafa; }
@@ -12,84 +12,179 @@
     p, li { margin-bottom: 8px; font-size: 15px; }
     ul { padding-left: 20px; }
     .updated { color: #888; font-size: 14px; margin-bottom: 24px; }
-    .logo { width: 48px; height: 48px; border-radius: 12px; vertical-align: middle; margin-right: 12px; }
-    .header { display: flex; align-items: center; margin-bottom: 8px; }
     strong { color: #1a1a1a; }
     a { color: #2e7d32; }
     .contact { background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 24px; }
+    .lang-toggle { text-align: center; margin-bottom: 24px; }
+    .lang-toggle a { display: inline-block; padding: 8px 20px; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 14px; }
+    .lang-toggle a.active { background: #2e7d32; color: white; }
+    .lang-toggle a:not(.active) { background: #e8f5e9; color: #2e7d32; }
+    .en, .es { display: none; }
+    .en.visible, .es.visible { display: block; }
+    .divider { border: none; border-top: 2px solid #e8f5e9; margin: 40px 0; }
   </style>
 </head>
 <body>
-  <div class="header">
+  <div class="lang-toggle">
+    <a href="#" id="btn-en" class="active" onclick="showLang('en'); return false;">English</a>
+    <a href="#" id="btn-es" onclick="showLang('es'); return false;">Español</a>
+  </div>
+
+  <!-- ==================== ENGLISH ==================== -->
+  <div class="en visible" id="content-en">
     <h1>Privacy Policy</h1>
+    <p class="updated">Galapagos Wildlife &mdash; Last updated: April 1, 2026</p>
+
+    <h2>What data we collect</h2>
+    <ul>
+      <li><strong>Account data:</strong> Email address (when you create an account)</li>
+      <li><strong>Sighting data:</strong> Photos, GPS coordinates, timestamps, notes (when you record wildlife sightings)</li>
+      <li><strong>Profile data:</strong> Display name, country, bio, avatar (optional)</li>
+      <li><strong>Usage data:</strong> App preferences (language, theme)</li>
+      <li><strong>Purchase data:</strong> Purchase status is managed by Apple/Google; we only store whether premium features are unlocked</li>
+    </ul>
+
+    <h2>How we use your data</h2>
+    <ul>
+      <li>To provide the app's core functionality (species catalog, sighting recording, favorites)</li>
+      <li>To sync your data across devices when you have an account</li>
+      <li>To improve species identification accuracy (with your consent)</li>
+    </ul>
+
+    <h2>Data storage</h2>
+    <ul>
+      <li>Cloud data is stored in Supabase (hosted on AWS infrastructure)</li>
+      <li>Local data is stored on your device via SQLite for offline access</li>
+      <li>Photos are stored in Supabase Storage (encrypted at rest)</li>
+      <li>We do not store payment information &mdash; all purchases are processed by Apple App Store or Google Play</li>
+    </ul>
+
+    <h2>Data sharing</h2>
+    <ul>
+      <li>We do <strong>NOT</strong> sell your personal data</li>
+      <li>We do <strong>NOT</strong> share your data with third parties for advertising</li>
+      <li>We do <strong>NOT</strong> use third-party analytics or tracking SDKs</li>
+      <li>Sighting data may be used anonymously for conservation research (with your consent)</li>
+    </ul>
+
+    <h2>Your rights</h2>
+    <ul>
+      <li><strong>Access:</strong> View all your data within the app</li>
+      <li><strong>Delete:</strong> Delete your account and all associated data from Settings &gt; Delete Account</li>
+      <li><strong>Export:</strong> Export your sightings as CSV from the sightings screen</li>
+      <li><strong>Portability:</strong> Your sighting data can be exported at any time</li>
+    </ul>
+
+    <h2>Data retention</h2>
+    <ul>
+      <li>Account data is retained until you delete your account</li>
+      <li>After account deletion, all personal data is permanently removed within 30 days</li>
+      <li>Anonymous, aggregated data (e.g., species sighting counts) may be retained for conservation purposes</li>
+    </ul>
+
+    <h2>Children's privacy</h2>
+    <p>The app does not knowingly collect personal data from children under 13. If you believe a child has provided us with personal data, please contact us to have it removed.</p>
+
+    <h2>Third-party services</h2>
+    <ul>
+      <li><strong>Supabase:</strong> Authentication and data storage (<a href="https://supabase.com/privacy">supabase.com/privacy</a>)</li>
+      <li><strong>Apple App Store / Google Play:</strong> In-app purchases and app distribution</li>
+      <li><strong>iNaturalist:</strong> Some species images sourced under Creative Commons licenses</li>
+    </ul>
+
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy from time to time. Changes will be noted with a new "Last updated" date at the top of this page.</p>
+
+    <div class="contact">
+      <h2 style="margin-top: 0; border: none;">Contact</h2>
+      <p>If you have questions about this privacy policy or your data, contact us at:</p>
+      <p><strong>Email:</strong> <a href="mailto:esalazargps@gmail.com">esalazargps@gmail.com</a></p>
+      <p><strong>Website:</strong> <a href="https://galapagos.tech">galapagos.tech</a></p>
+    </div>
   </div>
-  <p class="updated">Galapagos Wildlife &mdash; Last updated: April 1, 2026</p>
 
-  <h2>What data we collect</h2>
-  <ul>
-    <li><strong>Account data:</strong> Email address (when you create an account)</li>
-    <li><strong>Sighting data:</strong> Photos, GPS coordinates, timestamps, notes (when you record wildlife sightings)</li>
-    <li><strong>Profile data:</strong> Display name, country, bio, avatar (optional)</li>
-    <li><strong>Usage data:</strong> App preferences (language, theme)</li>
-    <li><strong>Purchase data:</strong> Purchase status is managed by Apple/Google; we only store whether premium features are unlocked</li>
-  </ul>
+  <!-- ==================== ESPAÑOL ==================== -->
+  <div class="es" id="content-es">
+    <h1>Política de Privacidad</h1>
+    <p class="updated">Galapagos Wildlife &mdash; Última actualización: 1 de abril de 2026</p>
 
-  <h2>How we use your data</h2>
-  <ul>
-    <li>To provide the app's core functionality (species catalog, sighting recording, favorites)</li>
-    <li>To sync your data across devices when you have an account</li>
-    <li>To improve species identification accuracy (with your consent)</li>
-  </ul>
+    <h2>Qué datos recopilamos</h2>
+    <ul>
+      <li><strong>Datos de cuenta:</strong> Correo electrónico (cuando creas una cuenta)</li>
+      <li><strong>Datos de avistamientos:</strong> Fotos, coordenadas GPS, fecha/hora, notas (cuando registras avistamientos de fauna)</li>
+      <li><strong>Datos de perfil:</strong> Nombre, país, biografía, avatar (opcionales)</li>
+      <li><strong>Datos de uso:</strong> Preferencias de la app (idioma, tema)</li>
+      <li><strong>Datos de compra:</strong> El estado de compra es gestionado por Apple/Google; solo almacenamos si las funciones premium están desbloqueadas</li>
+    </ul>
 
-  <h2>Data storage</h2>
-  <ul>
-    <li>Cloud data is stored in Supabase (hosted on AWS infrastructure)</li>
-    <li>Local data is stored on your device via SQLite for offline access</li>
-    <li>Photos are stored in Supabase Storage (encrypted at rest)</li>
-    <li>We do not store payment information &mdash; all purchases are processed by Apple App Store or Google Play</li>
-  </ul>
+    <h2>Cómo usamos tus datos</h2>
+    <ul>
+      <li>Para proveer la funcionalidad principal de la app (catálogo de especies, registro de avistamientos, favoritos)</li>
+      <li>Para sincronizar tus datos entre dispositivos cuando tienes una cuenta</li>
+      <li>Para mejorar la precisión de la identificación de especies (con tu consentimiento)</li>
+    </ul>
 
-  <h2>Data sharing</h2>
-  <ul>
-    <li>We do <strong>NOT</strong> sell your personal data</li>
-    <li>We do <strong>NOT</strong> share your data with third parties for advertising</li>
-    <li>We do <strong>NOT</strong> use third-party analytics or tracking SDKs</li>
-    <li>Sighting data may be used anonymously for conservation research (with your consent)</li>
-  </ul>
+    <h2>Almacenamiento de datos</h2>
+    <ul>
+      <li>Los datos en la nube se almacenan en Supabase (infraestructura AWS)</li>
+      <li>Los datos locales se almacenan en tu dispositivo mediante SQLite para acceso offline</li>
+      <li>Las fotos se almacenan en Supabase Storage (cifradas en reposo)</li>
+      <li>No almacenamos información de pago &mdash; todas las compras son procesadas por Apple App Store o Google Play</li>
+    </ul>
 
-  <h2>Your rights</h2>
-  <ul>
-    <li><strong>Access:</strong> View all your data within the app</li>
-    <li><strong>Delete:</strong> Delete your account and all associated data from Settings &gt; Delete Account</li>
-    <li><strong>Export:</strong> Export your sightings as CSV from the sightings screen</li>
-    <li><strong>Portability:</strong> Your sighting data can be exported at any time</li>
-  </ul>
+    <h2>Compartición de datos</h2>
+    <ul>
+      <li><strong>NO</strong> vendemos tus datos personales</li>
+      <li><strong>NO</strong> compartimos tus datos con terceros para publicidad</li>
+      <li><strong>NO</strong> usamos SDKs de análisis o rastreo de terceros</li>
+      <li>Los datos de avistamientos pueden usarse de forma anónima para investigación de conservación (con tu consentimiento)</li>
+    </ul>
 
-  <h2>Data retention</h2>
-  <ul>
-    <li>Account data is retained until you delete your account</li>
-    <li>After account deletion, all personal data is permanently removed within 30 days</li>
-    <li>Anonymous, aggregated data (e.g., species sighting counts) may be retained for conservation purposes</li>
-  </ul>
+    <h2>Tus derechos</h2>
+    <ul>
+      <li><strong>Acceso:</strong> Ver todos tus datos dentro de la app</li>
+      <li><strong>Eliminación:</strong> Eliminar tu cuenta y todos los datos asociados desde Ajustes &gt; Eliminar Cuenta</li>
+      <li><strong>Exportación:</strong> Exportar tus avistamientos como CSV desde la pantalla de avistamientos</li>
+      <li><strong>Portabilidad:</strong> Tus datos de avistamientos pueden exportarse en cualquier momento</li>
+    </ul>
 
-  <h2>Children's privacy</h2>
-  <p>The app does not knowingly collect personal data from children under 13. If you believe a child has provided us with personal data, please contact us to have it removed.</p>
+    <h2>Retención de datos</h2>
+    <ul>
+      <li>Los datos de cuenta se conservan hasta que elimines tu cuenta</li>
+      <li>Después de eliminar la cuenta, todos los datos personales se eliminan permanentemente en un plazo de 30 días</li>
+      <li>Los datos anónimos y agregados (ej: conteos de avistamientos por especie) pueden conservarse con fines de conservación</li>
+    </ul>
 
-  <h2>Third-party services</h2>
-  <ul>
-    <li><strong>Supabase:</strong> Authentication and data storage (<a href="https://supabase.com/privacy">supabase.com/privacy</a>)</li>
-    <li><strong>Apple App Store / Google Play:</strong> In-app purchases and app distribution</li>
-    <li><strong>iNaturalist:</strong> Some species images sourced from iNaturalist (Creative Commons)</li>
-  </ul>
+    <h2>Privacidad de menores</h2>
+    <p>La app no recopila intencionalmente datos personales de menores de 13 años. Si crees que un menor nos ha proporcionado datos personales, contáctanos para que los eliminemos.</p>
 
-  <h2>Changes to this policy</h2>
-  <p>We may update this policy from time to time. Changes will be noted with a new "Last updated" date at the top of this page.</p>
+    <h2>Servicios de terceros</h2>
+    <ul>
+      <li><strong>Supabase:</strong> Autenticación y almacenamiento de datos (<a href="https://supabase.com/privacy">supabase.com/privacy</a>)</li>
+      <li><strong>Apple App Store / Google Play:</strong> Compras dentro de la app y distribución</li>
+      <li><strong>iNaturalist:</strong> Algunas imágenes de especies bajo licencias Creative Commons</li>
+    </ul>
 
-  <div class="contact">
-    <h2 style="margin-top: 0; border: none;">Contact</h2>
-    <p>If you have questions about this privacy policy or your data, contact us at:</p>
-    <p><strong>Email:</strong> <a href="mailto:esalazargps@gmail.com">esalazargps@gmail.com</a></p>
-    <p><strong>Website:</strong> <a href="https://galapagos.tech">galapagos.tech</a></p>
+    <h2>Cambios a esta política</h2>
+    <p>Podemos actualizar esta política periódicamente. Los cambios se indicarán con una nueva fecha de "Última actualización" en la parte superior de esta página.</p>
+
+    <div class="contact">
+      <h2 style="margin-top: 0; border: none;">Contacto</h2>
+      <p>Si tienes preguntas sobre esta política de privacidad o tus datos, contáctanos en:</p>
+      <p><strong>Email:</strong> <a href="mailto:esalazargps@gmail.com">esalazargps@gmail.com</a></p>
+      <p><strong>Web:</strong> <a href="https://galapagos.tech">galapagos.tech</a></p>
+    </div>
   </div>
+
+  <script>
+    function showLang(lang) {
+      document.getElementById('content-en').className = 'en' + (lang === 'en' ? ' visible' : '');
+      document.getElementById('content-es').className = 'es' + (lang === 'es' ? ' visible' : '');
+      document.getElementById('btn-en').className = lang === 'en' ? 'active' : '';
+      document.getElementById('btn-es').className = lang === 'es' ? 'active' : '';
+    }
+    // Auto-detect language
+    if (navigator.language.startsWith('es')) showLang('es');
+  </script>
 </body>
 </html>
