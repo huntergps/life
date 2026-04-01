@@ -1,25 +1,18 @@
-import 'dart:async' show unawaited;
-import 'package:background_downloader/background_downloader.dart';
-import 'package:flutter/foundation.dart'
-    show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart'
-    show sqfliteFfiInit, databaseFactoryFfi, databaseFactory;
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:galapagos_wildlife/core/constants/supabase_constants.dart';
-import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
-import 'package:galapagos_wildlife/features/map/services/field_edit_service.dart';
-import 'package:galapagos_wildlife/features/map/services/pmtiles_manager.dart';
+import 'init_storage.dart';
+import 'init_supabase.dart';
+import 'init_maps.dart';
+import 'init_repository.dart';
+import 'init_background.dart';
 
 class Bootstrap {
   /// Pre-loaded SharedPreferences instance, available synchronously after init.
-  static late final SharedPreferences prefs;
+  static SharedPreferences get prefs => InitStorage.prefs;
 
   /// Whether Supabase connected successfully during init.
-  static bool supabaseConnected = false;
+  static bool get supabaseConnected => InitSupabase.connected;
 
   /// True on all native platforms where Brick + SQLite is supported:
   /// iOS, Android, macOS (sqflite_darwin), Linux and Windows (sqflite_common_ffi).
@@ -28,137 +21,10 @@ class Bootstrap {
 
   static Future<void> init() async {
     WidgetsFlutterBinding.ensureInitialized();
-
-    // Initialize sqflite FFI for Linux and Windows (sqflite_darwin handles macOS natively)
-    if (!kIsWeb &&
-        (defaultTargetPlatform == TargetPlatform.linux ||
-            defaultTargetPlatform == TargetPlatform.windows)) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
-
-    // Load SharedPreferences early so providers can read synchronously
-    prefs = await SharedPreferences.getInstance();
-
-    // Initialize intl date formatting for locale-aware DateFormat
-    await initializeDateFormatting();
-
-    // Initialize FMTC for offline map tile caching (native only)
-    if (!kIsWeb) {
-      try {
-        await FMTCObjectBoxBackend().initialise();
-
-        const stores = [
-          'galapagosMap',      // Street/OSM tiles
-          'satelliteCache',    // ESRI satellite tiles
-          'labelsCache',       // CartoDB label overlay tiles
-        ];
-
-        for (final storeName in stores) {
-          try {
-            final store = FMTCStore(storeName);
-            await store.manage.create();
-            debugPrint('✅ FMTC store created: $storeName');
-          } catch (e) {
-            debugPrint('⚠️ FMTC store $storeName already exists or failed: $e');
-          }
-        }
-      } catch (e) {
-        debugPrint('FMTC init failed: $e');
-      }
-    }
-
-    // Initialize Supabase for auth/storage
-    try {
-      await Supabase.initialize(
-        url: SupabaseConstants.url,
-        anonKey: SupabaseConstants.anonKey,
-      );
-      supabaseConnected = true;
-    } catch (e) {
-      debugPrint('Supabase init failed (offline mode): $e');
-    }
-
-    // Configure WildlifeRepository (Drift local DB + Supabase remote sync).
-    if (!kIsWeb) {
-      await WildlifeRepository.configure(
-        supabaseUrl: SupabaseConstants.url,
-        supabaseKey: SupabaseConstants.anonKey,
-        databaseFactory: databaseFactory,
-      );
-
-      // Clear any offline queue requests that have failed too many times
-      try {
-        final queueManager =
-            WildlifeRepository.instance.offlineQueueClient.requestManager;
-        final pending = await queueManager.unprocessedRequests();
-        int cleared = 0;
-        for (final req in pending) {
-          final id = req['id'] as int?;
-          final attempts = req['attempts'] as int? ?? 0;
-          if (id != null && attempts > 10) {
-            await queueManager.delete(id);
-            cleared++;
-          }
-        }
-        if (cleared > 0) {
-          debugPrint('🧹 Cleared $cleared stuck offline queue request(s)');
-        }
-      } catch (e) {
-        debugPrint('⚠️ Could not clear offline queue: $e');
-      }
-    } else {
-      await WildlifeRepository.configure(
-        supabaseUrl: SupabaseConstants.url,
-        supabaseKey: SupabaseConstants.anonKey,
-      );
-    }
-
-    // Record sync timestamp if Supabase connected
-    if (supabaseConnected) {
-      await prefs.setInt(
-        'last_synced',
-        DateTime.now().millisecondsSinceEpoch,
-      );
-      // Upload any trails that were recorded offline in a previous session (mobile only).
-      if (isMobile) {
-        final pending = FieldEditService.pendingTrailCount();
-        if (pending > 0) {
-          debugPrint('📤 Found $pending pending trail(s) — syncing now…');
-          unawaited(FieldEditService.syncPendingTrails());
-        }
-      }
-    }
-
-    // Initialize background_downloader (native only)
-    if (!kIsWeb) {
-      try {
-        FileDownloader().configureNotificationForGroup(
-          FileDownloader.defaultGroup,
-          running: const TaskNotification(
-            'Descargando mapa',
-            'La descarga continúa en segundo plano',
-          ),
-          complete: const TaskNotification(
-            'Mapa descargado',
-            'El mapa HD de Galápagos está listo',
-          ),
-          error: const TaskNotification(
-            'Error en descarga',
-            'No se pudo descargar el mapa. Intenta de nuevo.',
-          ),
-          progressBar: true,
-        );
-      } catch (e) {
-        debugPrint('FileDownloader init failed: $e');
-      }
-
-      // Ensure PMTiles base map is available (copy from assets if needed)
-      try {
-        await PmTilesManager.ensureAvailable();
-      } catch (e) {
-        debugPrint('PMTiles setup failed: $e');
-      }
-    }
+    await InitStorage.init();
+    await InitMaps.init();
+    await InitSupabase.init();
+    await InitRepository.init();
+    await InitBackground.init();
   }
 }
