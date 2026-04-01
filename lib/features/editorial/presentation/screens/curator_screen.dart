@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import '../../services/proposal_service.dart';
 
 class CuratorScreen extends ConsumerStatefulWidget {

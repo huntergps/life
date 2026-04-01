@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'app.dart';
-import 'bootstrap.dart';
+import 'app/shell/galapagos_wildlife_app.dart';
+import 'app/bootstrap/bootstrap.dart';
 import 'drift/repository/wildlife_repository.dart';
 import 'core/l10n/strings.g.dart';
 import 'core/presentation/screens/sync_screen.dart';

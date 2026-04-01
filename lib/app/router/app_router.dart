@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:galapagos_wildlife/bootstrap.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/ar_camera/presentation/screens/ar_camera_screen.dart';
 import 'package:galapagos_wildlife/features/species/presentation/screens/photo_id_screen.dart';
 import 'router_keys.dart';

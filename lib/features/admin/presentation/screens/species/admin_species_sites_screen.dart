@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import '../../../providers/admin_species_provider.dart';
 import '../../../providers/admin_visit_site_provider.dart';

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/legacy.dart';
 
-import '../../../bootstrap.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import '../../../core/services/app_logger.dart';
 
 /// Model for a pending change

@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import 'package:galapagos_wildlife/core/constants/supabase_constants.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';

@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/services/initial_sync_service.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 
 class _SyncProgress {
   final String currentTable;

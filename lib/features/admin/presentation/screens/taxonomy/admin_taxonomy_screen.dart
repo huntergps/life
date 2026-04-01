@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import '../../../providers/admin_taxonomy_provider.dart';
 import '../../widgets/admin_taxonomy_editor.dart';
 

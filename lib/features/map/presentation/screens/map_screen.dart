@@ -13,7 +13,7 @@ import 'package:vector_tile_renderer/vector_tile_renderer.dart' as vtr;
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/constants/mapbox_constants.dart'; // Now SatelliteMapConstants
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import 'package:galapagos_wildlife/models/island.model.dart';
 import 'package:galapagos_wildlife/models/trail.model.dart';

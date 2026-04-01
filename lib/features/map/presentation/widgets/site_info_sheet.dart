@@ -5,7 +5,7 @@ import 'package:galapagos_wildlife/models/island.model.dart';
 import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/cached_species_image.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import '../../providers/map_provider.dart';

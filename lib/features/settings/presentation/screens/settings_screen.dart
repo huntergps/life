@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import '../../providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
@@ -12,7 +12,7 @@ import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.
 import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/services/initial_sync_service.dart';
-import 'package:galapagos_wildlife/bootstrap.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/map_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/trail_provider.dart';

@@ -4,7 +4,7 @@ import 'package:galapagos_wildlife/core/widgets/favorite_heart_button.dart';
 import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
 import 'cached_species_image.dart';
 import 'conservation_badge.dart';
-import '../theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import '../utils/species_display_helpers.dart';
 
 class SpeciesCard extends ConsumerWidget {

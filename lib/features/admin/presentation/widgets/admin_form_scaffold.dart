@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 
 /// Reusable scaffold for admin create/edit forms.
 ///

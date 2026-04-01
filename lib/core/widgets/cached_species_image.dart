@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import '../constants/species_assets.dart';
-import '../theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import '../services/species_cache_manager.dart';
 
 class CachedSpeciesImage extends StatelessWidget {

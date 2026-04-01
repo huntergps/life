@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:galapagos_wildlife/bootstrap.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 
 final localeProvider = NotifierProvider<LocaleNotifier, String>(LocaleNotifier.new);

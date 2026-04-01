@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:galapagos_wildlife/bootstrap.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/badges/models/badge_definition.dart';
 import 'package:galapagos_wildlife/features/badges/providers/badges_provider.dart';
 

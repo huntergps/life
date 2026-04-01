@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:galapagos_wildlife/core/services/location/location_permission_service.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/utils/error_handler.dart';
 import 'package:galapagos_wildlife/features/admin/services/image_processing_service.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';

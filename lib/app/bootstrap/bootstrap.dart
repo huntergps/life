@@ -9,10 +9,10 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'core/constants/supabase_constants.dart';
-import 'drift/repository/wildlife_repository.dart';
-import 'features/map/services/field_edit_service.dart';
-import 'features/map/services/pmtiles_manager.dart';
+import 'package:galapagos_wildlife/core/constants/supabase_constants.dart';
+import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
+import 'package:galapagos_wildlife/features/map/services/field_edit_service.dart';
+import 'package:galapagos_wildlife/features/map/services/pmtiles_manager.dart';
 
 class Bootstrap {
   /// Pre-loaded SharedPreferences instance, available synchronously after init.
@@ -80,10 +80,39 @@ class Bootstrap {
     }
 
     // Configure WildlifeRepository (Drift local DB + Supabase remote sync).
-    await WildlifeRepository.configure(
-      supabaseUrl: SupabaseConstants.url,
-      supabaseKey: SupabaseConstants.anonKey,
-    );
+    if (!kIsWeb) {
+      await WildlifeRepository.configure(
+        supabaseUrl: SupabaseConstants.url,
+        supabaseKey: SupabaseConstants.anonKey,
+        databaseFactory: databaseFactory,
+      );
+
+      // Clear any offline queue requests that have failed too many times
+      try {
+        final queueManager =
+            WildlifeRepository.instance.offlineQueueClient.requestManager;
+        final pending = await queueManager.unprocessedRequests();
+        int cleared = 0;
+        for (final req in pending) {
+          final id = req['id'] as int?;
+          final attempts = req['attempts'] as int? ?? 0;
+          if (id != null && attempts > 10) {
+            await queueManager.delete(id);
+            cleared++;
+          }
+        }
+        if (cleared > 0) {
+          debugPrint('🧹 Cleared $cleared stuck offline queue request(s)');
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not clear offline queue: $e');
+      }
+    } else {
+      await WildlifeRepository.configure(
+        supabaseUrl: SupabaseConstants.url,
+        supabaseKey: SupabaseConstants.anonKey,
+      );
+    }
 
     // Record sync timestamp if Supabase connected
     if (supabaseConnected) {

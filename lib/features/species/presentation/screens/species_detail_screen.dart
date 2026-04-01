@@ -5,7 +5,7 @@ import 'package:galapagos_wildlife/core/widgets/conservation_badge.dart';
 import 'package:galapagos_wildlife/core/widgets/image_carousel.dart';
 import 'package:galapagos_wildlife/core/widgets/favorite_heart_button.dart';
 import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
-import 'package:galapagos_wildlife/core/theme/app_colors.dart';
+import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/models/species_threat.model.dart';

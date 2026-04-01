@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../bootstrap.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import '../../../models/trail.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
 import '../../../drift/drift.dart';
