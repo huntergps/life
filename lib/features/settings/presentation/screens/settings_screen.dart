@@ -316,7 +316,7 @@ class SettingsScreen extends ConsumerWidget {
         leading: const Icon(Icons.description),
         title: Text(context.t.settings.credits),
         subtitle: Text(
-          'Charles Darwin Foundation, Galapagos National Park',
+          'Galapagos Wildlife Team',
           style: TextStyle(color: isDark ? Colors.white54 : null),
         ),
         onTap: () {},
