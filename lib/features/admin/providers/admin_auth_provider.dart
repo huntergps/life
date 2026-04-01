@@ -12,7 +12,8 @@ final _rolesCheckProvider = FutureProvider<Set<String>>((ref) async {
   final user = Supabase.instance.client.auth.currentUser;
   if (user == null) return const {};
   try {
-    final data = await Supabase.instance.client.rpc('get_user_roles');
+    // Uses get_user_active_roles which filters out expired roles
+    final data = await Supabase.instance.client.rpc('get_user_active_roles');
     return (data as List<dynamic>).map((e) => e as String).toSet();
   } catch (e) {
     AppLogger.warning('Roles check failed (offline?)', e);
@@ -54,7 +55,13 @@ final userRolesProvider = Provider<AsyncValue<Set<String>>>((ref) {
         Bootstrap.prefs.setBool('is_curator', roles.contains('curator') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_editor', roles.contains('editor') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_staff', roles.isNotEmpty);
-        Bootstrap.prefs.setBool('is_beta_tester', roles.contains('beta_tester') || roles.contains('admin'));
+        // Premium access: admin, beta_tester, sponsored, editor, curator all get premium features
+        final hasPremiumRole = roles.contains('admin') ||
+            roles.contains('beta_tester') ||
+            roles.contains('sponsored') ||
+            roles.contains('editor') ||
+            roles.contains('curator');
+        Bootstrap.prefs.setBool('is_beta_tester', hasPremiumRole);
       });
       return AsyncValue.data(roles);
     },
@@ -90,6 +97,20 @@ final isStaffProvider = Provider<AsyncValue<bool>>((ref) =>
 final isBetaTesterProvider = Provider<AsyncValue<bool>>((ref) =>
     ref.watch(userRolesProvider).whenData(
         (r) => r.contains('beta_tester') || r.contains('admin')));
+
+final isSponsoredProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData(
+        (r) => r.contains('sponsored') || r.contains('admin')));
+
+/// True if user has ANY role that grants premium access (map, photo ID, etc.)
+/// without purchasing. Includes: admin, beta_tester, sponsored, editor, curator.
+final hasPremiumRoleProvider = Provider<AsyncValue<bool>>((ref) =>
+    ref.watch(userRolesProvider).whenData((r) =>
+        r.contains('admin') ||
+        r.contains('beta_tester') ||
+        r.contains('sponsored') ||
+        r.contains('editor') ||
+        r.contains('curator')));
 
 // ── Role invalidation helper ──────────────────────────────────────────────────
 //
