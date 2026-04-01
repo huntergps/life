@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart'
-    if (dart.library.html) '../../species/providers/_tflite_stub.dart';
+    if (dart.library.html) '../../species/photo_id/providers/_tflite_stub.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 
 // ── Assets ──────────────────────────────────────────────────────────────────
