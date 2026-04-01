@@ -13,6 +13,7 @@ import '../../../features/admin/presentation/screens/visit_sites/admin_visit_sit
 import '../../../features/admin/presentation/screens/taxonomy/admin_taxonomy_screen.dart';
 import '../../../features/admin/presentation/screens/site_catalogs/admin_site_catalogs_screen.dart';
 import '../../../features/admin/presentation/screens/users/admin_users_screen.dart';
+import '../../../features/admin/presentation/screens/users/admin_role_assignment_screen.dart';
 import '../../../features/editorial/presentation/screens/admin_proposals_screen.dart';
 import '../../../features/editorial/presentation/screens/curator_screen.dart';
 import '../../../features/editorial/presentation/screens/my_proposals_screen.dart';
@@ -131,6 +132,11 @@ List<RouteBase> adminRoutes() => [
             path: 'users',
             name: 'admin-users',
             builder: (context, state) => const AdminUsersScreen(),
+          ),
+          GoRoute(
+            path: 'role-assignments',
+            name: 'admin-role-assignments',
+            builder: (context, state) => const AdminRoleAssignmentScreen(),
           ),
           GoRoute(
             path: 'proposals',

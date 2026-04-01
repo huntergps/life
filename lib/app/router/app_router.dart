@@ -22,11 +22,12 @@ final appRouter = GoRouter(
     if (!noSave.contains(path)) {
       Bootstrap.prefs.setString('last_route', path);
     }
-    // Premium routes: accessible to beta testers OR users who purchased Pack/Pro
-    const betaRoutes = {'/map', '/photo-id', '/field-camera'};
-    if (betaRoutes.contains(path)) {
+    // Premium routes: accessible via role (sponsored/editor/curator/admin) OR purchase (pack/pro)
+    const premiumRoutes = {'/map', '/photo-id', '/field-camera'};
+    if (premiumRoutes.contains(path)) {
       final prefs = Bootstrap.prefs;
-      final canAccess = (prefs.getBool('is_beta_tester') ?? false)
+      final canAccess = (prefs.getBool('has_premium_role') ?? false)
+          || (prefs.getBool('is_beta_tester') ?? false)
           || (prefs.getBool('has_pack') ?? false)
           || (prefs.getBool('has_pro') ?? false);
       if (!canAccess) return '/';

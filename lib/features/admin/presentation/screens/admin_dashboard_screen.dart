@@ -190,6 +190,12 @@ class AdminDashboardScreen extends ConsumerWidget {
                         onTap: () => context.go('/admin/users'),
                       ),
                       AdminEntityTile(
+                        title: 'Roles',
+                        subtitle: 'Beta testers & sponsors',
+                        icon: Icons.assignment_ind_outlined,
+                        onTap: () => context.go('/admin/role-assignments'),
+                      ),
+                      AdminEntityTile(
                         title: 'Propuestas',
                         subtitle: 'Revisar y aprobar cambios',
                         icon: Icons.rate_review_outlined,

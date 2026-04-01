@@ -683,7 +683,8 @@ class _QuickActionsRow extends StatelessWidget {
           if (!kIsWeb &&
               (defaultTargetPlatform == TargetPlatform.android ||
                   defaultTargetPlatform == TargetPlatform.iOS) &&
-              ((Bootstrap.prefs.getBool('is_beta_tester') ?? false)
+              ((Bootstrap.prefs.getBool('has_premium_role') ?? false)
+                  || (Bootstrap.prefs.getBool('is_beta_tester') ?? false)
                   || (Bootstrap.prefs.getBool('has_pack') ?? false)
                   || (Bootstrap.prefs.getBool('has_pro') ?? false)))
             _ActionBtn(

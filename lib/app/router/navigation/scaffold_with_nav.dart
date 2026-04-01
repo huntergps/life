@@ -35,9 +35,11 @@ class ScaffoldWithNav extends StatelessWidget {
     return GoRouterState.of(context).uri.path.startsWith('/admin');
   }
 
-  static bool get _isBeta {
+  /// Whether the user can access premium features (map tab, etc.)
+  static bool get _hasPremiumAccess {
     final prefs = Bootstrap.prefs;
-    return (prefs.getBool('is_beta_tester') ?? false)
+    return (prefs.getBool('has_premium_role') ?? false)
+        || (prefs.getBool('is_beta_tester') ?? false)
         || (prefs.getBool('has_pack') ?? false)
         || (prefs.getBool('has_pro') ?? false);
   }
@@ -52,7 +54,7 @@ class ScaffoldWithNav extends StatelessWidget {
       if (location.startsWith('/admin/species-sites')) return 5;
       return 0;
     }
-    if (_isBeta) {
+    if (_hasPremiumAccess) {
       // Full 6-item nav: Home, Species, Map, Checklist, Sightings, Settings
       if (location.startsWith('/species')) return 1;
       if (location.startsWith('/map')) return 2;
@@ -92,7 +94,7 @@ class ScaffoldWithNav extends StatelessWidget {
       }
       return;
     }
-    if (_isBeta) {
+    if (_hasPremiumAccess) {
       switch (index) {
         case 0:
           context.goNamed('home');
@@ -142,7 +144,7 @@ class _PhoneLayout extends StatelessWidget {
             ScaffoldWithNav.onItemTapped(index, context),
         destinations: isAdmin
             ? _adminDestinations(tr)
-            : _appDestinations(tr, ScaffoldWithNav._isBeta),
+            : _appDestinations(tr, ScaffoldWithNav._hasPremiumAccess),
       ),
     );
   }
@@ -283,7 +285,7 @@ class _TabletLayoutState extends ConsumerState<_TabletLayout> {
                         backgroundColor: isDark ? AppColors.darkSurface : null,
                         destinations: ScaffoldWithNav.isAdminRoute(context)
                             ? _adminRailDestinations(tr)
-                            : _appRailDestinations(tr, ScaffoldWithNav._isBeta),
+                            : _appRailDestinations(tr, ScaffoldWithNav._hasPremiumAccess),
                         trailing: _RailTrailingActions(
                           collapsed: collapsed,
                           showExtended: showExtended,

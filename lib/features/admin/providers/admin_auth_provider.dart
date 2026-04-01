@@ -55,13 +55,14 @@ final userRolesProvider = Provider<AsyncValue<Set<String>>>((ref) {
         Bootstrap.prefs.setBool('is_curator', roles.contains('curator') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_editor', roles.contains('editor') || roles.contains('admin'));
         Bootstrap.prefs.setBool('is_staff', roles.isNotEmpty);
-        // Premium access: admin, beta_tester, sponsored, editor, curator all get premium features
+        // Beta tester: experimental features not yet released (admin inherits)
+        Bootstrap.prefs.setBool('is_beta_tester', roles.contains('beta_tester') || roles.contains('admin'));
+        // Premium access via role (without paying): admin, sponsored, editor, curator
         final hasPremiumRole = roles.contains('admin') ||
-            roles.contains('beta_tester') ||
             roles.contains('sponsored') ||
             roles.contains('editor') ||
             roles.contains('curator');
-        Bootstrap.prefs.setBool('is_beta_tester', hasPremiumRole);
+        Bootstrap.prefs.setBool('has_premium_role', hasPremiumRole);
       });
       return AsyncValue.data(roles);
     },
