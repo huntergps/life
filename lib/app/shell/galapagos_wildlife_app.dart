@@ -21,7 +21,7 @@ import 'package:galapagos_wildlife/features/badges/providers/badge_notification_
 import 'package:galapagos_wildlife/features/badges/presentation/widgets/badge_unlock_dialog.dart';
 import 'package:galapagos_wildlife/features/profile/providers/celebration_events_provider.dart';
 import 'package:galapagos_wildlife/features/profile/presentation/widgets/birthday_dialog.dart';
-import 'package:galapagos_wildlife/watch/watch_data_sync_provider.dart';
+import 'package:galapagos_wildlife/features/watch/sync/watch_data_sync_provider.dart';
 
 class GalapagosWildlifeApp extends ConsumerStatefulWidget {
   const GalapagosWildlifeApp({super.key});

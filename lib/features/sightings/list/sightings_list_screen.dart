@@ -10,15 +10,15 @@ import 'package:galapagos_wildlife/core/widgets/empty_state.dart';
 import 'package:galapagos_wildlife/core/widgets/error_state_widget.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
-import 'package:galapagos_wildlife/features/sightings/providers/sighting_filters_provider.dart';
+import 'package:galapagos_wildlife/features/sightings/list/sighting_filters_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_ui_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_csv_export.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:intl/intl.dart';
-import 'package:galapagos_wildlife/features/sightings/presentation/widgets/sighting_detail.dart';
-import 'package:galapagos_wildlife/features/sightings/presentation/widgets/sightings_filter_bar.dart';
-import 'package:galapagos_wildlife/features/sightings/utils/sightings_grouping.dart';
+import 'package:galapagos_wildlife/features/sightings/list/sighting_detail.dart';
+import 'package:galapagos_wildlife/features/sightings/list/sightings_filter_bar.dart';
+import 'package:galapagos_wildlife/features/sightings/list/sightings_grouping.dart';
 
 class SightingsListScreen extends ConsumerWidget {
   const SightingsListScreen({super.key});

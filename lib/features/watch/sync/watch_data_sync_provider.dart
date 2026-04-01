@@ -4,7 +4,7 @@ import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
-import 'watch_connectivity_service.dart';
+import 'package:galapagos_wildlife/features/watch/services/watch_connectivity_service.dart';
 
 /// Provider que orquesta la sincronización entre el Watch y Supabase.
 ///

@@ -20,7 +20,7 @@ import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
 import 'package:galapagos_wildlife/features/species/shared/species_id_sheet.dart';
-import '../widgets/species_picker_sheet.dart';
+import 'species_picker_sheet.dart';
 import 'location_picker_screen.dart';
 
 class AddSightingScreen extends ConsumerStatefulWidget {
