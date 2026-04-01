@@ -10,13 +10,9 @@ import 'data/sync/initial_sync_service.dart';
 Future<void> main() async {
   await Bootstrap.init();
 
-  // Brick/SQLite runs on iOS, Android and macOS (sqflite_darwin).
-  // Web is Supabase-direct with no local DB.
-  bool needsSync = false;
-  if (Bootstrap.isMobile) {
-    final syncService = InitialSyncService(WildlifeRepository.instance);
-    needsSync = !await syncService.isSyncComplete();
-  }
+  // Drift offline-first runs on all platforms (native SQLite + web Wasm/IndexedDB).
+  final syncService = InitialSyncService(WildlifeRepository.instance);
+  final needsSync = !await syncService.isSyncComplete();
 
   runApp(
     TranslationProvider(

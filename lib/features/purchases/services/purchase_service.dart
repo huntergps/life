@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:galapagos_wildlife/app/bootstrap/init_storage.dart';
 
 /// Product IDs — must match App Store Connect and Google Play Console
 const kPackProductId = 'galapagos_pack';
 const kProProductId = 'galapagos_pro';
 const _kAllProductIds = {kPackProductId, kProProductId};
+
+// TODO: Replace with real Stripe Payment Links from https://dashboard.stripe.com/payment-links
+const kStripePackUrl = 'https://buy.stripe.com/galapagos_pack';
+const kStripeProUrl = 'https://buy.stripe.com/galapagos_pro';
 
 class PurchaseService {
   static final PurchaseService _instance = PurchaseService._();
@@ -22,7 +27,20 @@ class PurchaseService {
   /// Callbacks for purchase state changes
   VoidCallback? onPurchaseUpdate;
 
+  /// Whether the current platform supports native in-app purchases (iOS/Android).
+  static bool get isNativeIAP {
+    if (kIsWeb) return false;
+    return defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.android;
+  }
+
   Future<void> initialize() async {
+    // Only initialize native IAP on iOS/Android
+    if (!isNativeIAP) {
+      debugPrint('IAP not available on this platform — use Stripe checkout');
+      return;
+    }
+
     final available = await _iap.isAvailable();
     if (!available) {
       debugPrint('IAP not available on this platform');
@@ -102,6 +120,27 @@ class PurchaseService {
   /// Restore purchases (e.g., after reinstall or new device)
   Future<void> restore() async {
     await _iap.restorePurchases();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Stripe Checkout — web and desktop platforms
+  // ---------------------------------------------------------------------------
+
+  /// Open Stripe Checkout for the Galapagos Pack (web/desktop).
+  /// After payment, a Stripe webhook writes to `user_purchases` in Supabase.
+  Future<bool> buyPackWeb() => _openStripeCheckout(kStripePackUrl);
+
+  /// Open Stripe Checkout for Pro subscription (web/desktop).
+  Future<bool> buyProWeb() => _openStripeCheckout(kStripeProUrl);
+
+  Future<bool> _openStripeCheckout(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return true;
+    }
+    debugPrint('Could not launch Stripe checkout: $url');
+    return false;
   }
 
   void dispose() {

@@ -102,10 +102,8 @@ final siteClassificationsProvider = FutureProvider.family<Map<String, List<Strin
 );
 
 /// User's current GPS position, or null if unavailable/denied.
-/// Returns null on web — GPS not supported in web deployment.
+/// Works on iOS, Android, macOS and Web (browser Geolocation API).
 final userLocationProvider = FutureProvider<Position?>((ref) async {
-  if (kIsWeb) return null;
-
   if (!await LocationPermissionService.ensurePermission()) return null;
 
   return Geolocator.getCurrentPosition(
@@ -167,7 +165,6 @@ final recentSightingsBySiteProvider = FutureProvider<Map<int, List<Map<String, d
 /// Nearest visit site within 2km of the user, or null if none / no GPS.
 final nearbyMapSiteProvider = FutureProvider<({VisitSite site, double distanceM})?>(
   (ref) async {
-    if (kIsWeb) return null;
     final pos = await ref.watch(userLocationProvider.future);
     if (pos == null) return null;
     final sites = await ref.watch(visitSitesProvider.future);

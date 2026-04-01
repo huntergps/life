@@ -80,8 +80,6 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   }
 
   Future<void> _getLocation() async {
-    if (kIsWeb) return; // GPS not supported on web deployment
-
     setState(() => _isLoadingLocation = true);
     try {
       if (!await LocationPermissionService.isServiceEnabled()) {
@@ -544,25 +542,23 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
                     ],
                   ),
                 ),
-              // GPS button — hidden on web
-              if (!kIsWeb)
-                ListTile(
-                  leading: _isLoadingLocation
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Icon(
-                          Icons.my_location,
-                          color: isDark ? AppColors.accentOrange : AppColors.primary,
-                        ),
-                  title: Text(context.t.sightings.useCurrentLocation),
-                  subtitle: const Text('Usar coordenadas del GPS'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: _isLoadingLocation ? null : _getLocation,
-                ),
-              if (!kIsWeb) const Divider(height: 1, indent: 16, endIndent: 16),
+              ListTile(
+                leading: _isLoadingLocation
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(
+                        Icons.my_location,
+                        color: isDark ? AppColors.accentOrange : AppColors.primary,
+                      ),
+                title: Text(context.t.sightings.useCurrentLocation),
+                subtitle: const Text('Usar coordenadas del GPS'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: _isLoadingLocation ? null : _getLocation,
+              ),
+              const Divider(height: 1, indent: 16, endIndent: 16),
               // Map picker — always available
               ListTile(
                 leading: Icon(
@@ -607,23 +603,22 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          if (_isMobile)
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                icon: _isIdentifying
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.auto_awesome, size: 18),
-                label: Text(
-                  isEs ? 'Identificar con IA' : 'Identify with AI',
-                ),
-                onPressed: (_isIdentifying || kIsWeb) ? null : _identifyPhoto,
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: _isIdentifying
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.auto_awesome, size: 18),
+              label: Text(
+                isEs ? 'Identificar con IA' : 'Identify with AI',
               ),
+              onPressed: _isIdentifying ? null : _identifyPhoto,
             ),
+          ),
           const SizedBox(height: 8),
         ],
         Card(

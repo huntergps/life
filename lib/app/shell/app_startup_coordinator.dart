@@ -55,12 +55,7 @@ class OnboardingCompleteNotifier extends Notifier<bool> {
 Future<void> initializeApp(WidgetRef ref) async {
   final phaseNotifier = ref.read(startupPhaseProvider.notifier);
 
-  // Brick/SQLite runs on iOS, Android and macOS. Web uses Supabase-direct.
-  if (!Bootstrap.isMobile) {
-    phaseNotifier.setPhase(StartupPhase.ready);
-    return;
-  }
-
+  // Drift offline-first runs on all platforms (native SQLite + web Wasm/IndexedDB).
   final syncService = InitialSyncService(WildlifeRepository.instance);
   final complete = await syncService.isSyncComplete();
 

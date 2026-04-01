@@ -41,31 +41,35 @@ class GpsTrackingNotifier extends StateNotifier<bool> {
   };
 
   Future<void> _startTracking() async {
-    if (kIsWeb) return; // GPS background tracking not supported on web
-
     // Verify permission
     if (!await LocationPermissionService.ensurePermission()) return;
 
     final profile = _ref.read(fieldEditProvider).trackingProfile;
     final distFilter = profile.distanceFilterMeters;
 
-    // iOS: enable background location updates so GPS continues when the
-    // screen is locked or another app is in the foreground.
-    // Each profile sets the appropriate activityType so iOS's motion
-    // coprocessor can apply the right dead-reckoning corrections.
-    final locationSettings = defaultTargetPlatform == TargetPlatform.iOS
-        ? AppleSettings(
-            accuracy: LocationAccuracy.best,
-            distanceFilter: distFilter,
-            pauseLocationUpdatesAutomatically: false,
-            allowBackgroundLocationUpdates: true,
-            activityType: _activityType(profile),
-          )
-        : AndroidSettings(
-            accuracy: LocationAccuracy.best,
-            distanceFilter: distFilter,
-            intervalDuration: const Duration(seconds: 3),
-          );
+    // Use platform-specific settings on iOS/Android for background tracking,
+    // and generic LocationSettings on web/desktop.
+    final LocationSettings locationSettings;
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      locationSettings = AppleSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: distFilter,
+        pauseLocationUpdatesAutomatically: false,
+        allowBackgroundLocationUpdates: true,
+        activityType: _activityType(profile),
+      );
+    } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+      locationSettings = AndroidSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: distFilter,
+        intervalDuration: const Duration(seconds: 3),
+      );
+    } else {
+      locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: distFilter,
+      );
+    }
 
     _subscription = Geolocator.getPositionStream(
       locationSettings: locationSettings,

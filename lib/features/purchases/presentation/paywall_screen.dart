@@ -96,7 +96,11 @@ class PaywallSheet extends ConsumerWidget {
             onBuy: hasPack
                 ? null
                 : () async {
-                    await PurchaseService.instance.buyPack();
+                    if (PurchaseService.isNativeIAP) {
+                      await PurchaseService.instance.buyPack();
+                    } else {
+                      await PurchaseService.instance.buyPackWeb();
+                    }
                   },
             color: AppColors.primary,
             isDark: isDark,
@@ -125,7 +129,11 @@ class PaywallSheet extends ConsumerWidget {
             onBuy: hasPro
                 ? null
                 : () async {
-                    await PurchaseService.instance.buyPro();
+                    if (PurchaseService.isNativeIAP) {
+                      await PurchaseService.instance.buyPro();
+                    } else {
+                      await PurchaseService.instance.buyProWeb();
+                    }
                   },
             color: Colors.amber.shade700,
             isDark: isDark,
@@ -136,7 +144,12 @@ class PaywallSheet extends ConsumerWidget {
           // Restore purchases
           TextButton(
             onPressed: () async {
-              await PurchaseService.instance.restore();
+              if (PurchaseService.isNativeIAP) {
+                await PurchaseService.instance.restore();
+              } else {
+                // On web/desktop, re-check Supabase for Stripe purchases
+                await ref.read(serverPurchaseProvider.future);
+              }
               ref.read(hasPackProvider.notifier).refresh();
               ref.read(hasProProvider.notifier).refresh();
               if (context.mounted) {
