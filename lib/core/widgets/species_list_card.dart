@@ -5,7 +5,7 @@ import 'cached_species_image.dart';
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import '../utils/species_display_helpers.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
 
 /// Card designed for grid/list views (species list & favorites).
 /// Shows a 16:9 image on top with name overlay, then a 2-column attribute

@@ -3,7 +3,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../models/trail.model.dart';
 import '../../../models/visit_site.model.dart';
-import 'package:galapagos_wildlife/drift/drift.dart';
+import 'package:galapagos_wildlife/data/local/drift/drift.dart';
 import 'site_edit_service.dart';
 import 'trail_edit_service.dart';
 

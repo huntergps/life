@@ -18,8 +18,8 @@ import 'package:galapagos_wildlife/features/sightings/providers/sightings_provid
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
-import 'package:galapagos_wildlife/features/species/presentation/widgets/species_id_sheet.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
+import 'package:galapagos_wildlife/features/species/shared/species_id_sheet.dart';
 import '../widgets/species_picker_sheet.dart';
 import 'location_picker_screen.dart';
 

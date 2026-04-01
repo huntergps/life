@@ -9,8 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:galapagos_wildlife/models/user_profile.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import 'package:galapagos_wildlife/drift/drift.dart';
-import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
+import 'package:galapagos_wildlife/data/local/drift/drift.dart';
+import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/admin/services/image_processing_service.dart';
 

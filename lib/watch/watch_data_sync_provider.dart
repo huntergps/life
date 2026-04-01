@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
+import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';

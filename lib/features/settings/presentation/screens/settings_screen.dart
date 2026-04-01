@@ -9,14 +9,14 @@ import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import '../../providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
-import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
+import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
-import 'package:galapagos_wildlife/core/services/initial_sync_service.dart';
+import 'package:galapagos_wildlife/data/sync/initial_sync_service.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/map_provider.dart';
 import 'package:galapagos_wildlife/features/map/providers/trail_provider.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart';
+import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/core/widgets/favorite_heart_button.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
 import 'cached_species_image.dart';
 import 'conservation_badge.dart';
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';

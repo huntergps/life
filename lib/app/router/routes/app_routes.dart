@@ -1,8 +1,8 @@
 import 'package:go_router/go_router.dart';
 import '../../../features/home/presentation/screens/home_screen.dart';
-import '../../../features/species/presentation/screens/species_list_screen.dart';
-import '../../../features/species/presentation/screens/species_detail_screen.dart';
-import '../../../features/species/presentation/screens/species_compare_screen.dart';
+import '../../../features/species/list/species_list_screen.dart';
+import '../../../features/species/detail/species_detail_screen.dart';
+import '../../../features/species/compare/species_compare_screen.dart';
 import '../../../features/map/presentation/screens/map_screen.dart';
 import '../../../features/favorites/presentation/screens/favorites_screen.dart';
 import '../../../features/sightings/presentation/screens/sightings_list_screen.dart';

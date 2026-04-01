@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
+import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
-import 'package:galapagos_wildlife/core/services/initial_sync_service.dart';
+import 'package:galapagos_wildlife/data/sync/initial_sync_service.dart';
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 
 class _SyncProgress {

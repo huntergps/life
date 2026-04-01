@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import '../../../models/trail.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import '../../../drift/drift.dart';
+import '../../../data/local/drift/drift.dart';
 import '../../../core/services/app_logger.dart';
 import '../../../core/services/location/geo_utils.dart';
 

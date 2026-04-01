@@ -4,7 +4,7 @@ import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/models/species_site.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
+import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 
 class SoundIdSuggestion {
   final Species species;

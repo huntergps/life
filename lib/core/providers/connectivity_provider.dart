@@ -1,6 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart';
+import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:galapagos_wildlife/features/favorites/providers/favorites_provider.dart';
 import 'package:galapagos_wildlife/features/map/services/field_edit_service.dart';

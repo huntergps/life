@@ -13,7 +13,7 @@ import 'package:galapagos_wildlife/core/widgets/species_card.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart';
+import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 
 // Search button shared across phone and tablet layouts
 class _SearchButton extends StatelessWidget {

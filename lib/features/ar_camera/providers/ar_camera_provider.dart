@@ -6,8 +6,8 @@ import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/models/species_site.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_identification_provider.dart';
+import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
 
 /// Live AR detection result — the species currently being detected in the camera frame.
 class ArLiveResult {

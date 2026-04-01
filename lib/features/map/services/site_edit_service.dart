@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../models/visit_site.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import '../../../drift/drift.dart';
+import '../../../data/local/drift/drift.dart';
 import '../../../core/services/app_logger.dart';
 
 /// Service for offline field editing of visit sites.

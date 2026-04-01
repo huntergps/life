@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/shell/galapagos_wildlife_app.dart';
 import 'app/bootstrap/bootstrap.dart';
-import 'drift/repository/wildlife_repository.dart';
+import 'data/local/drift/repository/wildlife_repository.dart';
 import 'core/l10n/strings.g.dart';
 import 'core/presentation/screens/sync_screen.dart';
-import 'core/services/initial_sync_service.dart';
+import 'data/sync/initial_sync_service.dart';
 
 Future<void> main() async {
   await Bootstrap.init();

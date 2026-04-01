@@ -10,7 +10,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/constants/supabase_constants.dart';
-import 'package:galapagos_wildlife/drift/repository/wildlife_repository.dart';
+import 'package:galapagos_wildlife/data/local/drift/repository/wildlife_repository.dart';
 import 'package:galapagos_wildlife/features/map/services/field_edit_service.dart';
 import 'package:galapagos_wildlife/features/map/services/pmtiles_manager.dart';
 

@@ -11,7 +11,7 @@ import 'package:galapagos_wildlife/models/visit_site.model.dart';
 import 'package:galapagos_wildlife/core/constants/app_constants.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
+import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 
 final islandsProvider = FutureProvider<List<Island>>((ref) async {

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
-import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
+import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Manages user favorite species IDs with optimistic updates.

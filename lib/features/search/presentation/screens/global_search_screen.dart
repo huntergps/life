@@ -12,7 +12,7 @@ import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/cached_species_image.dart';
 import 'package:galapagos_wildlife/features/search/providers/global_search_provider.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_list_provider.dart';
+import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 
 class GlobalSearchScreen extends ConsumerStatefulWidget {
   const GlobalSearchScreen({super.key});

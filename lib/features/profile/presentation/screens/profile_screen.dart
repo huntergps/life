@@ -20,7 +20,7 @@ import 'package:galapagos_wildlife/features/profile/presentation/widgets/recent_
 import 'package:galapagos_wildlife/models/sighting.model.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/models/user_profile.model.dart';
-import 'package:galapagos_wildlife/features/species/providers/species_checklist_provider.dart';
+import 'package:galapagos_wildlife/features/species/shared/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/profile/presentation/screens/visit_summary_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {

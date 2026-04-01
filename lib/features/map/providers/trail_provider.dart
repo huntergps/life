@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/models/trail.model.dart';
 import 'package:drift_offline_first/drift_offline_first.dart';
-import 'package:galapagos_wildlife/core/utils/data_helpers.dart';
+import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 
 /// All trails — always fetches fresh from Supabase so user-recorded trails
 /// (uploaded during the session) appear immediately. Falls back to local cache
