@@ -11,6 +11,7 @@ import '../../../features/settings/presentation/screens/settings_screen.dart';
 import '../../../features/badges/presentation/screens/badges_screen.dart';
 import '../../../features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import '../../../features/profile/presentation/screens/profile_screen.dart';
+import '../../../features/checklist/presentation/checklist_screen.dart';
 import '../router_keys.dart';
 
 List<RouteBase> appRoutes() => [
@@ -58,6 +59,11 @@ List<RouteBase> appRoutes() => [
         path: '/favorites',
         name: 'favorites',
         builder: (context, state) => const FavoritesScreen(),
+      ),
+      GoRoute(
+        path: '/checklist',
+        name: 'checklist',
+        builder: (context, state) => const ChecklistScreen(),
       ),
       GoRoute(
         path: '/sightings',

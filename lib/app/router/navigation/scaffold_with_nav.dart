@@ -53,20 +53,21 @@ class ScaffoldWithNav extends StatelessWidget {
       return 0;
     }
     if (_isBeta) {
-      // Full 6-item nav: Home, Species, Map, Favorites, Sightings, Settings
+      // Full 6-item nav: Home, Species, Map, Checklist, Sightings, Settings
       if (location.startsWith('/species')) return 1;
       if (location.startsWith('/map')) return 2;
-      if (location.startsWith('/favorites')) return 3;
+      if (location.startsWith('/checklist')) return 3;
       if (location.startsWith('/sightings')) return 4;
       if (location.startsWith('/settings')) return 5;
       return 0;
     } else {
-      // 5-item nav: Home, Species, Favorites, Sightings, Settings
+      // 5-item nav: Home, Species, Checklist, Sightings, Settings
       if (location.startsWith('/species')) return 1;
-      if (location.startsWith('/favorites')) return 2;
+      if (location.startsWith('/checklist')) return 2;
       if (location.startsWith('/sightings')) return 3;
       if (location.startsWith('/settings')) return 4;
       if (location.startsWith('/map')) return 0; // redirect to home
+      if (location.startsWith('/favorites')) return 0; // accessible from profile
       return 0;
     }
   }
@@ -100,7 +101,7 @@ class ScaffoldWithNav extends StatelessWidget {
         case 2:
           context.goNamed('map');
         case 3:
-          context.goNamed('favorites');
+          context.goNamed('checklist');
         case 4:
           context.goNamed('sightings');
         case 5:
@@ -113,7 +114,7 @@ class ScaffoldWithNav extends StatelessWidget {
         case 1:
           context.goNamed('species');
         case 2:
-          context.goNamed('favorites');
+          context.goNamed('checklist');
         case 3:
           context.goNamed('sightings');
         case 4:
@@ -164,9 +165,9 @@ class _PhoneLayout extends StatelessWidget {
         label: tr.nav.map,
       ),
     NavigationDestination(
-      icon: const Icon(Icons.favorite_outline),
-      selectedIcon: const Icon(Icons.favorite),
-      label: tr.nav.favorites,
+      icon: const Icon(Icons.fact_check_outlined),
+      selectedIcon: const Icon(Icons.fact_check),
+      label: tr.nav.checklist,
     ),
     NavigationDestination(
       icon: const Icon(Icons.camera_alt_outlined),
@@ -325,9 +326,9 @@ class _TabletLayoutState extends ConsumerState<_TabletLayout> {
         label: Text(tr.nav.map),
       ),
     NavigationRailDestination(
-      icon: const Icon(Icons.favorite_outline),
-      selectedIcon: const Icon(Icons.favorite),
-      label: Text(tr.nav.favorites),
+      icon: const Icon(Icons.fact_check_outlined),
+      selectedIcon: const Icon(Icons.fact_check),
+      label: Text(tr.nav.checklist),
     ),
     NavigationRailDestination(
       icon: const Icon(Icons.camera_alt_outlined),

@@ -694,6 +694,13 @@ class _QuickActionsRow extends StatelessWidget {
               onTap: () => context.push('/photo-id'),
             ),
           _ActionBtn(
+            icon: Icons.fact_check_outlined,
+            label: t.home.myChecklist,
+            color: AppColors.primary,
+            isDark: isDark,
+            onTap: () => context.goNamed('checklist'),
+          ),
+          _ActionBtn(
             icon: Icons.add_a_photo_outlined,
             label: t.home.recentSightings,
             color: Colors.orange,

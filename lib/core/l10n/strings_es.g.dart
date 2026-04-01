@@ -40,6 +40,7 @@ class TranslationsEs with BaseTranslations<AppLocale, Translations> implements T
 	@override late final _TranslationsAppEs app = _TranslationsAppEs._(_root);
 	@override late final _TranslationsNavEs nav = _TranslationsNavEs._(_root);
 	@override late final _TranslationsHomeEs home = _TranslationsHomeEs._(_root);
+	@override late final _TranslationsChecklistEs checklist = _TranslationsChecklistEs._(_root);
 	@override late final _TranslationsSpeciesEs species = _TranslationsSpeciesEs._(_root);
 	@override late final _TranslationsConservationEs conservation = _TranslationsConservationEs._(_root);
 	@override late final _TranslationsMapEs map = _TranslationsMapEs._(_root);
@@ -88,6 +89,7 @@ class _TranslationsNavEs implements TranslationsNavEn {
 	@override String get map => 'Mapa';
 	@override String get favorites => 'Favoritos';
 	@override String get sightings => 'Avistamientos';
+	@override String get checklist => 'Lista';
 }
 
 // Path: home
@@ -110,6 +112,30 @@ class _TranslationsHomeEs implements TranslationsHomeEn {
 	@override String get browseWildlife => 'Explorar toda la fauna';
 	@override String get findSites => 'Encontrar sitios de visita e islas';
 	@override String get logEncounters => 'Registra tus encuentros con la fauna';
+	@override String get myChecklist => 'Mi Lista';
+}
+
+// Path: checklist
+class _TranslationsChecklistEs implements TranslationsChecklistEn {
+	_TranslationsChecklistEs._(this._root);
+
+	final TranslationsEs _root; // ignore: unused_field
+
+	// Translations
+	@override String get title => 'Lista de Especies';
+	@override String progress({required Object seen, required Object total}) => '${seen} / ${total} especies vistas';
+	@override String get suggested => 'Sugeridas (25)';
+	@override String get allSpecies => 'Todas las Especies';
+	@override String get seen => 'Vista';
+	@override String get notSeen => 'No vista';
+	@override String seenOn({required Object date}) => 'Vista el ${date}';
+	@override String get markSeen => 'Marcar como vista';
+	@override String get markUnseen => 'Quitar marca';
+	@override String get allSuggested => 'Has visto las 25 especies sugeridas!';
+	@override String get celebration => 'Felicidades! Completaste la lista de Galapagos!';
+	@override String get filterSeen => 'Mostrar vistas';
+	@override String get filterUnseen => 'Mostrar no vistas';
+	@override String get filterAll => 'Mostrar todas';
 }
 
 // Path: species
@@ -1151,6 +1177,7 @@ extension on TranslationsEs {
 			'nav.map' => 'Mapa',
 			'nav.favorites' => 'Favoritos',
 			'nav.sightings' => 'Avistamientos',
+			'nav.checklist' => 'Lista',
 			'home.welcome' => 'Bienvenido a Galápagos',
 			'home.explore' => 'Explorar Fauna',
 			'home.categories' => 'Categorías',
@@ -1164,6 +1191,21 @@ extension on TranslationsEs {
 			'home.browseWildlife' => 'Explorar toda la fauna',
 			'home.findSites' => 'Encontrar sitios de visita e islas',
 			'home.logEncounters' => 'Registra tus encuentros con la fauna',
+			'home.myChecklist' => 'Mi Lista',
+			'checklist.title' => 'Lista de Especies',
+			'checklist.progress' => ({required Object seen, required Object total}) => '${seen} / ${total} especies vistas',
+			'checklist.suggested' => 'Sugeridas (25)',
+			'checklist.allSpecies' => 'Todas las Especies',
+			'checklist.seen' => 'Vista',
+			'checklist.notSeen' => 'No vista',
+			'checklist.seenOn' => ({required Object date}) => 'Vista el ${date}',
+			'checklist.markSeen' => 'Marcar como vista',
+			'checklist.markUnseen' => 'Quitar marca',
+			'checklist.allSuggested' => 'Has visto las 25 especies sugeridas!',
+			'checklist.celebration' => 'Felicidades! Completaste la lista de Galapagos!',
+			'checklist.filterSeen' => 'Mostrar vistas',
+			'checklist.filterUnseen' => 'Mostrar no vistas',
+			'checklist.filterAll' => 'Mostrar todas',
 			'species.title' => 'Especies',
 			'species.search' => 'Buscar especies...',
 			'species.all' => 'Todas',
@@ -1640,6 +1682,8 @@ extension on TranslationsEs {
 			'admin.confirmDeleteTitle' => 'Confirmar eliminación',
 			'admin.confirmDeleteCount' => ({required Object count}) => '¿Eliminar ${count} elementos?',
 			'admin.confirmDeletePermanentlyCount' => ({required Object count}) => '¿Eliminar permanentemente ${count} elementos? Esta acción no se puede deshacer.',
+			_ => null,
+		} ?? switch (path) {
 			'admin.inTrash' => ({required Object count}) => '${count} en papelera',
 			'admin.emptyTrash' => 'La papelera está vacía',
 			'admin.deletedLabel' => 'Eliminado',
@@ -1656,8 +1700,6 @@ extension on TranslationsEs {
 			'admin.speciesByCategory' => 'Especies por Categoría',
 			'admin.noData' => 'Sin datos',
 			'admin.dataCoverage' => 'Cobertura de Datos',
-			_ => null,
-		} ?? switch (path) {
 			'admin.visitSitesSection' => 'Sitios de Visita',
 			'admin.noVisitSitesForIsland' => 'No hay sitios de visita para esta isla. Usa la sección "Sitios de Visita" para crear nuevos.',
 			'admin.saveIslandFirst' => 'Guarda la isla primero para ver sus sitios de visita',

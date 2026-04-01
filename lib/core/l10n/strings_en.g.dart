@@ -43,6 +43,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final TranslationsAppEn app = TranslationsAppEn._(_root);
 	late final TranslationsNavEn nav = TranslationsNavEn._(_root);
 	late final TranslationsHomeEn home = TranslationsHomeEn._(_root);
+	late final TranslationsChecklistEn checklist = TranslationsChecklistEn._(_root);
 	late final TranslationsSpeciesEn species = TranslationsSpeciesEn._(_root);
 	late final TranslationsConservationEn conservation = TranslationsConservationEn._(_root);
 	late final TranslationsMapEn map = TranslationsMapEn._(_root);
@@ -105,6 +106,9 @@ class TranslationsNavEn {
 
 	/// en: 'Sightings'
 	String get sightings => 'Sightings';
+
+	/// en: 'Checklist'
+	String get checklist => 'Checklist';
 }
 
 // Path: home
@@ -153,6 +157,60 @@ class TranslationsHomeEn {
 
 	/// en: 'Log your wildlife encounters'
 	String get logEncounters => 'Log your wildlife encounters';
+
+	/// en: 'My Checklist'
+	String get myChecklist => 'My Checklist';
+}
+
+// Path: checklist
+class TranslationsChecklistEn {
+	TranslationsChecklistEn._(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Checklist'
+	String get title => 'Checklist';
+
+	/// en: '${seen} / ${total} species seen'
+	String progress({required Object seen, required Object total}) => '${seen} / ${total} species seen';
+
+	/// en: 'Suggested (25)'
+	String get suggested => 'Suggested (25)';
+
+	/// en: 'All Species'
+	String get allSpecies => 'All Species';
+
+	/// en: 'Seen'
+	String get seen => 'Seen';
+
+	/// en: 'Not seen'
+	String get notSeen => 'Not seen';
+
+	/// en: 'Seen on ${date}'
+	String seenOn({required Object date}) => 'Seen on ${date}';
+
+	/// en: 'Mark as seen'
+	String get markSeen => 'Mark as seen';
+
+	/// en: 'Remove mark'
+	String get markUnseen => 'Remove mark';
+
+	/// en: 'You've seen all 25 suggested species!'
+	String get allSuggested => 'You\'ve seen all 25 suggested species!';
+
+	/// en: 'Congratulations! You completed the Galapagos checklist!'
+	String get celebration => 'Congratulations! You completed the Galapagos checklist!';
+
+	/// en: 'Show seen only'
+	String get filterSeen => 'Show seen only';
+
+	/// en: 'Show unseen only'
+	String get filterUnseen => 'Show unseen only';
+
+	/// en: 'Show all'
+	String get filterAll => 'Show all';
 }
 
 // Path: species
@@ -2790,6 +2848,7 @@ extension on Translations {
 			'nav.map' => 'Map',
 			'nav.favorites' => 'Favorites',
 			'nav.sightings' => 'Sightings',
+			'nav.checklist' => 'Checklist',
 			'home.welcome' => 'Welcome to Galápagos',
 			'home.explore' => 'Explore Wildlife',
 			'home.categories' => 'Categories',
@@ -2803,6 +2862,21 @@ extension on Translations {
 			'home.browseWildlife' => 'Browse all wildlife',
 			'home.findSites' => 'Find visit sites and islands',
 			'home.logEncounters' => 'Log your wildlife encounters',
+			'home.myChecklist' => 'My Checklist',
+			'checklist.title' => 'Checklist',
+			'checklist.progress' => ({required Object seen, required Object total}) => '${seen} / ${total} species seen',
+			'checklist.suggested' => 'Suggested (25)',
+			'checklist.allSpecies' => 'All Species',
+			'checklist.seen' => 'Seen',
+			'checklist.notSeen' => 'Not seen',
+			'checklist.seenOn' => ({required Object date}) => 'Seen on ${date}',
+			'checklist.markSeen' => 'Mark as seen',
+			'checklist.markUnseen' => 'Remove mark',
+			'checklist.allSuggested' => 'You\'ve seen all 25 suggested species!',
+			'checklist.celebration' => 'Congratulations! You completed the Galapagos checklist!',
+			'checklist.filterSeen' => 'Show seen only',
+			'checklist.filterUnseen' => 'Show unseen only',
+			'checklist.filterAll' => 'Show all',
 			'species.title' => 'Species',
 			'species.search' => 'Search species...',
 			'species.all' => 'All',
@@ -3279,6 +3353,8 @@ extension on Translations {
 			'admin.confirmDeleteTitle' => 'Confirm Deletion',
 			'admin.confirmDeleteCount' => ({required Object count}) => 'Delete ${count} items?',
 			'admin.confirmDeletePermanentlyCount' => ({required Object count}) => 'Permanently delete ${count} items? This action cannot be undone.',
+			_ => null,
+		} ?? switch (path) {
 			'admin.inTrash' => ({required Object count}) => '${count} in trash',
 			'admin.emptyTrash' => 'Trash is empty',
 			'admin.deletedLabel' => 'Deleted',
@@ -3295,8 +3371,6 @@ extension on Translations {
 			'admin.speciesByCategory' => 'Species by Category',
 			'admin.noData' => 'No data',
 			'admin.dataCoverage' => 'Data Coverage',
-			_ => null,
-		} ?? switch (path) {
 			'admin.visitSitesSection' => 'Visit Sites',
 			'admin.noVisitSitesForIsland' => 'No visit sites for this island. Use the "Visit Sites" section to create new ones.',
 			'admin.saveIslandFirst' => 'Save the island first to see its visit sites',

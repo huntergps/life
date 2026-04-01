@@ -16,6 +16,7 @@ import 'package:galapagos_wildlife/core/utils/error_handler.dart';
 import 'package:galapagos_wildlife/features/admin/services/image_processing_service.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
+import 'package:galapagos_wildlife/features/species/shared/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
@@ -339,6 +340,11 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
       );
 
       ref.invalidate(sightingsProvider);
+
+      // Auto-mark species as seen in checklist
+      await ref
+          .read(userChecklistProvider.notifier)
+          .markAsSeen(_selectedSpecies!.id);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

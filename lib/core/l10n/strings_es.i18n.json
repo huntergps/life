@@ -8,7 +8,8 @@
     "species": "Especies",
     "map": "Mapa",
     "favorites": "Favoritos",
-    "sightings": "Avistamientos"
+    "sightings": "Avistamientos",
+    "checklist": "Lista"
   },
   "home": {
     "welcome": "Bienvenido a Galápagos",
@@ -23,7 +24,24 @@
     "photoId": "Foto ID",
     "browseWildlife": "Explorar toda la fauna",
     "findSites": "Encontrar sitios de visita e islas",
-    "logEncounters": "Registra tus encuentros con la fauna"
+    "logEncounters": "Registra tus encuentros con la fauna",
+    "myChecklist": "Mi Lista"
+  },
+  "checklist": {
+    "title": "Lista de Especies",
+    "progress": "${seen} / ${total} especies vistas",
+    "suggested": "Sugeridas (25)",
+    "allSpecies": "Todas las Especies",
+    "seen": "Vista",
+    "notSeen": "No vista",
+    "seenOn": "Vista el ${date}",
+    "markSeen": "Marcar como vista",
+    "markUnseen": "Quitar marca",
+    "allSuggested": "Has visto las 25 especies sugeridas!",
+    "celebration": "Felicidades! Completaste la lista de Galapagos!",
+    "filterSeen": "Mostrar vistas",
+    "filterUnseen": "Mostrar no vistas",
+    "filterAll": "Mostrar todas"
   },
   "species": {
     "title": "Especies",
