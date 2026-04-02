@@ -28,7 +28,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Viewer</string>
 			<key>CFBundleURLName</key>
-			<string>com.galapagos.galapagosWildlife</string>
+			<string>tech.galapagos.galapagosWildlife</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>galapagos</string>
