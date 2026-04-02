@@ -137,6 +137,8 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
                 isDark: isDark,
                 isEs: isEs,
               ),
+              if (seenInScope == total && total > 0)
+                _RewardsBanner(isDark: isDark, isEs: isEs),
               if (!_isUserPremium()) _UpgradeHint(isEs: isEs, isDark: isDark),
               const SizedBox(height: 8),
               // Content area
@@ -1318,6 +1320,65 @@ class _UpgradeHint extends StatelessWidget {
               ),
             ),
             Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Rewards Banner (shown when checklist is 100% complete) ──
+
+class _RewardsBanner extends StatelessWidget {
+  final bool isDark;
+  final bool isEs;
+
+  const _RewardsBanner({required this.isDark, required this.isEs});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => ChecklistCompletionDialog.show(context),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            const Text('🏆', style: TextStyle(fontSize: 24)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isEs ? '¡Checklist completado!' : 'Checklist Complete!',
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    isEs ? 'Ver premios, certificado y wallpapers' : 'View rewards, certificate & wallpapers',
+                    style: const TextStyle(color: Colors.black54, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black54),
           ],
         ),
       ),
