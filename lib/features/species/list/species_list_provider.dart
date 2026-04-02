@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
+import 'package:galapagos_wildlife/features/favorites/providers/favorites_provider.dart';
 
 final speciesCategoryFilterProvider = StateProvider<int?>((ref) => null);
 final speciesSearchQueryProvider = StateProvider<String>((ref) => '');
@@ -9,6 +10,7 @@ final speciesConservationFilterProvider = StateProvider<String?>((ref) => null);
 final speciesEndemicFilterProvider = StateProvider<bool?>((ref) => null);
 final speciesDietFilterProvider = StateProvider<String?>((ref) => null);
 final speciesActivityFilterProvider = StateProvider<String?>((ref) => null);
+final speciesFavoritesFilterProvider = StateProvider<bool>((ref) => false);
 
 enum SpeciesSort { nameAsc, nameDesc, rarityFirst, endemicFirst }
 
@@ -50,6 +52,7 @@ final speciesListProvider = FutureProvider<List<Species>>((ref) async {
   final endemicFilter = ref.watch(speciesEndemicFilterProvider);
   final dietFilter = ref.watch(speciesDietFilterProvider);
   final activityFilter = ref.watch(speciesActivityFilterProvider);
+  final favoritesOnly = ref.watch(speciesFavoritesFilterProvider);
   final sort = ref.watch(speciesSortProvider);
 
   final all = await ref.watch(allSpeciesProvider.future);
@@ -57,6 +60,11 @@ final speciesListProvider = FutureProvider<List<Species>>((ref) async {
   var filtered = categoryId != null
       ? all.where((s) => s.categoryId == categoryId).toList()
       : List<Species>.from(all);
+
+  if (favoritesOnly) {
+    final favoriteIds = ref.watch(favoritesProvider).asData?.value ?? {};
+    filtered = filtered.where((s) => favoriteIds.contains(s.id)).toList();
+  }
 
   if (conservationFilter != null) {
     filtered = filtered.where((s) => s.conservationStatus == conservationFilter).toList();
@@ -116,5 +124,6 @@ final hasActiveFiltersProvider = Provider<bool>((ref) {
       ref.watch(speciesEndemicFilterProvider) == true ||
       ref.watch(speciesDietFilterProvider) != null ||
       ref.watch(speciesActivityFilterProvider) != null ||
+      ref.watch(speciesFavoritesFilterProvider) ||
       ref.watch(speciesSearchQueryProvider).isNotEmpty;
 });

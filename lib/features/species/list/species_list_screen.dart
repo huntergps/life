@@ -13,10 +13,12 @@ import 'package:galapagos_wildlife/core/widgets/adaptive_layout.dart';
 import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
+import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 
 class SpeciesListScreen extends ConsumerStatefulWidget {
   final int? categoryId;
-  const SpeciesListScreen({super.key, this.categoryId});
+  final bool showFavoritesOnly;
+  const SpeciesListScreen({super.key, this.categoryId, this.showFavoritesOnly = false});
 
   @override
   ConsumerState<SpeciesListScreen> createState() => _SpeciesListScreenState();
@@ -32,6 +34,11 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
     if (widget.categoryId != null) {
       Future.microtask(() {
         ref.read(speciesCategoryFilterProvider.notifier).state = widget.categoryId;
+      });
+    }
+    if (widget.showFavoritesOnly) {
+      Future.microtask(() {
+        ref.read(speciesFavoritesFilterProvider.notifier).state = true;
       });
     }
   }
@@ -57,6 +64,7 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
     ref.read(speciesEndemicFilterProvider.notifier).state = null;
     ref.read(speciesDietFilterProvider.notifier).state = null;
     ref.read(speciesActivityFilterProvider.notifier).state = null;
+    ref.read(speciesFavoritesFilterProvider.notifier).state = false;
     ref.read(speciesSearchQueryProvider.notifier).state = '';
     _searchController.clear();
   }
@@ -122,14 +130,17 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
     final endemicFilter   = ref.watch(speciesEndemicFilterProvider);
     final dietFilter      = ref.watch(speciesDietFilterProvider);
     final activityFilter  = ref.watch(speciesActivityFilterProvider);
+    final favoritesOnly   = ref.watch(speciesFavoritesFilterProvider);
     final currentSort     = ref.watch(speciesSortProvider);
     final locale          = ref.watch(localeProvider);
+    final isAuthenticated = ref.watch(isAuthenticatedProvider);
     final crossAxisCount  = AdaptiveLayout.gridColumns(context);
     final padding         = AdaptiveLayout.responsivePadding(context);
     final counts          = countsAsync.asData?.value ?? {};
 
     final hasAdvancedFilters = selectedConservation != null ||
-        endemicFilter != null || dietFilter != null || activityFilter != null;
+        endemicFilter != null || dietFilter != null || activityFilter != null ||
+        favoritesOnly;
     final hasAnyFilter = hasAdvancedFilters || selectedCategory != null;
 
     return Scaffold(
@@ -149,6 +160,20 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
               pinned: false,
               forceElevated: true,
               actions: [
+                // Favorites toggle — only for authenticated users
+                if (isAuthenticated)
+                  IconButton(
+                    icon: Icon(
+                      favoritesOnly ? Icons.favorite : Icons.favorite_border,
+                      color: favoritesOnly
+                          ? Colors.red
+                          : null,
+                    ),
+                    tooltip: context.t.favorites.title,
+                    onPressed: () => ref
+                        .read(speciesFavoritesFilterProvider.notifier)
+                        .state = !favoritesOnly,
+                  ),
                 // Advanced filters button — badge when active
                 IconButton(
                   icon: Badge(
@@ -255,6 +280,14 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
+                              if (favoritesOnly)
+                                _ActiveFilterChip(
+                                  label: context.t.favorites.title,
+                                  color: Colors.red,
+                                  onRemove: () => ref
+                                      .read(speciesFavoritesFilterProvider.notifier)
+                                      .state = false,
+                                ),
                               if (endemicFilter == true)
                                 _ActiveFilterChip(
                                   label: context.t.species.endemic,
@@ -331,9 +364,15 @@ class _SpeciesListScreenState extends ConsumerState<SpeciesListScreen> {
                     SliverFillRemaining(
                       hasScrollBody: false,
                       child: EmptyState(
-                        icon: Icons.search_off,
-                        title: context.t.species.noResults,
-                        subtitle: context.t.species.noResultsSubtitle,
+                        icon: favoritesOnly
+                            ? Icons.favorite_outline
+                            : Icons.search_off,
+                        title: favoritesOnly
+                            ? context.t.favorites.empty
+                            : context.t.species.noResults,
+                        subtitle: favoritesOnly
+                            ? context.t.favorites.emptySubtitle
+                            : context.t.species.noResultsSubtitle,
                       ),
                     ),
                   ];

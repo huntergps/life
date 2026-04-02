@@ -4,7 +4,6 @@ import '../../../features/species/list/species_list_screen.dart';
 import '../../../features/species/detail/species_detail_screen.dart';
 import '../../../features/species/compare/species_compare_screen.dart';
 import '../../../features/map/presentation/screens/map_screen.dart';
-import '../../../features/favorites/presentation/screens/favorites_screen.dart';
 import '../../../features/sightings/list/sightings_list_screen.dart';
 import '../../../features/sightings/add/add_sighting_screen.dart';
 import '../../../features/settings/presentation/screens/settings_screen.dart';
@@ -25,8 +24,10 @@ List<RouteBase> appRoutes() => [
         name: 'species',
         builder: (context, state) {
           final categoryId = state.uri.queryParameters['category'];
+          final favorites = state.uri.queryParameters['favorites'] == 'true';
           return SpeciesListScreen(
             categoryId: categoryId != null ? int.tryParse(categoryId) : null,
+            showFavoritesOnly: favorites,
           );
         },
         routes: [
@@ -58,7 +59,7 @@ List<RouteBase> appRoutes() => [
       GoRoute(
         path: '/favorites',
         name: 'favorites',
-        builder: (context, state) => const FavoritesScreen(),
+        redirect: (context, state) => '/species?favorites=true',
       ),
       GoRoute(
         path: '/checklist',
