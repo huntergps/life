@@ -41,7 +41,12 @@
     "celebration": "Felicidades! Completaste la lista de Galapagos!",
     "filterSeen": "Mostrar vistas",
     "filterUnseen": "Mostrar no vistas",
-    "filterAll": "Mostrar todas"
+    "filterAll": "Mostrar todas",
+    "completedInDays": "Completado en ${days} dias",
+    "firstSpecies": "Primera especie",
+    "lastSpecies": "Ultima especie",
+    "earnedBadge": "Has ganado el logro Maestro de Galapagos!",
+    "shareCompletion": "Compartir Logro"
   },
   "species": {
     "title": "Especies",
@@ -663,6 +668,8 @@
     "curatorDesc": "Agrega 10 especies a favoritos",
     "conservationist": "Conservacionista",
     "conservationistDesc": "Avista 3 especies amenazadas (CR/EN/VU)",
+    "galapagosmaster": "Maestro de Galapagos",
+    "galapagosmasterDesc": "Completo el checklist de fauna de Galapagos",
     "badgeUnlocked": "¡Logro Desbloqueado!",
     "youEarned": "Has ganado: ${name}",
     "congratulations": "¡Felicidades!"

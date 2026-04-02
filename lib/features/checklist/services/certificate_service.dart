@@ -8,16 +8,19 @@ class CertificateService {
   CertificateService._();
 
   /// Requests a digital certificate to be sent to the user's email.
-  static Future<void> requestCertificate() async {
+  static Future<void> requestCertificate({
+    required int speciesCount,
+  }) async {
     final client = Supabase.instance.client;
     final user = client.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
     await client.rpc('request_checklist_certificate', params: {
-      'user_email': user.email,
+      'user_email': user.email ?? '',
       'user_name': user.userMetadata?['display_name'] ??
           user.email?.split('@').first ??
           'Explorer',
+      'species_count': speciesCount,
       'completed_at': DateTime.now().toIso8601String(),
     });
   }

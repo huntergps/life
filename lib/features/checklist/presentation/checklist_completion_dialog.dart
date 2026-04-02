@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:intl/intl.dart';
 
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/features/checklist/presentation/confetti_overlay.dart';
+import 'package:galapagos_wildlife/features/checklist/presentation/wallpaper_unlock_sheet.dart';
+import 'package:galapagos_wildlife/features/checklist/providers/checklist_stats_provider.dart';
+import 'package:galapagos_wildlife/features/checklist/providers/suggested_species_provider.dart';
 import 'package:galapagos_wildlife/features/checklist/services/certificate_service.dart';
+import 'package:galapagos_wildlife/features/checklist/services/share_card_service.dart';
 import 'package:galapagos_wildlife/features/profile/providers/profile_provider.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
+import 'package:galapagos_wildlife/features/checklist/services/celebration_effects_service.dart';
 
 /// Full-screen celebration dialog shown when the user completes all 25
 /// suggested iconic Galapagos species.
@@ -52,6 +57,9 @@ class _ChecklistCompletionDialogState
   @override
   void initState() {
     super.initState();
+
+    // Trigger celebration haptics when the dialog opens
+    CelebrationEffectsService.celebrateCompletion();
 
     // Trophy scale-in with elastic curve
     _trophyController = AnimationController(
@@ -99,7 +107,12 @@ class _ChecklistCompletionDialogState
   Future<void> _requestCertificate() async {
     setState(() => _requestingCertificate = true);
     try {
-      await CertificateService.requestCertificate();
+      final speciesCount =
+          ref.read(checklistSpeciesProvider).asData?.value.length ??
+              kDefaultSpeciesIds.length;
+      await CertificateService.requestCertificate(
+        speciesCount: speciesCount,
+      );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -121,12 +134,21 @@ class _ChecklistCompletionDialogState
     }
   }
 
-  void _share() {
+  Future<void> _share() async {
     final locale = LocaleSettings.currentLocale;
-    final text = locale == AppLocale.es
-        ? 'He completado la lista de las 25 especies iconicas de Galapagos! #GalapagosWildlife'
-        : "I've seen all 25 iconic Galapagos species! #GalapagosWildlife";
-    SharePlus.instance.share(ShareParams(text: text));
+    final isEs = locale == AppLocale.es;
+    final profile = ref.read(userProfileProvider).asData?.value;
+    final stats = ref.read(checklistStatsProvider);
+
+    await ShareCardService.shareCompletionCard(
+      context: context,
+      userName: profile?.displayName ?? '',
+      speciesCount: stats.totalSpecies,
+      daysToComplete: stats.daysToComplete,
+      firstSeenDate: stats.firstSeenDate,
+      lastSeenDate: stats.lastSeenDate,
+      locale: isEs ? 'es' : 'en',
+    );
   }
 
   @override
@@ -135,6 +157,8 @@ class _ChecklistCompletionDialogState
     final userName = profile?.displayName ?? '';
     final locale = LocaleSettings.currentLocale;
     final isEs = locale == AppLocale.es;
+    final stats = ref.watch(checklistStatsProvider);
+    final dateFormat = DateFormat.yMMMd(isEs ? 'es' : 'en');
 
     return Material(
       color: Colors.transparent,
@@ -152,8 +176,8 @@ class _ChecklistCompletionDialogState
 
           // Content
           Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -220,8 +244,8 @@ class _ChecklistCompletionDialogState
 
                         Text(
                           isEs
-                              ? 'Has visto las 25 especies iconicas de Galapagos!'
-                              : "You've seen all 25 iconic species of Galapagos!",
+                              ? 'Has visto las ${stats.totalSpecies} especies iconicas de Galapagos!'
+                              : "You've seen all ${stats.totalSpecies} iconic species of Galapagos!",
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Colors.white.withValues(alpha: 0.9),
                             height: 1.4,
@@ -229,7 +253,52 @@ class _ChecklistCompletionDialogState
                           textAlign: TextAlign.center,
                         ),
 
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 20),
+
+                        // Badge earned callout
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFFFFD700).withValues(alpha: 0.15),
+                            border: Border.all(
+                              color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.emoji_events,
+                                color: Color(0xFFFFD700),
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  context.t.checklist.earnedBadge,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: const Color(0xFFFFD700),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Trip statistics
+                        _buildTripStats(context, stats, isEs, dateFormat),
+
+                        const SizedBox(height: 28),
 
                         // Action buttons
                         _buildActionButtons(isEs),
@@ -248,6 +317,72 @@ class _ChecklistCompletionDialogState
             child: IconButton(
               onPressed: () => Navigator.of(context).pop(),
               icon: const Icon(Icons.close, color: Colors.white70, size: 28),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTripStats(
+    BuildContext context,
+    ChecklistStats stats,
+    bool isEs,
+    DateFormat dateFormat,
+  ) {
+    final items = <Widget>[];
+
+    if (stats.daysToComplete > 0) {
+      items.add(_statRow(
+        context,
+        Icons.timer_outlined,
+        context.t.checklist.completedInDays(days: stats.daysToComplete),
+      ));
+    }
+
+    if (stats.firstSeenDate != null) {
+      items.add(_statRow(
+        context,
+        Icons.flag_outlined,
+        '${context.t.checklist.firstSpecies}: ${dateFormat.format(stats.firstSeenDate!)}',
+      ));
+    }
+
+    if (stats.lastSeenDate != null) {
+      items.add(_statRow(
+        context,
+        Icons.check_circle_outline,
+        '${context.t.checklist.lastSpecies}: ${dateFormat.format(stats.lastSeenDate!)}',
+      ));
+    }
+
+    if (items.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.white.withValues(alpha: 0.08),
+      ),
+      child: Column(
+        children: items,
+      ),
+    );
+  }
+
+  Widget _statRow(BuildContext context, IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.white70, size: 18),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
             ),
           ),
         ],
@@ -286,15 +421,35 @@ class _ChecklistCompletionDialogState
   Widget _buildActionButtons(bool isEs) {
     return Column(
       children: [
-        // Share button
+        // Share button — visual card
         SizedBox(
           width: 240,
           child: ElevatedButton.icon(
             onPressed: _share,
             icon: const Icon(Icons.share),
-            label: Text(isEs ? 'Compartir' : 'Share'),
+            label: Text(context.t.checklist.shareCompletion),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Wallpapers button
+        SizedBox(
+          width: 240,
+          child: ElevatedButton.icon(
+            onPressed: () => showWallpaperUnlockSheet(context),
+            icon: const Icon(Icons.wallpaper),
+            label: Text(isEs ? 'Fondos de Pantalla' : 'Wallpapers'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(

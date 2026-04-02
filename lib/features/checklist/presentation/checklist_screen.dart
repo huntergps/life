@@ -13,6 +13,7 @@ import 'package:galapagos_wildlife/features/settings/providers/settings_provider
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
 import '../providers/suggested_species_provider.dart';
+import '../services/celebration_effects_service.dart';
 import 'checklist_detail_sheet.dart';
 import 'checklist_completion_dialog.dart';
 
@@ -567,6 +568,7 @@ class _GridView extends StatelessWidget {
               return;
             }
             await ref.read(userChecklistProvider.notifier).toggle(species.id);
+            CelebrationEffectsService.celebrateCheckmark();
             _checkMilestones(context, ref);
           },
           onRemove: () {
@@ -583,6 +585,7 @@ class _GridView extends StatelessWidget {
     final newSeenCount = myIds.where((id) => currentSeen.contains(id)).length;
 
     if (newSeenCount > 0 && newSeenCount % 5 == 0 && newSeenCount < total) {
+      CelebrationEffectsService.celebrateMilestone();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('\u{2B50} $newSeenCount ${isEs ? 'especies vistas!' : 'species seen!'}'),
@@ -592,6 +595,7 @@ class _GridView extends StatelessWidget {
       );
     }
     if (newSeenCount == (total / 2).round() && newSeenCount > 0) {
+      CelebrationEffectsService.celebrateMilestone();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('\u{1F949} ${isEs ? 'A mitad de camino!' : 'Halfway there!'}'),
@@ -601,6 +605,7 @@ class _GridView extends StatelessWidget {
       );
     }
     if (newSeenCount == total && total > 0) {
+      CelebrationEffectsService.celebrateCompletion();
       ChecklistCompletionDialog.show(context);
     }
   }
@@ -854,6 +859,7 @@ class _ListView extends StatelessWidget {
               return;
             }
             await ref.read(userChecklistProvider.notifier).toggle(species.id);
+            CelebrationEffectsService.celebrateCheckmark();
             _checkMilestones(context);
           },
           onTap: () {
@@ -883,6 +889,7 @@ class _ListView extends StatelessWidget {
     final newSeenCount = myIds.where((id) => currentSeen.contains(id)).length;
 
     if (newSeenCount > 0 && newSeenCount % 5 == 0 && newSeenCount < total) {
+      CelebrationEffectsService.celebrateMilestone();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('\u{2B50} $newSeenCount ${isEs ? 'especies vistas!' : 'species seen!'}'),
@@ -892,6 +899,7 @@ class _ListView extends StatelessWidget {
       );
     }
     if (newSeenCount == (total / 2).round() && newSeenCount > 0) {
+      CelebrationEffectsService.celebrateMilestone();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('\u{1F949} ${isEs ? 'A mitad de camino!' : 'Halfway there!'}'),
@@ -901,6 +909,7 @@ class _ListView extends StatelessWidget {
       );
     }
     if (newSeenCount == total && total > 0) {
+      CelebrationEffectsService.celebrateCompletion();
       ChecklistCompletionDialog.show(context);
     }
   }

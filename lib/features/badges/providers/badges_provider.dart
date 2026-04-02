@@ -5,6 +5,8 @@ import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/features/badges/models/badge_definition.dart';
 import 'package:galapagos_wildlife/features/favorites/providers/favorites_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
+import 'package:galapagos_wildlife/features/species/shared/species_checklist_provider.dart';
+import 'package:galapagos_wildlife/features/checklist/providers/suggested_species_provider.dart';
 
 /// All badge definitions. Uses i18n `t` for localized names/descriptions.
 List<BadgeDefinition> allBadges() => [
@@ -98,6 +100,15 @@ List<BadgeDefinition> allBadges() => [
         category: BadgeCategory.conservation,
         target: 3,
       ),
+      BadgeDefinition(
+        id: 'galapagos_master',
+        name: (t) => t.badges.galapagosmaster,
+        description: (t) => t.badges.galapagosmasterDesc,
+        icon: Icons.emoji_events,
+        color: const Color(0xFFFFD700),
+        category: BadgeCategory.species,
+        target: 1, // binary: 1 = all checklist species seen
+      ),
     ];
 
 /// Computes badge progress from existing sightings, species, and favorites data.
@@ -106,11 +117,18 @@ final badgeProgressProvider = FutureProvider<List<BadgeProgress>>((ref) async {
   final speciesMap = await ref.watch(speciesLookupProvider.future);
   final favorites = await ref.watch(favoritesProvider.future);
 
+  // Checklist completion data for Galapagos Master badge
+  final seenIds = ref.watch(userChecklistProvider).asData?.value ?? {};
+  final checklistIds = ref.watch(checklistSpeciesProvider).asData?.value ?? [];
+  final checklistComplete =
+      checklistIds.isNotEmpty && checklistIds.every((id) => seenIds.contains(id));
+
   final badges = allBadges();
   final stats = _computeStats(sightings, speciesMap);
 
   return badges.map((badge) {
-    final current = _currentForBadge(badge.id, stats, favorites.length);
+    final current =
+        _currentForBadge(badge.id, stats, favorites.length, checklistComplete);
     return BadgeProgress(badge: badge, current: current);
   }).toList();
 });
@@ -172,7 +190,8 @@ _Stats _computeStats(List<Sighting> sightings, Map<int, Species> speciesMap) {
   );
 }
 
-int _currentForBadge(String badgeId, _Stats stats, int favoritesCount) {
+int _currentForBadge(
+    String badgeId, _Stats stats, int favoritesCount, bool checklistComplete) {
   return switch (badgeId) {
     'first_sighting' => stats.totalSightings,
     'explorer' => stats.totalSightings,
@@ -184,6 +203,7 @@ int _currentForBadge(String badgeId, _Stats stats, int favoritesCount) {
     'photographer' => stats.photosCount,
     'curator' => favoritesCount,
     'conservationist' => stats.threatenedSpecies,
+    'galapagos_master' => checklistComplete ? 1 : 0,
     _ => 0,
   };
 }

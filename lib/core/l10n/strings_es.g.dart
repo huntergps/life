@@ -136,6 +136,11 @@ class _TranslationsChecklistEs implements TranslationsChecklistEn {
 	@override String get filterSeen => 'Mostrar vistas';
 	@override String get filterUnseen => 'Mostrar no vistas';
 	@override String get filterAll => 'Mostrar todas';
+	@override String completedInDays({required Object days}) => 'Completado en ${days} dias';
+	@override String get firstSpecies => 'Primera especie';
+	@override String get lastSpecies => 'Ultima especie';
+	@override String get earnedBadge => 'Has ganado el logro Maestro de Galapagos!';
+	@override String get shareCompletion => 'Compartir Logro';
 }
 
 // Path: species
@@ -808,6 +813,8 @@ class _TranslationsBadgesEs implements TranslationsBadgesEn {
 	@override String get curatorDesc => 'Agrega 10 especies a favoritos';
 	@override String get conservationist => 'Conservacionista';
 	@override String get conservationistDesc => 'Avista 3 especies amenazadas (CR/EN/VU)';
+	@override String get galapagosmaster => 'Maestro de Galapagos';
+	@override String get galapagosmasterDesc => 'Completo el checklist de fauna de Galapagos';
 	@override String get badgeUnlocked => '¡Logro Desbloqueado!';
 	@override String youEarned({required Object name}) => 'Has ganado: ${name}';
 	@override String get congratulations => '¡Felicidades!';
@@ -1206,6 +1213,11 @@ extension on TranslationsEs {
 			'checklist.filterSeen' => 'Mostrar vistas',
 			'checklist.filterUnseen' => 'Mostrar no vistas',
 			'checklist.filterAll' => 'Mostrar todas',
+			'checklist.completedInDays' => ({required Object days}) => 'Completado en ${days} dias',
+			'checklist.firstSpecies' => 'Primera especie',
+			'checklist.lastSpecies' => 'Ultima especie',
+			'checklist.earnedBadge' => 'Has ganado el logro Maestro de Galapagos!',
+			'checklist.shareCompletion' => 'Compartir Logro',
 			'species.title' => 'Especies',
 			'species.search' => 'Buscar especies...',
 			'species.all' => 'Todas',
@@ -1677,13 +1689,13 @@ extension on TranslationsEs {
 			'admin.selectSpeciesRequired' => 'Selecciona una especie',
 			'admin.speciesAlreadyAssociated' => 'Esta especie ya está asociada a este sitio',
 			'admin.relationshipAlreadyExists' => 'Esta relación especie-sitio ya existe',
+			_ => null,
+		} ?? switch (path) {
 			'admin.manageTaxonomy' => 'Gestión de Taxonomía',
 			'admin.search' => 'Buscar...',
 			'admin.confirmDeleteTitle' => 'Confirmar eliminación',
 			'admin.confirmDeleteCount' => ({required Object count}) => '¿Eliminar ${count} elementos?',
 			'admin.confirmDeletePermanentlyCount' => ({required Object count}) => '¿Eliminar permanentemente ${count} elementos? Esta acción no se puede deshacer.',
-			_ => null,
-		} ?? switch (path) {
 			'admin.inTrash' => ({required Object count}) => '${count} en papelera',
 			'admin.emptyTrash' => 'La papelera está vacía',
 			'admin.deletedLabel' => 'Eliminado',
@@ -1807,6 +1819,8 @@ extension on TranslationsEs {
 			'badges.curatorDesc' => 'Agrega 10 especies a favoritos',
 			'badges.conservationist' => 'Conservacionista',
 			'badges.conservationistDesc' => 'Avista 3 especies amenazadas (CR/EN/VU)',
+			'badges.galapagosmaster' => 'Maestro de Galapagos',
+			'badges.galapagosmasterDesc' => 'Completo el checklist de fauna de Galapagos',
 			'badges.badgeUnlocked' => '¡Logro Desbloqueado!',
 			'badges.youEarned' => ({required Object name}) => 'Has ganado: ${name}',
 			'badges.congratulations' => '¡Felicidades!',

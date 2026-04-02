@@ -211,6 +211,21 @@ class TranslationsChecklistEn {
 
 	/// en: 'Show all'
 	String get filterAll => 'Show all';
+
+	/// en: 'Completed in ${days} days'
+	String completedInDays({required Object days}) => 'Completed in ${days} days';
+
+	/// en: 'First species'
+	String get firstSpecies => 'First species';
+
+	/// en: 'Last species'
+	String get lastSpecies => 'Last species';
+
+	/// en: 'You earned the Galapagos Master badge!'
+	String get earnedBadge => 'You earned the Galapagos Master badge!';
+
+	/// en: 'Share Achievement'
+	String get shareCompletion => 'Share Achievement';
 }
 
 // Path: species
@@ -2064,6 +2079,12 @@ class TranslationsBadgesEn {
 	/// en: 'Spot 3 threatened species (CR/EN/VU)'
 	String get conservationistDesc => 'Spot 3 threatened species (CR/EN/VU)';
 
+	/// en: 'Galapagos Master'
+	String get galapagosmaster => 'Galapagos Master';
+
+	/// en: 'Completed the Galapagos Wildlife checklist'
+	String get galapagosmasterDesc => 'Completed the Galapagos Wildlife checklist';
+
 	/// en: 'Badge Unlocked!'
 	String get badgeUnlocked => 'Badge Unlocked!';
 
@@ -2877,6 +2898,11 @@ extension on Translations {
 			'checklist.filterSeen' => 'Show seen only',
 			'checklist.filterUnseen' => 'Show unseen only',
 			'checklist.filterAll' => 'Show all',
+			'checklist.completedInDays' => ({required Object days}) => 'Completed in ${days} days',
+			'checklist.firstSpecies' => 'First species',
+			'checklist.lastSpecies' => 'Last species',
+			'checklist.earnedBadge' => 'You earned the Galapagos Master badge!',
+			'checklist.shareCompletion' => 'Share Achievement',
 			'species.title' => 'Species',
 			'species.search' => 'Search species...',
 			'species.all' => 'All',
@@ -3348,13 +3374,13 @@ extension on Translations {
 			'admin.selectSpeciesRequired' => 'Select a species',
 			'admin.speciesAlreadyAssociated' => 'This species is already associated with this site',
 			'admin.relationshipAlreadyExists' => 'This species-site relationship already exists',
+			_ => null,
+		} ?? switch (path) {
 			'admin.manageTaxonomy' => 'Taxonomy Management',
 			'admin.search' => 'Search...',
 			'admin.confirmDeleteTitle' => 'Confirm Deletion',
 			'admin.confirmDeleteCount' => ({required Object count}) => 'Delete ${count} items?',
 			'admin.confirmDeletePermanentlyCount' => ({required Object count}) => 'Permanently delete ${count} items? This action cannot be undone.',
-			_ => null,
-		} ?? switch (path) {
 			'admin.inTrash' => ({required Object count}) => '${count} in trash',
 			'admin.emptyTrash' => 'Trash is empty',
 			'admin.deletedLabel' => 'Deleted',
@@ -3478,6 +3504,8 @@ extension on Translations {
 			'badges.curatorDesc' => 'Add 10 species to favorites',
 			'badges.conservationist' => 'Conservationist',
 			'badges.conservationistDesc' => 'Spot 3 threatened species (CR/EN/VU)',
+			'badges.galapagosmaster' => 'Galapagos Master',
+			'badges.galapagosmasterDesc' => 'Completed the Galapagos Wildlife checklist',
 			'badges.badgeUnlocked' => 'Badge Unlocked!',
 			'badges.youEarned' => ({required Object name}) => 'You earned: ${name}',
 			'badges.congratulations' => 'Congratulations!',

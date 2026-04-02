@@ -41,7 +41,12 @@
     "celebration": "Congratulations! You completed the Galapagos checklist!",
     "filterSeen": "Show seen only",
     "filterUnseen": "Show unseen only",
-    "filterAll": "Show all"
+    "filterAll": "Show all",
+    "completedInDays": "Completed in ${days} days",
+    "firstSpecies": "First species",
+    "lastSpecies": "Last species",
+    "earnedBadge": "You earned the Galapagos Master badge!",
+    "shareCompletion": "Share Achievement"
   },
   "species": {
     "title": "Species",
@@ -663,6 +668,8 @@
     "curatorDesc": "Add 10 species to favorites",
     "conservationist": "Conservationist",
     "conservationistDesc": "Spot 3 threatened species (CR/EN/VU)",
+    "galapagosmaster": "Galapagos Master",
+    "galapagosmasterDesc": "Completed the Galapagos Wildlife checklist",
     "badgeUnlocked": "Badge Unlocked!",
     "youEarned": "You earned: ${name}",
     "congratulations": "Congratulations!"
