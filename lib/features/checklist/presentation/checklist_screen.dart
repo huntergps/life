@@ -15,9 +15,12 @@ import 'package:galapagos_wildlife/features/purchases/providers/purchase_provide
 import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import '../providers/suggested_species_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/celebration_effects_service.dart';
+import '../services/certificate_service.dart';
 import 'checklist_detail_sheet.dart';
 import 'checklist_completion_dialog.dart';
+import 'wallpaper_unlock_sheet.dart';
 
 // ── View mode enum ──
 
@@ -1340,49 +1343,119 @@ class _RewardsBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => ChecklistCompletionDialog.show(context),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFFFFD700).withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFD700), Color(0xFFFFA000)],
         ),
-        child: Row(
-          children: [
-            const Text('🏆', style: TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    isEs ? '¡Checklist completado!' : 'Checklist Complete!',
-                    style: const TextStyle(
-                      color: Colors.black87,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFFD700).withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              const Text('🏆', style: TextStyle(fontSize: 28)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  isEs ? '¡Galápagos Master!' : 'Galápagos Master!',
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
-                  Text(
-                    isEs ? 'Ver premios, certificado y wallpapers' : 'View rewards, certificate & wallpapers',
-                    style: const TextStyle(color: Colors.black54, fontSize: 12),
-                  ),
-                ],
+                ),
               ),
-            ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.black54),
-          ],
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _RewardButton(
+                  icon: Icons.workspace_premium,
+                  label: isEs ? 'Certificado' : 'Certificate',
+                  onTap: () {
+                    final user = Supabase.instance.client.auth.currentUser;
+                    if (user == null) {
+                      context.push('/login');
+                    } else {
+                      CertificateService.requestCertificate(
+                        speciesCount: 17,
+                        context: context,
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _RewardButton(
+                  icon: Icons.wallpaper,
+                  label: isEs ? 'Fondos' : 'Wallpapers',
+                  onTap: () => showWallpaperUnlockSheet(context),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _RewardButton(
+                  icon: Icons.share,
+                  label: isEs ? 'Compartir' : 'Share',
+                  onTap: () => ChecklistCompletionDialog.show(context),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RewardButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _RewardButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Column(
+            children: [
+              Icon(icon, color: Colors.black87, size: 22),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
