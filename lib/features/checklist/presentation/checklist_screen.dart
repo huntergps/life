@@ -10,9 +10,9 @@ import 'package:galapagos_wildlife/features/species/shared/species_checklist_pro
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
 import '../providers/suggested_species_provider.dart';
-
-enum _ChecklistFilter { all, seen, unseen }
+import 'checklist_detail_sheet.dart';
 
 class ChecklistScreen extends ConsumerStatefulWidget {
   const ChecklistScreen({super.key});
@@ -22,9 +22,6 @@ class ChecklistScreen extends ConsumerStatefulWidget {
 }
 
 class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
-  bool _showSuggestedOnly = true;
-  _ChecklistFilter _filter = _ChecklistFilter.all;
-
   @override
   Widget build(BuildContext context) {
     final tr = context.t;
@@ -32,36 +29,59 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
     final isEs = ref.watch(localeProvider.select((l) => l == 'es'));
     final allSpeciesAsync = ref.watch(allSpeciesProvider);
     final checklistAsync = ref.watch(userChecklistProvider);
-    final suggestedIds = ref.watch(suggestedSpeciesIdsProvider);
+    final myListAsync = ref.watch(checklistSpeciesProvider);
     final isAuthenticated = ref.watch(isAuthenticatedProvider);
+    final isPremium = ref.watch(isPremiumProvider);
 
     final seenSet = checklistAsync.asData?.value ?? <int>{};
+    final myListIds = myListAsync.asData?.value ?? [];
 
     return Scaffold(
       appBar: AppBar(
         title: Text(tr.checklist.title),
         actions: [
-          // Filter popup
-          PopupMenuButton<_ChecklistFilter>(
-            icon: Icon(
-              Icons.filter_list,
-              color: _filter != _ChecklistFilter.all
-                  ? AppColors.primary
-                  : null,
-            ),
-            onSelected: (f) => setState(() => _filter = f),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            onSelected: (value) async {
+              if (value == 'reset') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: Text(isEs ? 'Restablecer lista' : 'Reset list'),
+                    content: Text(isEs
+                        ? 'Volver a las 10 especies predeterminadas?'
+                        : 'Reset to the 10 default species?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text(tr.common.cancel),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        child: Text(isEs ? 'Restablecer' : 'Reset'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  await ref
+                      .read(checklistSpeciesProvider.notifier)
+                      .resetToDefaults();
+                }
+              }
+            },
             itemBuilder: (_) => [
               PopupMenuItem(
-                value: _ChecklistFilter.all,
-                child: Text(tr.checklist.filterAll),
-              ),
-              PopupMenuItem(
-                value: _ChecklistFilter.seen,
-                child: Text(tr.checklist.filterSeen),
-              ),
-              PopupMenuItem(
-                value: _ChecklistFilter.unseen,
-                child: Text(tr.checklist.filterUnseen),
+                value: 'reset',
+                child: Row(
+                  children: [
+                    const Icon(Icons.restart_alt, size: 20),
+                    const SizedBox(width: 8),
+                    Text(isEs
+                        ? 'Restablecer predeterminados'
+                        : 'Reset to defaults'),
+                  ],
+                ),
               ),
             ],
           ),
@@ -71,103 +91,97 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text(tr.common.error)),
         data: (allSpecies) {
-          // Determine which species to display
-          List<Species> displaySpecies;
-          if (_showSuggestedOnly) {
-            final idSet = suggestedIds.toSet();
-            displaySpecies = allSpecies
-                .where((s) => idSet.contains(s.id))
-                .toList();
-            // Sort by the order in suggestedIds
-            displaySpecies.sort((a, b) =>
-                suggestedIds.indexOf(a.id).compareTo(suggestedIds.indexOf(b.id)));
-          } else {
-            displaySpecies = List.of(allSpecies)
-              ..sort((a, b) {
-                final aName = isEs ? a.commonNameEs : a.commonNameEn;
-                final bName = isEs ? b.commonNameEs : b.commonNameEn;
-                return aName.compareTo(bName);
-              });
-          }
+          // Build a map for quick lookup
+          final speciesMap = <int, Species>{
+            for (final s in allSpecies) s.id: s,
+          };
 
-          // Apply seen/unseen filter
-          if (_filter == _ChecklistFilter.seen) {
-            displaySpecies =
-                displaySpecies.where((s) => seenSet.contains(s.id)).toList();
-          } else if (_filter == _ChecklistFilter.unseen) {
-            displaySpecies =
-                displaySpecies.where((s) => !seenSet.contains(s.id)).toList();
-          }
+          // Build display list from user's custom list
+          final displaySpecies = <Species>[
+            for (final id in myListIds)
+              if (speciesMap.containsKey(id)) speciesMap[id]!,
+          ];
 
-          final totalForProgress =
-              _showSuggestedOnly ? suggestedIds.length : allSpecies.length;
-          final seenInScope = _showSuggestedOnly
-              ? seenSet.where((id) => suggestedIds.contains(id)).length
-              : seenSet.length;
-
-          // Check if all suggested are completed
-          final allSuggestedDone = _showSuggestedOnly &&
-              suggestedIds.every((id) => seenSet.contains(id));
+          final seenInScope =
+              myListIds.where((id) => seenSet.contains(id)).length;
+          final total = myListIds.length;
+          final allDone =
+              total > 0 && myListIds.every((id) => seenSet.contains(id));
 
           return Column(
             children: [
               // Progress header
               _ProgressHeader(
                 seen: seenInScope,
-                total: totalForProgress,
+                total: total,
                 isDark: isDark,
-                allSuggestedDone: allSuggestedDone,
+                allDone: allDone,
               ),
-              // Toggle row
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _ToggleChip(
-                        label: tr.checklist.suggested,
-                        selected: _showSuggestedOnly,
-                        onTap: () =>
-                            setState(() => _showSuggestedOnly = true),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _ToggleChip(
-                        label:
-                            '${tr.checklist.allSpecies} (${allSpecies.length})',
-                        selected: !_showSuggestedOnly,
-                        onTap: () =>
-                            setState(() => _showSuggestedOnly = false),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Species list
+              const SizedBox(height: 8),
+              // Species list with reorder + swipe-to-remove
               Expanded(
                 child: displaySpecies.isEmpty
                     ? Center(
-                        child: Text(
-                          tr.species.noResults,
-                          style: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.grey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(32),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.playlist_add,
+                                  size: 64,
+                                  color: isDark
+                                      ? Colors.white38
+                                      : Colors.grey.shade400),
+                              const SizedBox(height: 16),
+                              Text(
+                                isEs
+                                    ? 'Tu lista esta vacia.\nToca + para agregar especies.'
+                                    : 'Your list is empty.\nTap + to add species.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white54 : Colors.grey,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       )
-                    : ListView.builder(
+                    : ReorderableListView.builder(
                         padding: const EdgeInsets.only(bottom: 80),
                         itemCount: displaySpecies.length,
+                        onReorder: (oldIndex, newIndex) {
+                          ref
+                              .read(checklistSpeciesProvider.notifier)
+                              .reorder(oldIndex, newIndex);
+                        },
+                        proxyDecorator: (child, index, animation) {
+                          return AnimatedBuilder(
+                            animation: animation,
+                            builder: (context, child) => Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(12),
+                              child: child,
+                            ),
+                            child: child,
+                          );
+                        },
                         itemBuilder: (context, index) {
                           final species = displaySpecies[index];
                           final isSeen = seenSet.contains(species.id);
                           return _SpeciesCheckRow(
+                            key: ValueKey('row-${species.id}'),
                             species: species,
+                            index: index,
                             isSeen: isSeen,
                             isEs: isEs,
                             isDark: isDark,
                             isAuthenticated: isAuthenticated,
+                            onRemove: () {
+                              ref
+                                  .read(checklistSpeciesProvider.notifier)
+                                  .removeSpecies(species.id);
+                            },
                             onToggle: () async {
                               if (!isAuthenticated) {
                                 context.push('/login');
@@ -177,10 +191,24 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
                                   .read(userChecklistProvider.notifier)
                                   .toggle(species.id);
                             },
-                            onTap: () => context.goNamed(
-                              'species-detail',
-                              pathParameters: {'id': '${species.id}'},
-                            ),
+                            onTap: () {
+                              if (isSeen) {
+                                final entry = ref
+                                    .read(userChecklistProvider.notifier)
+                                    .entryFor(species.id);
+                                showChecklistDetailSheet(
+                                  context: context,
+                                  species: species,
+                                  entry: entry,
+                                  isPremium: isPremium,
+                                );
+                              } else {
+                                context.goNamed(
+                                  'species-detail',
+                                  pathParameters: {'id': '${species.id}'},
+                                );
+                              }
+                            },
                           );
                         },
                       ),
@@ -189,6 +217,202 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (!isAuthenticated) {
+            context.push('/login');
+            return;
+          }
+          _showAddSpeciesSheet(context, ref, myListIds, isDark, isEs);
+        },
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+// ── Add Species Bottom Sheet ──
+
+void _showAddSpeciesSheet(
+  BuildContext context,
+  WidgetRef ref,
+  List<int> currentIds,
+  bool isDark,
+  bool isEs,
+) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (ctx) => DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) => _AddSpeciesContent(
+        currentIds: currentIds,
+        scrollController: scrollController,
+        isDark: isDark,
+        isEs: isEs,
+      ),
+    ),
+  );
+}
+
+class _AddSpeciesContent extends ConsumerStatefulWidget {
+  final List<int> currentIds;
+  final ScrollController scrollController;
+  final bool isDark;
+  final bool isEs;
+
+  const _AddSpeciesContent({
+    required this.currentIds,
+    required this.scrollController,
+    required this.isDark,
+    required this.isEs,
+  });
+
+  @override
+  ConsumerState<_AddSpeciesContent> createState() =>
+      _AddSpeciesContentState();
+}
+
+class _AddSpeciesContentState extends ConsumerState<_AddSpeciesContent> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final allSpeciesAsync = ref.watch(allSpeciesProvider);
+    final currentIds = ref.watch(checklistSpeciesProvider).asData?.value ?? [];
+
+    return Column(
+      children: [
+        // Drag handle
+        Center(
+          child: Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(top: 12, bottom: 8),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade400,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: Text(
+            widget.isEs ? 'Agregar especie' : 'Add species',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+        ),
+        // Search field
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: TextField(
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: widget.isEs ? 'Buscar especie...' : 'Search species...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              isDense: true,
+            ),
+            onChanged: (v) => setState(() => _query = v.toLowerCase()),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: allSpeciesAsync.when(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (e, _) =>
+                Center(child: Text(widget.isEs ? 'Error' : 'Error')),
+            data: (allSpecies) {
+              final currentIdSet = currentIds.toSet();
+              var available = allSpecies
+                  .where((s) => !currentIdSet.contains(s.id))
+                  .toList();
+
+              if (_query.isNotEmpty) {
+                available = available.where((s) {
+                  final name = widget.isEs
+                      ? s.commonNameEs.toLowerCase()
+                      : s.commonNameEn.toLowerCase();
+                  final sci = s.scientificName.toLowerCase();
+                  return name.contains(_query) || sci.contains(_query);
+                }).toList();
+              }
+
+              // Sort alphabetically
+              available.sort((a, b) {
+                final aName =
+                    widget.isEs ? a.commonNameEs : a.commonNameEn;
+                final bName =
+                    widget.isEs ? b.commonNameEs : b.commonNameEn;
+                return aName.compareTo(bName);
+              });
+
+              if (available.isEmpty) {
+                return Center(
+                  child: Text(
+                    widget.isEs
+                        ? 'No hay especies disponibles'
+                        : 'No species available',
+                    style: TextStyle(
+                        color: widget.isDark ? Colors.white54 : Colors.grey),
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                controller: widget.scrollController,
+                itemCount: available.length,
+                itemBuilder: (context, index) {
+                  final species = available[index];
+                  final name = widget.isEs
+                      ? species.commonNameEs
+                      : species.commonNameEn;
+                  final imageUrl = species.thumbnailUrl ??
+                      SpeciesAssets.thumbnail(species.id);
+
+                  return ListTile(
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: CachedSpeciesImage(
+                        imageUrl: imageUrl,
+                        speciesId: species.id,
+                        width: 44,
+                        height: 44,
+                      ),
+                    ),
+                    title: Text(name),
+                    subtitle: Text(
+                      species.scientificName,
+                      style: const TextStyle(
+                          fontStyle: FontStyle.italic, fontSize: 12),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.add_circle_outline),
+                      color: AppColors.primary,
+                      onPressed: () {
+                        ref
+                            .read(checklistSpeciesProvider.notifier)
+                            .addSpecies(species.id);
+                      },
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
@@ -199,13 +423,13 @@ class _ProgressHeader extends StatelessWidget {
   final int seen;
   final int total;
   final bool isDark;
-  final bool allSuggestedDone;
+  final bool allDone;
 
   const _ProgressHeader({
     required this.seen,
     required this.total,
     required this.isDark,
-    required this.allSuggestedDone,
+    required this.allDone,
   });
 
   @override
@@ -220,10 +444,10 @@ class _ProgressHeader extends StatelessWidget {
         color: isDark ? AppColors.darkCard : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: allSuggestedDone
+          color: allDone
               ? AppColors.primaryLight
               : (isDark ? AppColors.darkBorder : Colors.grey.shade200),
-          width: allSuggestedDone ? 2 : 1,
+          width: allDone ? 2 : 1,
         ),
         boxShadow: isDark
             ? null
@@ -250,9 +474,7 @@ class _ProgressHeader extends StatelessWidget {
                   backgroundColor:
                       isDark ? AppColors.darkBorder : Colors.grey.shade200,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    allSuggestedDone
-                        ? AppColors.primaryLight
-                        : AppColors.primary,
+                    allDone ? AppColors.primaryLight : AppColors.primary,
                   ),
                 ),
                 Text(
@@ -272,12 +494,13 @@ class _ProgressHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tr.checklist.progress(seen: seen.toString(), total: total.toString()),
+                  tr.checklist.progress(
+                      seen: seen.toString(), total: total.toString()),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                 ),
-                if (allSuggestedDone) ...[
+                if (allDone) ...[
                   const SizedBox(height: 4),
                   Text(
                     tr.checklist.allSuggested,
@@ -297,72 +520,28 @@ class _ProgressHeader extends StatelessWidget {
   }
 }
 
-// ── Toggle Chip ──
-
-class _ToggleChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _ToggleChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-        decoration: BoxDecoration(
-          color: selected
-              ? AppColors.primary.withValues(alpha: isDark ? 0.3 : 0.12)
-              : (isDark ? AppColors.darkCard : Colors.grey.shade100),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: selected
-                ? AppColors.primary
-                : (isDark ? AppColors.darkBorder : Colors.grey.shade300),
-            width: selected ? 1.5 : 1,
-          ),
-        ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-            color: selected
-                ? AppColors.primary
-                : (isDark ? Colors.white70 : Colors.black54),
-            fontSize: 13,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 // ── Species Check Row ──
 
 class _SpeciesCheckRow extends StatelessWidget {
   final Species species;
+  final int index;
   final bool isSeen;
   final bool isEs;
   final bool isDark;
   final bool isAuthenticated;
+  final VoidCallback onRemove;
   final VoidCallback onToggle;
   final VoidCallback onTap;
 
   const _SpeciesCheckRow({
+    super.key,
     required this.species,
+    required this.index,
     required this.isSeen,
     required this.isEs,
     required this.isDark,
     required this.isAuthenticated,
+    required this.onRemove,
     required this.onToggle,
     required this.onTap,
   });
@@ -373,53 +552,84 @@ class _SpeciesCheckRow extends StatelessWidget {
     final imageUrl =
         species.thumbnailUrl ?? SpeciesAssets.thumbnail(species.id);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
-      decoration: BoxDecoration(
-        color: isSeen
-            ? AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.06)
-            : (isDark ? AppColors.darkCard : Colors.white),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isSeen
-              ? AppColors.primary.withValues(alpha: isDark ? 0.4 : 0.25)
-              : (isDark ? AppColors.darkBorder : Colors.grey.shade200),
-        ),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: CachedSpeciesImage(
-            imageUrl: imageUrl,
-            speciesId: species.id,
-            width: 52,
-            height: 52,
-          ),
-        ),
-        title: Text(
-          name,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-        ),
-        subtitle: Text(
-          species.scientificName,
-          style: TextStyle(
-            fontStyle: FontStyle.italic,
-            fontSize: 12,
-            color: isDark ? Colors.white38 : Colors.black45,
-          ),
-        ),
-        trailing: _CheckButton(
-          isSeen: isSeen,
-          isDark: isDark,
-          onTap: onToggle,
-        ),
-        onTap: onTap,
-        shape: RoundedRectangleBorder(
+    return Dismissible(
+      key: ValueKey('dismiss-${species.id}'),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 24),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+        decoration: BoxDecoration(
+          color: Colors.red.shade400,
           borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.delete_outline, color: Colors.white),
+      ),
+      onDismissed: (_) => onRemove(),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+        decoration: BoxDecoration(
+          color: isSeen
+              ? AppColors.primary.withValues(alpha: isDark ? 0.15 : 0.06)
+              : (isDark ? AppColors.darkCard : Colors.white),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSeen
+                ? AppColors.primary.withValues(alpha: isDark ? 0.4 : 0.25)
+                : (isDark ? AppColors.darkBorder : Colors.grey.shade200),
+          ),
+        ),
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          leading: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ReorderableDragStartListener(
+                index: index,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Icon(
+                    Icons.drag_handle,
+                    color: isDark ? Colors.white38 : Colors.grey.shade400,
+                  ),
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: CachedSpeciesImage(
+                  imageUrl: imageUrl,
+                  speciesId: species.id,
+                  width: 48,
+                  height: 48,
+                ),
+              ),
+            ],
+          ),
+          title: Text(
+            name,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          subtitle: Text(
+            species.scientificName,
+            style: TextStyle(
+              fontStyle: FontStyle.italic,
+              fontSize: 12,
+              color: isDark ? Colors.white38 : Colors.black45,
+            ),
+          ),
+          trailing: _CheckButton(
+            isSeen: isSeen,
+            isDark: isDark,
+            onTap: onToggle,
+          ),
+          onTap: onTap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     );
@@ -461,7 +671,7 @@ class _CheckButton extends StatelessWidget {
           ),
         ),
         child: Icon(
-          isSeen ? Icons.check : Icons.add,
+          isSeen ? Icons.check : Icons.radio_button_unchecked,
           size: 20,
           color: isSeen
               ? Colors.white
