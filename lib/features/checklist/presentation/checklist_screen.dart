@@ -562,7 +562,7 @@ class _GridView extends StatelessWidget {
                 isPremium: isPremium,
               );
             } else {
-              context.goNamed(
+              context.pushNamed(
                 'species-detail',
                 pathParameters: {'id': '${species.id}'},
               );
@@ -736,14 +736,19 @@ class _GridCard extends StatelessWidget {
             ),
 
             // Seen check badge (top-right) — large hit area for easy tapping
+            // Check button — covers top-right quadrant for easy tapping
             Positioned(
               top: 0,
               right: 0,
               child: GestureDetector(
                 onTap: onToggle,
                 behavior: HitTestBehavior.opaque,
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
+                child: Container(
+                  // Large invisible hit area (half the card width, top half height)
+                  width: 72,
+                  height: 72,
+                  alignment: Alignment.topRight,
+                  padding: const EdgeInsets.all(8),
                   child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder: (child, animation) =>
@@ -761,8 +766,8 @@ class _GridCard extends StatelessWidget {
                               ),
                             ],
                           ),
-                          padding: const EdgeInsets.all(4),
-                          child: const Icon(Icons.check, color: Colors.white, size: 20),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(Icons.check, color: Colors.white, size: 22),
                         )
                       : Container(
                           key: const ValueKey(false),
@@ -770,7 +775,7 @@ class _GridCard extends StatelessWidget {
                             color: Colors.black.withValues(alpha: 0.4),
                             shape: BoxShape.circle,
                           ),
-                          padding: const EdgeInsets.all(4),
+                          padding: const EdgeInsets.all(6),
                           child: const Icon(Icons.radio_button_unchecked,
                               color: Colors.white70, size: 20),
                         ),
@@ -913,7 +918,7 @@ class _ListView extends StatelessWidget {
                 isPremium: isPremium,
               );
             } else {
-              context.goNamed(
+              context.pushNamed(
                 'species-detail',
                 pathParameters: {'id': '${species.id}'},
               );
