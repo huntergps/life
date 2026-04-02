@@ -88,8 +88,9 @@ class _TranslationsNavEs implements TranslationsNavEn {
 	@override String get species => 'Especies';
 	@override String get map => 'Mapa';
 	@override String get favorites => 'Favoritos';
-	@override String get sightings => 'Avistamientos';
+	@override String get sightings => 'Registros';
 	@override String get checklist => 'Lista';
+	@override String get settings => 'Ajustes';
 }
 
 // Path: home
@@ -1183,8 +1184,9 @@ extension on TranslationsEs {
 			'nav.species' => 'Especies',
 			'nav.map' => 'Mapa',
 			'nav.favorites' => 'Favoritos',
-			'nav.sightings' => 'Avistamientos',
+			'nav.sightings' => 'Registros',
 			'nav.checklist' => 'Lista',
+			'nav.settings' => 'Ajustes',
 			'home.welcome' => 'Bienvenido a Galápagos',
 			'home.explore' => 'Explorar Fauna',
 			'home.categories' => 'Categorías',
@@ -1688,9 +1690,9 @@ extension on TranslationsEs {
 			'admin.speciesAddedToSite' => 'Especie agregada al sitio',
 			'admin.selectSpeciesRequired' => 'Selecciona una especie',
 			'admin.speciesAlreadyAssociated' => 'Esta especie ya está asociada a este sitio',
-			'admin.relationshipAlreadyExists' => 'Esta relación especie-sitio ya existe',
 			_ => null,
 		} ?? switch (path) {
+			'admin.relationshipAlreadyExists' => 'Esta relación especie-sitio ya existe',
 			'admin.manageTaxonomy' => 'Gestión de Taxonomía',
 			'admin.search' => 'Buscar...',
 			'admin.confirmDeleteTitle' => 'Confirmar eliminación',

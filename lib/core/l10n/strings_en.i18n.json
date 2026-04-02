@@ -9,7 +9,8 @@
     "map": "Map",
     "favorites": "Favorites",
     "sightings": "Sightings",
-    "checklist": "Checklist"
+    "checklist": "Checklist",
+    "settings": "Settings"
   },
   "home": {
     "welcome": "Welcome to Galápagos",

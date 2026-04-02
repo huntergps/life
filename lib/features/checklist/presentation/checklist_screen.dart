@@ -540,6 +540,8 @@ class _GridView extends StatelessWidget {
         final isSeen = seenSet.contains(species.id);
         return _GridCard(
           species: species,
+          index: index,
+          totalCount: displaySpecies.length,
           isSeen: isSeen,
           isEs: isEs,
           isDark: isDark,
@@ -574,6 +576,12 @@ class _GridView extends StatelessWidget {
           onRemove: () {
             ref.read(checklistSpeciesProvider.notifier).removeSpecies(species.id);
           },
+          onMoveUp: index > 0 ? () {
+            ref.read(checklistSpeciesProvider.notifier).reorder(index, index - 1);
+          } : null,
+          onMoveDown: index < displaySpecies.length - 1 ? () {
+            ref.read(checklistSpeciesProvider.notifier).reorder(index, index + 2);
+          } : null,
         );
       },
     );
@@ -615,6 +623,8 @@ class _GridView extends StatelessWidget {
 
 class _GridCard extends StatelessWidget {
   final Species species;
+  final int index;
+  final int totalCount;
   final bool isSeen;
   final bool isEs;
   final bool isDark;
@@ -622,9 +632,13 @@ class _GridCard extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onToggle;
   final VoidCallback onRemove;
+  final VoidCallback? onMoveUp;
+  final VoidCallback? onMoveDown;
 
   const _GridCard({
     required this.species,
+    required this.index,
+    required this.totalCount,
     required this.isSeen,
     required this.isEs,
     required this.isDark,
@@ -632,6 +646,8 @@ class _GridCard extends StatelessWidget {
     required this.onTap,
     required this.onToggle,
     required this.onRemove,
+    this.onMoveUp,
+    this.onMoveDown,
   });
 
   static const _grayscaleMatrix = ColorFilter.matrix(<double>[
@@ -766,10 +782,34 @@ class _GridCard extends StatelessWidget {
   }
 
   void _showCardPopupMenu(BuildContext context) {
+    final box = context.findRenderObject() as RenderBox;
+    final offset = box.localToGlobal(Offset.zero);
     showMenu<String>(
       context: context,
-      position: RelativeRect.fill,
+      position: RelativeRect.fromLTRB(offset.dx, offset.dy + box.size.height, offset.dx + box.size.width, 0),
       items: [
+        if (index > 0)
+          PopupMenuItem(
+            value: 'up',
+            child: Row(
+              children: [
+                const Icon(Icons.arrow_upward, size: 20),
+                const SizedBox(width: 8),
+                Text(isEs ? 'Mover arriba' : 'Move up'),
+              ],
+            ),
+          ),
+        if (index < totalCount - 1)
+          PopupMenuItem(
+            value: 'down',
+            child: Row(
+              children: [
+                const Icon(Icons.arrow_downward, size: 20),
+                const SizedBox(width: 8),
+                Text(isEs ? 'Mover abajo' : 'Move down'),
+              ],
+            ),
+          ),
         PopupMenuItem(
           value: 'remove',
           child: Row(
@@ -782,6 +822,8 @@ class _GridCard extends StatelessWidget {
         ),
       ],
     ).then((value) {
+      if (value == 'up') onMoveUp?.call();
+      if (value == 'down') onMoveDown?.call();
       if (value == 'remove') onRemove();
     });
   }

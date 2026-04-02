@@ -8,8 +8,9 @@
     "species": "Especies",
     "map": "Mapa",
     "favorites": "Favoritos",
-    "sightings": "Avistamientos",
-    "checklist": "Lista"
+    "sightings": "Registros",
+    "checklist": "Lista",
+    "settings": "Ajustes"
   },
   "home": {
     "welcome": "Bienvenido a Galápagos",

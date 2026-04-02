@@ -109,6 +109,9 @@ class TranslationsNavEn {
 
 	/// en: 'Checklist'
 	String get checklist => 'Checklist';
+
+	/// en: 'Settings'
+	String get settings => 'Settings';
 }
 
 // Path: home
@@ -2870,6 +2873,7 @@ extension on Translations {
 			'nav.favorites' => 'Favorites',
 			'nav.sightings' => 'Sightings',
 			'nav.checklist' => 'Checklist',
+			'nav.settings' => 'Settings',
 			'home.welcome' => 'Welcome to Galápagos',
 			'home.explore' => 'Explore Wildlife',
 			'home.categories' => 'Categories',
@@ -3373,9 +3377,9 @@ extension on Translations {
 			'admin.speciesAddedToSite' => 'Species added to site',
 			'admin.selectSpeciesRequired' => 'Select a species',
 			'admin.speciesAlreadyAssociated' => 'This species is already associated with this site',
-			'admin.relationshipAlreadyExists' => 'This species-site relationship already exists',
 			_ => null,
 		} ?? switch (path) {
+			'admin.relationshipAlreadyExists' => 'This species-site relationship already exists',
 			'admin.manageTaxonomy' => 'Taxonomy Management',
 			'admin.search' => 'Search...',
 			'admin.confirmDeleteTitle' => 'Confirm Deletion',

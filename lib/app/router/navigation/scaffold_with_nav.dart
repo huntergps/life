@@ -179,7 +179,7 @@ class _PhoneLayout extends StatelessWidget {
     NavigationDestination(
       icon: const Icon(Icons.settings_outlined),
       selectedIcon: const Icon(Icons.settings),
-      label: tr.settings.title,
+      label: tr.nav.settings,
     ),
   ];
 
