@@ -651,9 +651,14 @@ void _showEditSheet(BuildContext context, AdminUserRecord user, bool isDark,
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.of(context).size.height * 0.85,
+    ),
     shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-    builder: (_) => _UserDetailSheet(user: user, isDark: isDark, ref: ref),
+    builder: (_) => SingleChildScrollView(
+      child: _UserDetailSheet(user: user, isDark: isDark, ref: ref),
+    ),
   );
 }
 
@@ -802,9 +807,217 @@ class _UserDetailSheet extends StatelessWidget {
               isDark: isDark,
               ref: ref,
             ),
+
+            // ── Sponsored / Beta Tester (with expiry) ──
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text('Acceso Premium',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+            const SizedBox(height: 4),
+            Text('Roles con fecha de caducidad',
+                style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.grey)),
+            const SizedBox(height: 12),
+            _ExpiringRoleButton(
+              label: 'Sponsored',
+              description: 'Acceso premium gratuito (estudiantes, investigadores)',
+              icon: Icons.school_outlined,
+              role: 'sponsored',
+              userId: user.id,
+              isDark: isDark,
+              ref: ref,
+            ),
+            const SizedBox(height: 8),
+            _ExpiringRoleButton(
+              label: 'Beta Tester',
+              description: 'Acceso a funciones experimentales',
+              icon: Icons.bug_report_outlined,
+              role: 'beta_tester',
+              userId: user.id,
+              isDark: isDark,
+              ref: ref,
+            ),
+
+            // ── Certificate ──
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text('Certificado',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Revocar certificado'),
+                      content: const Text('El usuario podra volver a emitir su certificado. ¿Continuar?'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+                        TextButton(
+                          style: TextButton.styleFrom(foregroundColor: Colors.red),
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Revocar'),
+                        ),
+                      ],
+                    ),
+                  );
+                  if (confirm != true) return;
+                  try {
+                    await Supabase.instance.client.rpc('revoke_checklist_certificate', params: {
+                      'target_user_id': user.id,
+                    });
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Certificado revocado')),
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: $e')),
+                      );
+                    }
+                  }
+                },
+                icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                label: const Text('Revocar certificado', style: TextStyle(color: Colors.red)),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+              ),
+            ),
           ],
         ],
       ),
+    );
+  }
+}
+
+// ── Expiring role button with duration picker ──
+
+class _ExpiringRoleButton extends StatelessWidget {
+  final String label;
+  final String description;
+  final IconData icon;
+  final String role;
+  final String userId;
+  final bool isDark;
+  final WidgetRef ref;
+
+  const _ExpiringRoleButton({
+    required this.label,
+    required this.description,
+    required this.icon,
+    required this.role,
+    required this.userId,
+    required this.isDark,
+    required this.ref,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: isDark ? AppColors.darkBorder : Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 20, color: isDark ? Colors.white70 : Colors.grey.shade700),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text(description, style: TextStyle(fontSize: 11, color: isDark ? Colors.white38 : Colors.grey)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              _DurationChip(label: '1 mes', months: 1, role: role, userId: userId, ref: ref),
+              _DurationChip(label: '3 meses', months: 3, role: role, userId: userId, ref: ref),
+              _DurationChip(label: '6 meses', months: 6, role: role, userId: userId, ref: ref),
+              _DurationChip(label: '1 año', months: 12, role: role, userId: userId, ref: ref),
+              ActionChip(
+                avatar: const Icon(Icons.calendar_today, size: 14),
+                label: const Text('Fecha...', style: TextStyle(fontSize: 12)),
+                onPressed: () async {
+                  final date = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now().add(const Duration(days: 90)),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
+                  );
+                  if (date == null) return;
+                  await _assignWithExpiry(context, role, userId, date, ref);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Future<void> _assignWithExpiry(
+    BuildContext context, String role, String userId, DateTime expiresAt, WidgetRef ref,
+  ) async {
+    try {
+      await Supabase.instance.client.rpc('grant_role_with_expiry', params: {
+        'target_user_id': userId,
+        'target_role': role,
+        'target_expires_at': expiresAt.toIso8601String(),
+      });
+      ref.invalidate(adminUsersProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('$role asignado hasta ${DateFormat.yMMMd('es').format(expiresAt)}')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    }
+  }
+}
+
+class _DurationChip extends StatelessWidget {
+  final String label;
+  final int months;
+  final String role;
+  final String userId;
+  final WidgetRef ref;
+
+  const _DurationChip({
+    required this.label,
+    required this.months,
+    required this.role,
+    required this.userId,
+    required this.ref,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionChip(
+      label: Text(label, style: const TextStyle(fontSize: 12)),
+      onPressed: () {
+        final expiresAt = DateTime.now().add(Duration(days: months * 30));
+        _ExpiringRoleButton._assignWithExpiry(context, role, userId, expiresAt, ref);
+      },
     );
   }
 }
