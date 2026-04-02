@@ -12,6 +12,8 @@ import 'package:galapagos_wildlife/features/species/list/species_list_provider.d
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import '../providers/suggested_species_provider.dart';
 import '../services/celebration_effects_service.dart';
 import 'checklist_detail_sheet.dart';
@@ -135,6 +137,7 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
                 isDark: isDark,
                 isEs: isEs,
               ),
+              if (!_isUserPremium()) _UpgradeHint(isEs: isEs, isDark: isDark),
               const SizedBox(height: 8),
               // Content area
               Expanded(
@@ -1275,6 +1278,61 @@ class _AddSpeciesContentState extends ConsumerState<_AddSpeciesContent> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─── Premium check helper ────────────────────────────────────────────────────
+
+bool _isUserPremium() {
+  final prefs = Bootstrap.prefs;
+  return (prefs.getBool('has_premium_role') ?? false)
+      || (prefs.getBool('is_beta_tester') ?? false)
+      || (prefs.getBool('has_pack') ?? false)
+      || (prefs.getBool('has_pro') ?? false);
+}
+
+// ─── Upgrade Hint (subtle banner for free users) ─────────────────────────────
+
+class _UpgradeHint extends StatelessWidget {
+  final bool isEs;
+  final bool isDark;
+
+  const _UpgradeHint({required this.isEs, required this.isDark});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => showPaywall(context),
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: AppColors.primary.withValues(alpha: isDark ? 0.12 : 0.06),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: AppColors.primary.withValues(alpha: isDark ? 0.3 : 0.15),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.lock_outline, size: 16, color: AppColors.primary),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                isEs
+                    ? 'Actualiza para ver fechas, GPS y fotos de tus avistamientos'
+                    : 'Upgrade to see dates, GPS & photos of your sightings',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                ),
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, size: 12, color: AppColors.primary),
+          ],
+        ),
+      ),
     );
   }
 }

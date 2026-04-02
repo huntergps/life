@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/ar_camera/presentation/screens/ar_camera_screen.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/presentation/photo_id_screen.dart';
+import 'package:galapagos_wildlife/features/purchases/presentation/upgrade_screen.dart';
 import 'router_keys.dart';
 import 'routes/app_routes.dart';
 import 'routes/admin_routes.dart';
@@ -30,7 +31,7 @@ final appRouter = GoRouter(
           || (prefs.getBool('is_beta_tester') ?? false)
           || (prefs.getBool('has_pack') ?? false)
           || (prefs.getBool('has_pro') ?? false);
-      if (!canAccess) return '/';
+      if (!canAccess) return '/upgrade';
     }
     // Guard admin routes
     if (path.startsWith('/admin')) {
@@ -69,6 +70,12 @@ final appRouter = GoRouter(
     ),
     ...authRoutes(),
     ...searchRoutes(),
+    GoRoute(
+      path: '/upgrade',
+      name: 'upgrade',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const UpgradeScreen(),
+    ),
     GoRoute(
       path: '/field-camera',
       name: 'field-camera',

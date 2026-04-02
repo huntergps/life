@@ -12,6 +12,7 @@ import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
+import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
 
 // Search button shared across phone and tablet layouts
 class _SearchButton extends StatelessWidget {
@@ -68,6 +69,10 @@ class _PhoneHome extends StatelessWidget {
 
                 // Quick action buttons — visible without scrolling
                 const SliverToBoxAdapter(child: _QuickActionsRow()),
+
+                // Upgrade banner for free users
+                if (!_isPremiumUser())
+                  SliverToBoxAdapter(child: _UpgradeBanner()),
 
                 // Categories
                 SliverToBoxAdapter(
@@ -258,6 +263,10 @@ class _TabletHome extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (!_isPremiumUser()) ...[
+                    const SizedBox(height: 16),
+                    const _UpgradeBanner(),
+                  ],
                   const SizedBox(height: 24),
                   // Categories
                   Text(context.t.home.categories, style: Theme.of(context).textTheme.titleLarge),
@@ -768,6 +777,84 @@ class _ActionBtn extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Premium check helper ────────────────────────────────────────────────────
+
+bool _isPremiumUser() {
+  final prefs = Bootstrap.prefs;
+  return (prefs.getBool('has_premium_role') ?? false)
+      || (prefs.getBool('is_beta_tester') ?? false)
+      || (prefs.getBool('has_pack') ?? false)
+      || (prefs.getBool('has_pro') ?? false);
+}
+
+// ─── Upgrade Banner ──────────────────────────────────────────────────────────
+
+class _UpgradeBanner extends StatelessWidget {
+  const _UpgradeBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEs = LocaleSettings.currentLocale == AppLocale.es;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+      child: Material(
+        borderRadius: BorderRadius.circular(14),
+        color: AppColors.primary.withValues(alpha: isDark ? 0.18 : 0.08),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => showPaywall(context),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Icon(Icons.map_outlined, color: AppColors.primary, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isEs ? 'Desbloquea Galapagos' : 'Unlock Galapagos',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        isEs
+                            ? 'Mapa, Photo ID con IA y mas'
+                            : 'Map, AI Photo ID & more',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  isEs ? 'Ver planes' : 'See plans',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.primary),
+              ],
+            ),
+          ),
         ),
       ),
     );
