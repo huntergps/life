@@ -53,6 +53,7 @@ class CertificateService {
 
     final locale = LocaleSettings.currentLocale.languageCode;
     final userName = await _resolveUserName(client, user);
+    final profileData = await _resolveProfileData(client, user);
 
     // Try to register in Supabase (returns false if already exists)
     try {
@@ -82,6 +83,8 @@ class CertificateService {
       speciesCount: speciesCount,
       completedAt: now,
       locale: locale,
+      userType: profileData.$1,
+      affiliation: profileData.$2,
     );
     return true;
   }
@@ -99,6 +102,23 @@ class CertificateService {
       completedAt: date,
       locale: locale,
     );
+  }
+
+  static Future<(String, String?)> _resolveProfileData(
+      SupabaseClient client, User user) async {
+    try {
+      final profile = await client
+          .from('profiles')
+          .select('user_type, affiliation')
+          .eq('id', user.id)
+          .maybeSingle();
+      return (
+        (profile?['user_type'] as String?) ?? 'tourist',
+        profile?['affiliation'] as String?,
+      );
+    } catch (_) {
+      return ('tourist', null);
+    }
   }
 
   static Future<String> _resolveUserName(SupabaseClient client, User user) async {

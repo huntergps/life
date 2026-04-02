@@ -906,6 +906,8 @@ class UserProfileAdapter extends SupabaseAdapter<UserProfile> {
         'avatarUrl': _col('avatar_url'),
         'createdAt': _col('created_at'),
         'updatedAt': _col('updated_at'),
+        'userType': _col('user_type'),
+        'affiliation': _col('affiliation'),
       };
 
   @override
@@ -930,6 +932,8 @@ class UserProfileAdapter extends SupabaseAdapter<UserProfile> {
         updatedAt: data['updated_at'] != null
             ? DateTime.tryParse(data['updated_at'] as String)
             : null,
+        userType: data['user_type'] as String? ?? 'tourist',
+        affiliation: data['affiliation'] as String?,
       );
 
   @override
@@ -948,6 +952,8 @@ class UserProfileAdapter extends SupabaseAdapter<UserProfile> {
         'avatar_url': instance.avatarUrl,
         'created_at': instance.createdAt?.toIso8601String(),
         'updated_at': instance.updatedAt?.toIso8601String(),
+        'user_type': instance.userType,
+        'affiliation': instance.affiliation,
       };
 }
 

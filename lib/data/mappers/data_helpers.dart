@@ -146,6 +146,8 @@ UserProfile userProfileFromRow(Map<String, dynamic> r) => UserProfile(
       updatedAt: r['updated_at'] != null
           ? DateTime.tryParse(r['updated_at'] as String)
           : null,
+      userType: r['user_type'] as String? ?? 'tourist',
+      affiliation: r['affiliation'] as String?,
     );
 
 Sighting sightingFromRow(Map<String, dynamic> r) => Sighting(

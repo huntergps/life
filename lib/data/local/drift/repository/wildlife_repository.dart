@@ -560,6 +560,8 @@ class WildlifeRepository
               avatarUrl: Value(instance.avatarUrl),
               createdAt: Value(instance.createdAt),
               updatedAt: Value(instance.updatedAt),
+              userType: Value(instance.userType),
+              affiliation: Value(instance.affiliation),
             ),
           );
       return null;
@@ -989,6 +991,8 @@ class WildlifeRepository
         avatarUrl: r.avatarUrl,
         createdAt: r.createdAt,
         updatedAt: r.updatedAt,
+        userType: r.userType,
+        affiliation: r.affiliation,
       );
 
   UserSiteWishlist _rowToUserSiteWishlist(db.UserSiteWishlist r) =>

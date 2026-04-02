@@ -8229,6 +8229,29 @@ class $UserProfilesTable extends UserProfiles
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _userTypeMeta = const VerificationMeta(
+    'userType',
+  );
+  @override
+  late final GeneratedColumn<String> userType = GeneratedColumn<String>(
+    'user_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('tourist'),
+  );
+  static const VerificationMeta _affiliationMeta = const VerificationMeta(
+    'affiliation',
+  );
+  @override
+  late final GeneratedColumn<String> affiliation = GeneratedColumn<String>(
+    'affiliation',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -8240,6 +8263,8 @@ class $UserProfilesTable extends UserProfiles
     avatarUrl,
     createdAt,
     updatedAt,
+    userType,
+    affiliation,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -8312,6 +8337,21 @@ class $UserProfilesTable extends UserProfiles
         updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
       );
     }
+    if (data.containsKey('user_type')) {
+      context.handle(
+        _userTypeMeta,
+        userType.isAcceptableOrUnknown(data['user_type']!, _userTypeMeta),
+      );
+    }
+    if (data.containsKey('affiliation')) {
+      context.handle(
+        _affiliationMeta,
+        affiliation.isAcceptableOrUnknown(
+          data['affiliation']!,
+          _affiliationMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -8357,6 +8397,14 @@ class $UserProfilesTable extends UserProfiles
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       ),
+      userType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_type'],
+      )!,
+      affiliation: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}affiliation'],
+      ),
     );
   }
 
@@ -8376,6 +8424,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
   final String? avatarUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String userType;
+  final String? affiliation;
   const UserProfile({
     required this.id,
     this.displayName,
@@ -8386,6 +8436,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     this.avatarUrl,
     this.createdAt,
     this.updatedAt,
+    required this.userType,
+    this.affiliation,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -8415,6 +8467,10 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     if (!nullToAbsent || updatedAt != null) {
       map['updated_at'] = Variable<DateTime>(updatedAt);
     }
+    map['user_type'] = Variable<String>(userType);
+    if (!nullToAbsent || affiliation != null) {
+      map['affiliation'] = Variable<String>(affiliation);
+    }
     return map;
   }
 
@@ -8443,6 +8499,10 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       updatedAt: updatedAt == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedAt),
+      userType: Value(userType),
+      affiliation: affiliation == null && nullToAbsent
+          ? const Value.absent()
+          : Value(affiliation),
     );
   }
 
@@ -8461,6 +8521,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       avatarUrl: serializer.fromJson<String?>(json['avatarUrl']),
       createdAt: serializer.fromJson<DateTime?>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime?>(json['updatedAt']),
+      userType: serializer.fromJson<String>(json['userType']),
+      affiliation: serializer.fromJson<String?>(json['affiliation']),
     );
   }
   @override
@@ -8476,6 +8538,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       'avatarUrl': serializer.toJson<String?>(avatarUrl),
       'createdAt': serializer.toJson<DateTime?>(createdAt),
       'updatedAt': serializer.toJson<DateTime?>(updatedAt),
+      'userType': serializer.toJson<String>(userType),
+      'affiliation': serializer.toJson<String?>(affiliation),
     };
   }
 
@@ -8489,6 +8553,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     Value<String?> avatarUrl = const Value.absent(),
     Value<DateTime?> createdAt = const Value.absent(),
     Value<DateTime?> updatedAt = const Value.absent(),
+    String? userType,
+    Value<String?> affiliation = const Value.absent(),
   }) => UserProfile(
     id: id ?? this.id,
     displayName: displayName.present ? displayName.value : this.displayName,
@@ -8499,6 +8565,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
     createdAt: createdAt.present ? createdAt.value : this.createdAt,
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
+    userType: userType ?? this.userType,
+    affiliation: affiliation.present ? affiliation.value : this.affiliation,
   );
   UserProfile copyWithCompanion(UserProfilesCompanion data) {
     return UserProfile(
@@ -8515,6 +8583,10 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
       avatarUrl: data.avatarUrl.present ? data.avatarUrl.value : this.avatarUrl,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      userType: data.userType.present ? data.userType.value : this.userType,
+      affiliation: data.affiliation.present
+          ? data.affiliation.value
+          : this.affiliation,
     );
   }
 
@@ -8529,7 +8601,9 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
           ..write('countryCode: $countryCode, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('userType: $userType, ')
+          ..write('affiliation: $affiliation')
           ..write(')'))
         .toString();
   }
@@ -8545,6 +8619,8 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
     avatarUrl,
     createdAt,
     updatedAt,
+    userType,
+    affiliation,
   );
   @override
   bool operator ==(Object other) =>
@@ -8558,7 +8634,9 @@ class UserProfile extends DataClass implements Insertable<UserProfile> {
           other.countryCode == this.countryCode &&
           other.avatarUrl == this.avatarUrl &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.userType == this.userType &&
+          other.affiliation == this.affiliation);
 }
 
 class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
@@ -8571,6 +8649,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
   final Value<String?> avatarUrl;
   final Value<DateTime?> createdAt;
   final Value<DateTime?> updatedAt;
+  final Value<String> userType;
+  final Value<String?> affiliation;
   final Value<int> rowid;
   const UserProfilesCompanion({
     this.id = const Value.absent(),
@@ -8582,6 +8662,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     this.avatarUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.userType = const Value.absent(),
+    this.affiliation = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserProfilesCompanion.insert({
@@ -8594,6 +8676,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     this.avatarUrl = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.userType = const Value.absent(),
+    this.affiliation = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id);
   static Insertable<UserProfile> custom({
@@ -8606,6 +8690,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     Expression<String>? avatarUrl,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? userType,
+    Expression<String>? affiliation,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -8618,6 +8704,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
       if (avatarUrl != null) 'avatar_url': avatarUrl,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (userType != null) 'user_type': userType,
+      if (affiliation != null) 'affiliation': affiliation,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -8632,6 +8720,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     Value<String?>? avatarUrl,
     Value<DateTime?>? createdAt,
     Value<DateTime?>? updatedAt,
+    Value<String>? userType,
+    Value<String?>? affiliation,
     Value<int>? rowid,
   }) {
     return UserProfilesCompanion(
@@ -8644,6 +8734,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
       avatarUrl: avatarUrl ?? this.avatarUrl,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      userType: userType ?? this.userType,
+      affiliation: affiliation ?? this.affiliation,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -8678,6 +8770,12 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (userType.present) {
+      map['user_type'] = Variable<String>(userType.value);
+    }
+    if (affiliation.present) {
+      map['affiliation'] = Variable<String>(affiliation.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -8696,6 +8794,8 @@ class UserProfilesCompanion extends UpdateCompanion<UserProfile> {
           ..write('avatarUrl: $avatarUrl, ')
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('userType: $userType, ')
+          ..write('affiliation: $affiliation, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -14082,6 +14182,8 @@ typedef $$UserProfilesTableCreateCompanionBuilder =
       Value<String?> avatarUrl,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
+      Value<String> userType,
+      Value<String?> affiliation,
       Value<int> rowid,
     });
 typedef $$UserProfilesTableUpdateCompanionBuilder =
@@ -14095,6 +14197,8 @@ typedef $$UserProfilesTableUpdateCompanionBuilder =
       Value<String?> avatarUrl,
       Value<DateTime?> createdAt,
       Value<DateTime?> updatedAt,
+      Value<String> userType,
+      Value<String?> affiliation,
       Value<int> rowid,
     });
 
@@ -14149,6 +14253,16 @@ class $$UserProfilesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userType => $composableBuilder(
+    column: $table.userType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get affiliation => $composableBuilder(
+    column: $table.affiliation,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -14206,6 +14320,16 @@ class $$UserProfilesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get userType => $composableBuilder(
+    column: $table.userType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get affiliation => $composableBuilder(
+    column: $table.affiliation,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserProfilesTableAnnotationComposer
@@ -14247,6 +14371,14 @@ class $$UserProfilesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get userType =>
+      $composableBuilder(column: $table.userType, builder: (column) => column);
+
+  GeneratedColumn<String> get affiliation => $composableBuilder(
+    column: $table.affiliation,
+    builder: (column) => column,
+  );
 }
 
 class $$UserProfilesTableTableManager
@@ -14289,6 +14421,8 @@ class $$UserProfilesTableTableManager
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String> userType = const Value.absent(),
+                Value<String?> affiliation = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserProfilesCompanion(
                 id: id,
@@ -14300,6 +14434,8 @@ class $$UserProfilesTableTableManager
                 avatarUrl: avatarUrl,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                userType: userType,
+                affiliation: affiliation,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -14313,6 +14449,8 @@ class $$UserProfilesTableTableManager
                 Value<String?> avatarUrl = const Value.absent(),
                 Value<DateTime?> createdAt = const Value.absent(),
                 Value<DateTime?> updatedAt = const Value.absent(),
+                Value<String> userType = const Value.absent(),
+                Value<String?> affiliation = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UserProfilesCompanion.insert(
                 id: id,
@@ -14324,6 +14462,8 @@ class $$UserProfilesTableTableManager
                 avatarUrl: avatarUrl,
                 createdAt: createdAt,
                 updatedAt: updatedAt,
+                userType: userType,
+                affiliation: affiliation,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

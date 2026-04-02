@@ -16,4 +16,6 @@ class UserProfiles extends Table {
   TextColumn get avatarUrl => text().nullable()();
   DateTimeColumn get createdAt => dateTime().nullable()();
   DateTimeColumn get updatedAt => dateTime().nullable()();
+  TextColumn get userType => text().withDefault(const Constant('tourist'))();
+  TextColumn get affiliation => text().nullable()();
 }

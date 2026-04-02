@@ -20,9 +20,11 @@ class CertificateGenerator {
     required int speciesCount,
     required DateTime completedAt,
     required String locale,
+    String userType = 'tourist',
+    String? affiliation,
   }) async {
     final isEs = locale == 'es';
-    final cacheKey = '${userName}_${speciesCount}_${completedAt.toIso8601String()}_$locale';
+    final cacheKey = '${userName}_${speciesCount}_${completedAt.toIso8601String()}_${locale}_${userType}_$affiliation';
 
     if (_cachedPdf != null && _cachedKey == cacheKey) {
       await _sharePdf(_cachedPdf!, isEs);
@@ -138,6 +140,19 @@ class CertificateGenerator {
                             color: PdfColor.fromHex('#1A1A1A'),
                           ),
                         ),
+                        if (userType != 'tourist') ...[
+                          pw.SizedBox(height: 4),
+                          pw.Text(
+                            _userTypeLabel(userType, isEs) +
+                                (affiliation != null && affiliation.isNotEmpty
+                                    ? ' — $affiliation'
+                                    : ''),
+                            style: pw.TextStyle(
+                              font: italic, fontSize: 13,
+                              color: PdfColors.grey700,
+                            ),
+                          ),
+                        ],
                         pw.SizedBox(height: 8),
                         pw.Container(width: 280, height: 1, color: gold),
                         pw.SizedBox(height: 24),
@@ -275,5 +290,17 @@ class CertificateGenerator {
   static String _formatDateEs(DateTime dt) {
     const m = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     return '${dt.day} de ${m[dt.month - 1]} de ${dt.year}';
+  }
+
+  static String _userTypeLabel(String type, bool isEs) {
+    const labels = {
+      'researcher': ('Researcher', 'Investigador/a'),
+      'guide': ('Naturalist Guide', 'Guia naturalista'),
+      'ranger': ('Park Ranger', 'Guardaparque'),
+      'student': ('Student', 'Estudiante'),
+    };
+    final pair = labels[type];
+    if (pair == null) return '';
+    return isEs ? pair.$2 : pair.$1;
   }
 }

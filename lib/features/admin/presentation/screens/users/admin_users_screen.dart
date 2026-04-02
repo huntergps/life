@@ -838,6 +838,12 @@ class _UserDetailSheet extends StatelessWidget {
               ref: ref,
             ),
 
+            // ── User Type Badge ──
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            _UserTypeSection(userId: user.id, isDark: isDark),
+
             // ── Certificate ──
             const SizedBox(height: 16),
             const Divider(),
@@ -1159,4 +1165,145 @@ class _RoleRowState extends State<_RoleRow> {
 String _formatDate(DateTime? dt) {
   if (dt == null) return '—';
   return DateFormat('dd/MM/yyyy HH:mm').format(dt.toLocal());
+}
+
+// ---------------------------------------------------------------------------
+// User Type Section (stateful — dropdown + optional text field)
+// ---------------------------------------------------------------------------
+
+class _UserTypeSection extends StatefulWidget {
+  const _UserTypeSection({required this.userId, required this.isDark});
+  final String userId;
+  final bool isDark;
+
+  @override
+  State<_UserTypeSection> createState() => _UserTypeSectionState();
+}
+
+class _UserTypeSectionState extends State<_UserTypeSection> {
+  String? _selectedType;
+  final _affiliationCtrl = TextEditingController();
+  bool _loading = true;
+  bool _saving = false;
+
+  static const _types = ['tourist', 'researcher', 'guide', 'ranger', 'student'];
+  static const _labels = {
+    'tourist': 'Turista',
+    'researcher': 'Investigador/a',
+    'guide': 'Guia naturalista',
+    'ranger': 'Guardaparque',
+    'student': 'Estudiante',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCurrentType();
+  }
+
+  Future<void> _loadCurrentType() async {
+    try {
+      final row = await Supabase.instance.client
+          .from('profiles')
+          .select('user_type, affiliation')
+          .eq('id', widget.userId)
+          .maybeSingle();
+      if (mounted) {
+        setState(() {
+          _selectedType = (row?['user_type'] as String?) ?? 'tourist';
+          _affiliationCtrl.text = (row?['affiliation'] as String?) ?? '';
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await Supabase.instance.client.from('profiles').update({
+        'user_type': _selectedType,
+        'affiliation': (_selectedType == 'researcher' || _selectedType == 'student')
+            ? _affiliationCtrl.text.trim().isEmpty
+                ? null
+                : _affiliationCtrl.text.trim()
+            : null,
+      }).eq('id', widget.userId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tipo de usuario actualizado')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _affiliationCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16),
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Tipo de usuario',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: _selectedType,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            isDense: true,
+          ),
+          items: _types
+              .map((t) => DropdownMenuItem(value: t, child: Text(_labels[t] ?? t)))
+              .toList(),
+          onChanged: (v) => setState(() => _selectedType = v),
+        ),
+        if (_selectedType == 'researcher' || _selectedType == 'student') ...[
+          const SizedBox(height: 12),
+          TextField(
+            controller: _affiliationCtrl,
+            decoration: const InputDecoration(
+              labelText: 'Afiliacion / Institucion',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _saving ? null : _save,
+            child: _saving
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const Text('Guardar tipo'),
+          ),
+        ),
+      ],
+    );
+  }
 }

@@ -22,6 +22,7 @@ import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/models/user_profile.model.dart';
 import 'package:galapagos_wildlife/features/species/shared/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/profile/presentation/screens/visit_summary_screen.dart';
+import 'package:galapagos_wildlife/core/widgets/user_type_badge.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -460,6 +461,10 @@ class _LargeProfileCard extends StatelessWidget {
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
+          if (profile case final p? when p.userType != 'tourist') ...[
+            const SizedBox(height: 4),
+            UserTypeBadge(userType: p.userType, affiliation: p.affiliation),
+          ],
           Text(
             email,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -724,6 +729,10 @@ class _ProfileHeader extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+                if (profile case final p? when p.userType != 'tourist') ...[
+                  const SizedBox(height: 4),
+                  UserTypeBadge(userType: p.userType, affiliation: p.affiliation),
+                ],
                 Text(
                   email,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(

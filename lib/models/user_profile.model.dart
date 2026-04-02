@@ -19,6 +19,10 @@ class UserProfile extends OfflineFirstWithSupabaseModel {
 
   final DateTime? updatedAt;
 
+  final String userType; // 'tourist', 'researcher', 'guide', 'ranger', 'student'
+
+  final String? affiliation; // institution name (only for researcher/student)
+
   @override
   Object? get primaryKey => id;
 
@@ -32,6 +36,8 @@ class UserProfile extends OfflineFirstWithSupabaseModel {
     this.avatarUrl,
     this.createdAt,
     this.updatedAt,
+    this.userType = 'tourist',
+    this.affiliation,
   });
 }
 
