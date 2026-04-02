@@ -712,13 +712,17 @@ class _QuickActionsRow extends StatelessWidget {
             isDark: isDark,
             onTap: () => context.goNamed('sightings'),
           ),
-          _ActionBtn(
-            icon: Icons.map_outlined,
-            label: t.home.exploreMap,
-            color: Colors.blue,
-            isDark: isDark,
-            onTap: () => context.goNamed('map'),
-          ),
+          if ((Bootstrap.prefs.getBool('has_premium_role') ?? false)
+                  || (Bootstrap.prefs.getBool('is_beta_tester') ?? false)
+                  || (Bootstrap.prefs.getBool('has_pack') ?? false)
+                  || (Bootstrap.prefs.getBool('has_pro') ?? false))
+            _ActionBtn(
+              icon: Icons.map_outlined,
+              label: t.home.exploreMap,
+              color: Colors.blue,
+              isDark: isDark,
+              onTap: () => context.goNamed('map'),
+            ),
         ].map((w) => Expanded(child: w)).toList(),
       ),
     );

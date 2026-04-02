@@ -173,10 +173,6 @@ class _ChecklistScreenState extends ConsumerState<ChecklistScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          if (!isAuthenticated) {
-            context.push('/login');
-            return;
-          }
           _showAddSpeciesSheet(context, ref, myListIds, isDark, isEs);
         },
         child: const Icon(Icons.add),
@@ -568,10 +564,6 @@ class _GridView extends StatelessWidget {
             }
           },
           onToggle: () async {
-            if (!isAuthenticated) {
-              context.push('/login');
-              return;
-            }
             await ref.read(userChecklistProvider.notifier).toggle(species.id);
             CelebrationEffectsService.celebrateCheckmark();
             _checkMilestones(context, ref);
@@ -899,10 +891,6 @@ class _ListView extends StatelessWidget {
             ref.read(checklistSpeciesProvider.notifier).removeSpecies(species.id);
           },
           onToggle: () async {
-            if (!isAuthenticated) {
-              context.push('/login');
-              return;
-            }
             await ref.read(userChecklistProvider.notifier).toggle(species.id);
             CelebrationEffectsService.celebrateCheckmark();
             _checkMilestones(context);
