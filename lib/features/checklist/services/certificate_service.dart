@@ -16,7 +16,7 @@ class CertificateService {
 
     final locale = LocaleSettings.currentLocale.languageCode;
 
-    // Get display name from profiles table (most reliable)
+    // Get display name — try profile table first, then auth metadata, then email
     String userName = 'Explorer';
     try {
       final profile = await client
@@ -24,18 +24,25 @@ class CertificateService {
           .select('display_name')
           .eq('id', user.id)
           .maybeSingle();
-      if (profile != null && profile['display_name'] != null) {
-        userName = profile['display_name'] as String;
+      final profileName = profile?['display_name'] as String?;
+      if (profileName != null && profileName.trim().isNotEmpty) {
+        userName = profileName.trim();
       } else {
-        userName = user.userMetadata?['display_name'] as String? ??
-            user.email?.split('@').first ??
-            'Explorer';
+        // Fallback to auth metadata
+        final metaName = user.userMetadata?['display_name'] as String?;
+        if (metaName != null && metaName.trim().isNotEmpty) {
+          userName = metaName.trim();
+        } else {
+          // Last resort: email prefix
+          userName = user.email?.split('@').first ?? 'Explorer';
+        }
       }
     } catch (_) {
-      userName = user.userMetadata?['display_name'] as String? ??
-          user.email?.split('@').first ??
-          'Explorer';
+      userName = user.email?.split('@').first ?? 'Explorer';
     }
+
+    // Invalidate cache so new name is used
+    CertificateGenerator.invalidateCache();
 
     await CertificateGenerator.generateAndShare(
       userName: userName,

@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -9,7 +8,6 @@ import 'package:share_plus/share_plus.dart';
 class CertificateGenerator {
   CertificateGenerator._();
 
-  /// Cached PDF bytes — regenerate only if data changes.
   static List<int>? _cachedPdf;
   static String? _cachedKey;
 
@@ -27,7 +25,6 @@ class CertificateGenerator {
     final isEs = locale == 'es';
     final cacheKey = '${userName}_${speciesCount}_${completedAt.toIso8601String()}_$locale';
 
-    // Use cached PDF if available
     if (_cachedPdf != null && _cachedKey == cacheKey) {
       await _sharePdf(_cachedPdf!, isEs);
       return;
@@ -42,200 +39,178 @@ class CertificateGenerator {
       logoImage = pw.MemoryImage(logoData.buffer.asUint8List());
     } catch (_) {}
 
-    // Use built-in fonts (no network download = instant)
+    // Built-in fonts — no download, instant
     final bold = pw.Font.timesBold();
     final regular = pw.Font.times();
     final italic = pw.Font.timesItalic();
     final boldItalic = pw.Font.timesBoldItalic();
 
-    final gold = PdfColor.fromHex('#C5922E');
-    final darkGreen = PdfColor.fromHex('#1B5E20');
-    final ocean = PdfColor.fromHex('#0D47A1');
-    final cream = PdfColor.fromHex('#FFFDE7');
-    final darkText = PdfColor.fromHex('#1A1A1A');
+    final gold = PdfColor.fromHex('#B8860B');
+    final lightGold = PdfColor.fromHex('#DAA520');
+    final darkGreen = PdfColor.fromHex('#2E7D32');
 
+    // Portrait A4 — fills the whole phone screen when viewing PDF
     pdf.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat.a4.landscape,
+        pageFormat: PdfPageFormat.a4,
         margin: pw.EdgeInsets.zero,
         build: (context) {
-          final w = PdfPageFormat.a4.landscape.width;
-          final h = PdfPageFormat.a4.landscape.height;
-
           return pw.Container(
-            width: w,
-            height: h,
-            decoration: pw.BoxDecoration(color: cream),
+            width: double.infinity,
+            height: double.infinity,
+            color: PdfColors.white,
             child: pw.Stack(
               children: [
-                // Top colored band
-                pw.Positioned(
-                  top: 0, left: 0, right: 0,
-                  child: pw.Container(
-                    height: 45,
-                    decoration: pw.BoxDecoration(
-                      gradient: pw.LinearGradient(
-                        colors: [darkGreen, ocean],
-                      ),
-                    ),
-                  ),
-                ),
-                // Bottom colored band
-                pw.Positioned(
-                  bottom: 0, left: 0, right: 0,
-                  child: pw.Container(
-                    height: 35,
-                    decoration: pw.BoxDecoration(
-                      gradient: pw.LinearGradient(
-                        colors: [ocean, darkGreen],
-                      ),
-                    ),
-                    child: pw.Center(
-                      child: pw.Text(
-                        'galapagos.tech',
-                        style: pw.TextStyle(font: regular, fontSize: 9, color: PdfColors.white),
-                      ),
-                    ),
-                  ),
-                ),
-                // Gold border frame
+                // Gold double border
                 pw.Positioned.fill(
                   child: pw.Container(
-                    margin: const pw.EdgeInsets.fromLTRB(25, 55, 25, 45),
+                    margin: const pw.EdgeInsets.all(24),
                     decoration: pw.BoxDecoration(
                       border: pw.Border.all(color: gold, width: 2),
-                      borderRadius: pw.BorderRadius.circular(4),
                     ),
                   ),
                 ),
-                // Inner content
                 pw.Positioned.fill(
                   child: pw.Container(
-                    margin: const pw.EdgeInsets.fromLTRB(45, 60, 45, 55),
+                    margin: const pw.EdgeInsets.all(30),
+                    decoration: pw.BoxDecoration(
+                      border: pw.Border.all(color: lightGold, width: 0.5),
+                    ),
+                  ),
+                ),
+                // Corner ornaments
+                ..._corners(gold),
+                // Content
+                pw.Positioned.fill(
+                  child: pw.Container(
+                    margin: const pw.EdgeInsets.all(50),
                     child: pw.Column(
                       mainAxisAlignment: pw.MainAxisAlignment.center,
                       children: [
-                        // Logo + app name row
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.center,
-                          children: [
-                            if (logoImage != null)
-                              pw.Image(logoImage, width: 36, height: 36),
-                            if (logoImage != null) pw.SizedBox(width: 10),
-                            pw.Text(
-                              'GALAPAGOS WILDLIFE',
-                              style: pw.TextStyle(
-                                font: bold, fontSize: 11,
-                                letterSpacing: 3, color: darkGreen,
-                              ),
-                            ),
-                          ],
+                        // Logo — large
+                        if (logoImage != null)
+                          pw.Image(logoImage, width: 80, height: 80),
+                        pw.SizedBox(height: 10),
+                        pw.Text(
+                          'GALAPAGOS WILDLIFE',
+                          style: pw.TextStyle(
+                            font: bold, fontSize: 11,
+                            letterSpacing: 4, color: darkGreen,
+                          ),
                         ),
-                        pw.SizedBox(height: 14),
+                        pw.SizedBox(height: 24),
+
+                        // Divider
+                        _divider(gold),
+                        pw.SizedBox(height: 24),
 
                         // Title
                         pw.Text(
                           isEs ? 'CERTIFICADO' : 'CERTIFICATE',
                           style: pw.TextStyle(
-                            font: bold, fontSize: 38,
-                            color: gold, letterSpacing: 6,
+                            font: bold, fontSize: 42,
+                            color: gold, letterSpacing: 8,
                           ),
                         ),
-                        pw.SizedBox(height: 2),
+                        pw.SizedBox(height: 4),
                         pw.Text(
                           isEs ? 'DE EXPLORACION' : 'OF EXPLORATION',
                           style: pw.TextStyle(
-                            font: regular, fontSize: 14,
-                            color: gold, letterSpacing: 4,
+                            font: regular, fontSize: 16,
+                            color: lightGold, letterSpacing: 6,
                           ),
                         ),
-                        pw.SizedBox(height: 14),
-
-                        // Divider
-                        _wavyDivider(gold),
-                        pw.SizedBox(height: 14),
+                        pw.SizedBox(height: 30),
 
                         // "Awarded to"
                         pw.Text(
                           isEs ? 'Otorgado a' : 'Awarded to',
                           style: pw.TextStyle(
-                            font: italic, fontSize: 12, color: PdfColors.grey700,
+                            font: italic, fontSize: 14, color: PdfColors.grey600,
                           ),
                         ),
-                        pw.SizedBox(height: 6),
+                        pw.SizedBox(height: 12),
 
-                        // User name — big and bold
+                        // User name
                         pw.Text(
                           userName,
                           style: pw.TextStyle(
-                            font: boldItalic, fontSize: 36, color: darkText,
+                            font: boldItalic, fontSize: 40,
+                            color: PdfColor.fromHex('#1A1A1A'),
                           ),
                         ),
+                        pw.SizedBox(height: 8),
+                        pw.Container(width: 280, height: 1, color: gold),
+                        pw.SizedBox(height: 24),
 
-                        pw.SizedBox(height: 6),
-                        pw.Container(width: 250, height: 1, color: gold),
-                        pw.SizedBox(height: 14),
-
-                        // Fun description
+                        // Description
                         pw.Text(
                           isEs
-                              ? 'Por descubrir las $speciesCount especies mas iconicas'
-                              : 'For discovering all $speciesCount most iconic species',
+                              ? 'Por descubrir las $speciesCount especies'
+                              : 'For discovering all $speciesCount species',
                           textAlign: pw.TextAlign.center,
                           style: pw.TextStyle(
-                            font: regular, fontSize: 13, color: PdfColors.grey800,
+                            font: regular, fontSize: 14, color: PdfColors.grey800,
                           ),
                         ),
                         pw.Text(
                           isEs
-                              ? 'de las Islas Galapagos'
-                              : 'of the Galapagos Islands',
+                              ? 'mas iconicas de las Islas Galapagos'
+                              : 'most iconic of the Galapagos Islands',
                           textAlign: pw.TextAlign.center,
                           style: pw.TextStyle(
-                            font: bold, fontSize: 14, color: darkGreen,
+                            font: regular, fontSize: 14, color: PdfColors.grey800,
                           ),
                         ),
-                        pw.SizedBox(height: 14),
+                        pw.SizedBox(height: 24),
 
-                        // Badge
+                        // Badge pill
                         pw.Container(
-                          padding: const pw.EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                          padding: const pw.EdgeInsets.symmetric(horizontal: 28, vertical: 10),
                           decoration: pw.BoxDecoration(
                             color: gold,
-                            borderRadius: pw.BorderRadius.circular(20),
+                            borderRadius: pw.BorderRadius.circular(24),
                           ),
                           child: pw.Text(
                             isEs ? 'MAESTRO DE GALAPAGOS' : 'GALAPAGOS MASTER',
                             style: pw.TextStyle(
-                              font: bold, fontSize: 13,
-                              letterSpacing: 2, color: PdfColors.white,
+                              font: bold, fontSize: 14,
+                              letterSpacing: 3, color: PdfColors.white,
                             ),
                           ),
                         ),
-                        pw.SizedBox(height: 14),
+                        pw.SizedBox(height: 30),
 
                         // Divider
-                        _wavyDivider(gold),
-                        pw.SizedBox(height: 10),
+                        _divider(gold),
+                        pw.SizedBox(height: 20),
 
                         // Date + location
                         pw.Text(
                           isEs
-                              ? '${_formatDateEs(completedAt)}  |  Islas Galapagos, Ecuador'
-                              : '${_formatDateEn(completedAt)}  |  Galapagos Islands, Ecuador',
+                              ? '${_formatDateEs(completedAt)}'
+                              : '${_formatDateEn(completedAt)}',
                           style: pw.TextStyle(
-                            font: regular, fontSize: 10, color: PdfColors.grey600,
+                            font: regular, fontSize: 12, color: PdfColors.grey600,
                           ),
                         ),
-                        pw.SizedBox(height: 16),
+                        pw.SizedBox(height: 4),
+                        pw.Text(
+                          isEs
+                              ? 'Islas Galapagos, Ecuador'
+                              : 'Galapagos Islands, Ecuador',
+                          style: pw.TextStyle(
+                            font: italic, fontSize: 11, color: PdfColors.grey500,
+                          ),
+                        ),
+                        pw.SizedBox(height: 20),
 
-                        // Footer
-                        pw.Row(
-                          mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
-                          children: [
-                            _footerBlock(bold, regular, 'GalapagosTech', isEs ? 'Organizador' : 'Organizer', gold),
-                            _footerBlock(bold, regular, isEs ? 'Verificado' : 'Verified', isEs ? 'Certificado digital' : 'Digital certificate', gold),
-                          ],
+                        // Footer — just the website
+                        pw.Text(
+                          'galapagos.tech',
+                          style: pw.TextStyle(
+                            font: regular, fontSize: 9, color: PdfColors.grey400,
+                          ),
                         ),
                       ],
                     ),
@@ -251,7 +226,6 @@ class CertificateGenerator {
     final bytes = await pdf.save();
     _cachedPdf = bytes;
     _cachedKey = cacheKey;
-
     await _sharePdf(bytes, isEs);
   }
 
@@ -260,44 +234,41 @@ class CertificateGenerator {
     final fileName = isEs ? 'Certificado_Galapagos.pdf' : 'Galapagos_Certificate.pdf';
     final file = File('${tempDir.path}/$fileName');
     await file.writeAsBytes(bytes);
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)]),
-    );
+    await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
   }
 
-  static pw.Widget _wavyDivider(PdfColor color) {
+  static pw.Widget _divider(PdfColor color) {
     return pw.Row(
       mainAxisAlignment: pw.MainAxisAlignment.center,
       children: [
-        pw.Container(width: 60, height: 0.5, color: color),
-        pw.SizedBox(width: 6),
-        _dot(color, 4), pw.SizedBox(width: 4),
-        _dot(color, 6), pw.SizedBox(width: 4),
-        _dot(color, 8), pw.SizedBox(width: 4),
-        _dot(color, 6), pw.SizedBox(width: 4),
+        pw.Container(width: 80, height: 0.5, color: color),
+        pw.SizedBox(width: 8),
+        _dot(color, 4), pw.SizedBox(width: 5),
+        _dot(color, 7), pw.SizedBox(width: 5),
         _dot(color, 4),
-        pw.SizedBox(width: 6),
-        pw.Container(width: 60, height: 0.5, color: color),
+        pw.SizedBox(width: 8),
+        pw.Container(width: 80, height: 0.5, color: color),
       ],
     );
   }
 
-  static pw.Widget _dot(PdfColor color, double size) {
-    return pw.Container(
-      width: size, height: size,
-      decoration: pw.BoxDecoration(shape: pw.BoxShape.circle, color: color),
-    );
-  }
+  static pw.Widget _dot(PdfColor c, double s) =>
+      pw.Container(width: s, height: s, decoration: pw.BoxDecoration(shape: pw.BoxShape.circle, color: c));
 
-  static pw.Widget _footerBlock(pw.Font bold, pw.Font regular, String title, String subtitle, PdfColor lineColor) {
-    return pw.Column(
-      children: [
-        pw.Container(width: 120, height: 0.5, color: lineColor),
-        pw.SizedBox(height: 4),
-        pw.Text(title, style: pw.TextStyle(font: bold, fontSize: 9, color: PdfColors.grey800)),
-        pw.Text(subtitle, style: pw.TextStyle(font: regular, fontSize: 7, color: PdfColors.grey500)),
-      ],
-    );
+  static List<pw.Widget> _corners(PdfColor c) {
+    const m = 27.0;
+    const s = 20.0;
+    const w = 1.5;
+    return [
+      pw.Positioned(top: m, left: m, child: pw.Container(width: s, height: w, color: c)),
+      pw.Positioned(top: m, left: m, child: pw.Container(width: w, height: s, color: c)),
+      pw.Positioned(top: m, right: m, child: pw.Container(width: s, height: w, color: c)),
+      pw.Positioned(top: m, right: m, child: pw.Container(width: w, height: s, color: c)),
+      pw.Positioned(bottom: m, left: m, child: pw.Container(width: s, height: w, color: c)),
+      pw.Positioned(bottom: m, left: m, child: pw.Container(width: w, height: s, color: c)),
+      pw.Positioned(bottom: m, right: m, child: pw.Container(width: s, height: w, color: c)),
+      pw.Positioned(bottom: m, right: m, child: pw.Container(width: w, height: s, color: c)),
+    ];
   }
 
   static String _formatDateEn(DateTime dt) {

@@ -47,50 +47,57 @@ Future<void> updateProfile({
   String? countryCode,
   String? avatarUrl,
 }) async {
-  if (kIsWeb) {
-    // Fetch existing to preserve unmodified fields
-    final existing = await Supabase.instance.client
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
-    final existingProfile =
-        existing != null ? userProfileFromRow(existing) : null;
+  // Fetch existing profile to preserve unmodified fields
+  UserProfile? existingProfile;
+  try {
+    if (!kIsWeb && WildlifeRepository.initialized) {
+      final existing = await WildlifeRepository.instance.get<UserProfile>(
+        policy: OfflineFirstGetPolicy.localOnly,
+        query: Query(where: [Where('id').isExactly(userId)]),
+      );
+      existingProfile = existing.isEmpty ? null : existing.first;
+    }
+    if (existingProfile == null) {
+      final data = await Supabase.instance.client
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
+      if (data != null) existingProfile = userProfileFromRow(data);
+    }
+  } catch (_) {}
 
-    await Supabase.instance.client.from('profiles').upsert({
-      'id': userId,
-      'display_name': displayName ?? existingProfile?.displayName,
-      'bio': bio ?? existingProfile?.bio,
-      'birth_date': (birthDate ?? existingProfile?.birthDate)?.toIso8601String(),
-      'country': country ?? existingProfile?.country,
-      'country_code': countryCode ?? existingProfile?.countryCode,
-      'avatar_url': avatarUrl ?? existingProfile?.avatarUrl,
-      'updated_at': DateTime.now().toIso8601String(),
-    });
-    return;
+  final profileData = {
+    'id': userId,
+    'display_name': displayName ?? existingProfile?.displayName,
+    'bio': bio ?? existingProfile?.bio,
+    'birth_date': (birthDate ?? existingProfile?.birthDate)?.toIso8601String(),
+    'country': country ?? existingProfile?.country,
+    'country_code': countryCode ?? existingProfile?.countryCode,
+    'avatar_url': avatarUrl ?? existingProfile?.avatarUrl,
+    'updated_at': DateTime.now().toIso8601String(),
+  };
+
+  // Always upsert directly to Supabase (ensures row exists)
+  await Supabase.instance.client.from('profiles').upsert(profileData);
+
+  // Also update local Drift cache
+  if (!kIsWeb && WildlifeRepository.initialized) {
+    final profile = UserProfile(
+      id: userId,
+      displayName: displayName ?? existingProfile?.displayName,
+      bio: bio ?? existingProfile?.bio,
+      birthDate: birthDate ?? existingProfile?.birthDate,
+      country: country ?? existingProfile?.country,
+      countryCode: countryCode ?? existingProfile?.countryCode,
+      avatarUrl: avatarUrl ?? existingProfile?.avatarUrl,
+      createdAt: existingProfile?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    try {
+      await WildlifeRepository.instance.upsertDriftOnly<UserProfile>(profile);
+    } catch (_) {}
   }
-
-  // Get existing profile first to preserve unmodified fields
-  final existing = await WildlifeRepository.instance.get<UserProfile>(
-    policy: OfflineFirstGetPolicy.localOnly,
-    query: Query(where: [Where('id').isExactly(userId)]),
-  );
-
-  final existingProfile = existing.isEmpty ? null : existing.first;
-
-  final profile = UserProfile(
-    id: userId,
-    displayName: displayName ?? existingProfile?.displayName,
-    bio: bio ?? existingProfile?.bio,
-    birthDate: birthDate ?? existingProfile?.birthDate,
-    country: country ?? existingProfile?.country,
-    countryCode: countryCode ?? existingProfile?.countryCode,
-    avatarUrl: avatarUrl ?? existingProfile?.avatarUrl,
-    createdAt: existingProfile?.createdAt ?? DateTime.now(),
-    updatedAt: DateTime.now(),
-  );
-
-  await WildlifeRepository.instance.upsert<UserProfile>(profile);
 }
 
 /// Picks, crops (1:1 square), compresses, and uploads avatar image.
