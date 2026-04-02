@@ -1,128 +1,85 @@
 # Soporte por Plataforma — Galápagos Wildlife
 
-## Matriz de features por plataforma
-
-### Leyenda
+## Leyenda
 - ✅ Funciona completamente
-- ⚠️ Funciona parcialmente o con limitaciones
-- ❌ No disponible en la plataforma
+- ✅ᶠ Funciona con fallback (resultado parcial pero funcional)
+- ✅ᵇ Funciona vía cache del navegador (no plugin nativo)
+- ⚠️ Limitado
+- ❌ No disponible (limitación de hardware/plataforma)
 
-### Core
+## Matriz de features
 
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Base de datos local (Drift/SQLite) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ Wasm |
-| Sync offline-first (cola offline) | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ Supabase directo |
+| Feature | iOS | Android | macOS | Win | Linux | Web |
+|---|---|---|---|---|---|---|
+| **CORE** |||||||
+| Base de datos local (Drift/SQLite) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Offline queue + sync automático | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Supabase (Auth, Storage, Realtime) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| i18n (ES/EN) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Bilingüe ES/EN | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Tema claro/oscuro | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Catálogo y exploración
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Catálogo de 131 especies | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Detalle de especie | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| GPS/Ubicación | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **CATÁLOGO** |||||||
+| 131 especies + detalle completo | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Búsqueda global | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Favoritos | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Checklist | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Daily Facts | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Checklist (25 sugeridas + todas) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Reproducción de sonidos | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Mapa
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
+| Daily Facts | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **MAPA** |||||||
 | Mapa interactivo (flutter_map) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Mapa base vectorial (PMTiles) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ streaming |
-| Cache de tiles offline (FMTC) | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-| Marcadores de islas/sitios | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| GPS tracking de senderos | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
-| Ubicación del usuario | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
+| Mapa base vectorial (PMTiles) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 891 sitios + 43 senderos | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Cache de tiles offline | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ᵇ |
+| GPS tracking de senderos | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Ubicación del usuario en mapa | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Descarga de mapas HD | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
-
-### IA e identificación
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Photo ID (TFLite on-device) | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
-| AR Camera (YOLO real-time) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Fallback por ubicación | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
-
-### Avistamientos y campo
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
+| **IA E IDENTIFICACIÓN** |||||||
+| Photo ID (seleccionar foto → IA) | ✅ | ✅ | ✅ | ✅ᶠ | ✅ᶠ | ✅ᶠ |
+| AR Camera (detección tiempo real) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
+| Fallback por ubicación GPS | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **AVISTAMIENTOS** |||||||
 | Crear sighting (manual) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Foto de sighting (cámara) | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ❌ |
-| GPS automático en sighting | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
-| Grabación de audio | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ❌ |
+| Adjuntar foto (cámara o archivo) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| GPS automático en sighting | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Export CSV | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Edición de campo (trails/sites) | ✅ | ✅ | ⚠️ | ❌ | ❌ | ❌ |
-
-### Gamificación
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Badges | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Edición de campo (trails/sites) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Grabación de audio | ✅ | ✅ | ⚠️ | ⚠️ | ⚠️ | ❌ |
+| **GAMIFICACIÓN** |||||||
+| Badges (10 logros) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Leaderboard | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Celebración checklist (confetti) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Certificado por email | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Compras y monetización
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
+| Celebración confetti al completar | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Certificado digital por email | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **COMPRAS** |||||||
 | In-App Purchase (Pack/Pro) | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Paywall UI | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Restaurar compras | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| Roles premium (sponsored/etc) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Admin y editorial
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
-| Panel admin | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| CRUD de especies | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Gestión de usuarios/roles | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Acceso premium por rol (server) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **ADMIN Y EDITORIAL** |||||||
+| Panel admin (15 pantallas) | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| CRUD especies/sitios/islas | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Gestión usuarios y roles | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Asignación beta/sponsored con fecha | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | Workflow editorial | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-
-### Actualizaciones y distribución
-
-| Feature | iOS | Android | macOS | Windows | Linux | Web |
-|---------|-----|---------|-------|---------|-------|-----|
+| **DISTRIBUCIÓN** |||||||
 | Shorebird OTA patches | ✅ | ✅ | ✅ | ✅ | ✅ | ❌ |
 | Apple Watch companion | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| GitHub Pages deploy | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
+| GitHub Pages auto-deploy | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
----
+## Notas
 
-## Resumen por plataforma
+### ✅ᶠ Photo ID con fallback
+En iOS/Android/macOS el modelo TFLite (2.1 MB, MobileNetV3) corre on-device y clasifica la foto directamente. En Windows, Linux y Web, TFLite no está disponible — la app sugiere especies basándose en la ubicación GPS del usuario (sitio de visita más cercano + especies asociadas). El usuario siempre obtiene una respuesta útil.
 
-### iOS — Plataforma principal ⭐
-**Todo funciona.** Es la plataforma más completa: IA, cámara, GPS, mapas offline, Apple Watch, compras in-app, Shorebird.
+### ✅ᵇ Cache de tiles en Web
+FMTC (plugin nativo de cache) no funciona en web. Sin embargo, los tiles del mapa se cachean automáticamente por el **HTTP cache del navegador**. Si el usuario visitó una zona del mapa con internet, esos tiles permanecen disponibles offline en el cache del browser. Además, el **mapa base vectorial PMTiles** (2.9 MB) se carga por streaming HTTP y también se beneficia del cache del navegador. En la práctica, el mapa funciona offline en web para zonas previamente visitadas.
 
-### Android — Segunda plataforma ⭐
-**Todo excepto Apple Watch.** Misma experiencia que iOS menos el Watch companion.
-
-### macOS — Funcional con limitaciones
-**Catálogo, búsqueda, checklist, admin, mapas.** Sin cámara real, GPS limitado, sin compras in-app. Útil para revisión de contenido y administración.
-
-### Windows / Linux — Mínimo viable
-**Catálogo, búsqueda, checklist, admin.** Sin GPS, sin cámara, sin compras. Útil para administración y editorial.
-
-### Web — Demo y acceso rápido
-**Catálogo, búsqueda, checklist, badges, admin.** Sin offline queue, sin IA, sin cámara, sin compras. Útil como demo pública y para acceso rápido desde cualquier navegador. Deployado automáticamente vía GitHub Pages.
-
----
-
-## Notas técnicas
-
-- **Web sin offline queue**: En web, los datos se leen directo de Supabase. No hay cola offline ni persistencia local robusta.
-- **TFLite en web**: Se usa un stub que proporciona clases dummy para que compile. La IA no funciona en web.
-- **FMTC en web**: El cache de tiles no existe en web. Los tiles se cargan por red cada vez.
-- **IAP en web**: El plugin `in_app_purchase` retorna `isAvailable() = false` en web automáticamente.
-- **Shorebird en web**: No aplica — la web siempre sirve la versión más reciente desde GitHub Pages.
+### ❌ Brechas irreducibles
+| Brecha | Razón |
+|---|---|
+| AR Camera en web/desktop | Requiere stream de cámara nativo a nivel de frame — la Web API no lo soporta con la resolución y velocidad necesarias |
+| In-App Purchase en web/desktop | Apple y Google IAP solo funcionan en sus stores móviles. En web/desktop el acceso premium se otorga vía roles (sponsored/editor/curator) |
+| Apple Watch | Hardware exclusivo de Apple, protocolo WCSession solo disponible en iOS |
+| Shorebird en web | No aplica — web siempre sirve la versión más reciente desde GitHub Pages automáticamente |
+| Descarga de mapas HD en web | Requiere background_downloader (filesystem nativo). El streaming HTTP con cache del browser cumple la misma función en web |
+| Grabación de audio en web | El paquete `record` no soporta web. La Web MediaRecorder API existe pero no está integrada |
 
 ---
 
