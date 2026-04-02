@@ -110,6 +110,8 @@ dependencies:
   flutter_watch_os_connectivity: ^1.0.0
   screenshot: ^3.0.0
   drift_flutter: ^0.2.8
+  pdf: ^3.11.1
+  printing: ^5.13.3
 
 dev_dependencies:
   flutter_test:

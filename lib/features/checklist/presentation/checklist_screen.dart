@@ -732,14 +732,16 @@ class _GridCard extends StatelessWidget {
               ),
             ),
 
-            // Seen check badge (top-right)
+            // Seen check badge (top-right) — large hit area for easy tapping
             Positioned(
-              top: 8,
-              right: 8,
+              top: 0,
+              right: 0,
               child: GestureDetector(
                 onTap: onToggle,
                 behavior: HitTestBehavior.opaque,
-                child: AnimatedSwitcher(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder: (child, animation) =>
                       ScaleTransition(scale: animation, child: child),
@@ -769,6 +771,7 @@ class _GridCard extends StatelessWidget {
                           child: const Icon(Icons.radio_button_unchecked,
                               color: Colors.white70, size: 20),
                         ),
+                  ),
                 ),
               ),
             ),

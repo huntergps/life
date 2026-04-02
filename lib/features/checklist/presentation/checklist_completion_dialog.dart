@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/features/checklist/presentation/confetti_overlay.dart';
@@ -105,6 +107,15 @@ class _ChecklistCompletionDialogState
   }
 
   Future<void> _requestCertificate() async {
+    // Certificate requires login to get user name and email
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // close celebration dialog
+      context.push('/login');
+      return;
+    }
+
     setState(() => _requestingCertificate = true);
     try {
       final speciesCount =
@@ -112,6 +123,7 @@ class _ChecklistCompletionDialogState
               kDefaultSpeciesIds.length;
       await CertificateService.requestCertificate(
         speciesCount: speciesCount,
+        context: context,
       );
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
