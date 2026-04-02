@@ -15,7 +15,6 @@ import '../../../../models/species.model.dart';
 import '../../../../models/species_image.model.dart';
 import '../../../../models/species_reference.model.dart';
 import '../../../../models/species_site.model.dart';
-import '../../../../models/species_sound.model.dart';
 import '../../../../models/species_threat.model.dart';
 import '../../../../models/trail.model.dart';
 import '../../../../models/user_favorite.model.dart';
@@ -627,72 +626,6 @@ class SpeciesSiteAdapter extends SupabaseAdapter<SpeciesSite> {
 }
 
 // ---------------------------------------------------------------------------
-// SpeciesSound
-// ---------------------------------------------------------------------------
-
-class SpeciesSoundAdapter extends SupabaseAdapter<SpeciesSound> {
-  @override
-  String get supabaseTableName => 'species_sounds';
-
-  @override
-  Set<String> get uniqueFields => {'id'};
-
-  @override
-  bool get defaultToNull => false;
-
-  @override
-  bool get ignoreDuplicates => false;
-
-  @override
-  Map<String, RuntimeSupabaseColumnDefinition> get fieldsToSupabaseColumns => {
-        'id': _col('id'),
-        'speciesId': _col('species_id'),
-        'soundUrl': _col('sound_url'),
-        'soundType': _col('sound_type'),
-        'descriptionEs': _col('description_es'),
-        'descriptionEn': _col('description_en'),
-        'recordedBy': _col('recorded_by'),
-        'recordedDate': _col('recorded_date'),
-      };
-
-  @override
-  Future<SpeciesSound> fromSupabase(
-    Map<String, dynamic> data, {
-    required covariant Object provider,
-    covariant Object? repository,
-  }) async =>
-      SpeciesSound(
-        id: data['id'] as int,
-        speciesId: data['species_id'] as int,
-        soundUrl: data['sound_url'] as String,
-        soundType: data['sound_type'] as String?,
-        descriptionEs: data['description_es'] as String?,
-        descriptionEn: data['description_en'] as String?,
-        recordedBy: data['recorded_by'] as String?,
-        recordedDate: data['recorded_date'] != null
-            ? DateTime.tryParse(data['recorded_date'] as String)
-            : null,
-      );
-
-  @override
-  Future<Map<String, dynamic>> toSupabase(
-    SpeciesSound instance, {
-    required covariant Object provider,
-    covariant Object? repository,
-  }) async =>
-      {
-        'id': instance.id,
-        'species_id': instance.speciesId,
-        'sound_url': instance.soundUrl,
-        'sound_type': instance.soundType,
-        'description_es': instance.descriptionEs,
-        'description_en': instance.descriptionEn,
-        'recorded_by': instance.recordedBy,
-        'recorded_date': instance.recordedDate?.toIso8601String(),
-      };
-}
-
-// ---------------------------------------------------------------------------
 // SpeciesThreat
 // ---------------------------------------------------------------------------
 
@@ -713,7 +646,7 @@ class SpeciesThreatAdapter extends SupabaseAdapter<SpeciesThreat> {
   Map<String, RuntimeSupabaseColumnDefinition> get fieldsToSupabaseColumns => {
         'id': _col('id'),
         'speciesId': _col('species_id'),
-        'threatType': _col('threat_type'),
+        'threatType': _col('threat_category'),
         'severity': _col('severity'),
         'descriptionEs': _col('description_es'),
         'descriptionEn': _col('description_en'),
@@ -728,7 +661,7 @@ class SpeciesThreatAdapter extends SupabaseAdapter<SpeciesThreat> {
       SpeciesThreat(
         id: data['id'] as int,
         speciesId: data['species_id'] as int,
-        threatType: (data['threat_type'] as String?) ?? '',
+        threatType: (data['threat_category'] as String?) ?? '',
         severity: data['severity'] as String?,
         descriptionEs: data['description_es'] as String?,
         descriptionEn: data['description_en'] as String?,
@@ -743,7 +676,7 @@ class SpeciesThreatAdapter extends SupabaseAdapter<SpeciesThreat> {
       {
         'id': instance.id,
         'species_id': instance.speciesId,
-        'threat_type': instance.threatType,
+        'threat_category': instance.threatType,
         'severity': instance.severity,
         'description_es': instance.descriptionEs,
         'description_en': instance.descriptionEn,
@@ -1168,7 +1101,6 @@ final supabaseModelDictionary = SupabaseModelDictionary({
   SpeciesImage: SpeciesImageAdapter(),
   SpeciesReference: SpeciesReferenceAdapter(),
   SpeciesSite: SpeciesSiteAdapter(),
-  SpeciesSound: SpeciesSoundAdapter(),
   SpeciesThreat: SpeciesThreatAdapter(),
   Trail: TrailAdapter(),
   UserFavorite: UserFavoriteAdapter(),

@@ -20,11 +20,9 @@ import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.
 import 'package:galapagos_wildlife/features/editorial/presentation/sheets/field_proposal_sheet.dart';
 import 'package:galapagos_wildlife/features/editorial/services/proposal_service.dart';
 import 'species_detail_provider.dart';
-import 'species_sounds_provider.dart';
 import 'quick_facts_row.dart';
 import 'taxonomy_tree.dart';
 import 'gallery_carousel.dart';
-import 'species_sound_player.dart';
 import 'package:go_router/go_router.dart';
 
 class SpeciesDetailScreen extends ConsumerWidget {
@@ -199,8 +197,6 @@ class _DetailContent extends ConsumerWidget {
         : const <String>{};
     final threatsAsync = ref.watch(speciesThreatsProvider(species.id));
     final referencesAsync = ref.watch(speciesReferencesProvider(species.id));
-    final soundsAsync = ref.watch(speciesSoundsProvider(species.id));
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -328,14 +324,6 @@ class _DetailContent extends ConsumerWidget {
             isEditor: isEditor,
             pendingFields: pendingFields,
           ),
-          if ((soundsAsync.asData?.value ?? []).isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: SpeciesSoundPlayer(
-                sounds: soundsAsync.asData!.value,
-                locale: locale,
-              ),
-            ),
         ]
         else
           _LoginPromptSection(isDark: isDark),

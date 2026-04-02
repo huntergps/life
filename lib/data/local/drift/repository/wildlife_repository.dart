@@ -21,7 +21,6 @@ import '../../../../models/species.model.dart';
 import '../../../../models/species_image.model.dart';
 import '../../../../models/species_reference.model.dart';
 import '../../../../models/species_site.model.dart';
-import '../../../../models/species_sound.model.dart';
 import '../../../../models/species_threat.model.dart';
 import '../../../../models/trail.model.dart';
 import '../../../../models/user_favorite.model.dart';
@@ -108,12 +107,6 @@ class WildlifeRepository
     'id': _db.speciesSites.id as GeneratedColumn<Object>,
     'speciesId': _db.speciesSites.speciesId as GeneratedColumn<Object>,
     'visitSiteId': _db.speciesSites.visitSiteId as GeneratedColumn<Object>,
-  });
-
-  late final _speciesSoundTransformer = QueryDriftTransformer({
-    'id': _db.speciesSounds.id as GeneratedColumn<Object>,
-    'speciesId': _db.speciesSounds.speciesId as GeneratedColumn<Object>,
-    'soundType': _db.speciesSounds.soundType as GeneratedColumn<Object>,
   });
 
   late final _speciesThreatTransformer = QueryDriftTransformer({
@@ -273,11 +266,6 @@ class WildlifeRepository
       final stmt = _db.select(_db.speciesSites);
       _speciesSiteTransformer.applyToSelect(stmt, query);
       return (await stmt.get()).map(_rowToSpeciesSite).toList().cast<T>();
-    }
-    if (T == SpeciesSound) {
-      final stmt = _db.select(_db.speciesSounds);
-      _speciesSoundTransformer.applyToSelect(stmt, query);
-      return (await stmt.get()).map(_rowToSpeciesSound).toList().cast<T>();
     }
     if (T == SpeciesThreat) {
       final stmt = _db.select(_db.speciesThreats);
@@ -490,21 +478,6 @@ class WildlifeRepository
           );
       return null;
     }
-    if (instance is SpeciesSound) {
-      await _db.into(_db.speciesSounds).insertOnConflictUpdate(
-            db.SpeciesSoundsCompanion(
-              id: Value(instance.id),
-              speciesId: Value(instance.speciesId),
-              soundUrl: Value(instance.soundUrl),
-              soundType: Value(instance.soundType),
-              descriptionEs: Value(instance.descriptionEs),
-              descriptionEn: Value(instance.descriptionEn),
-              recordedBy: Value(instance.recordedBy),
-              recordedDate: Value(instance.recordedDate),
-            ),
-          );
-      return null;
-    }
     if (instance is SpeciesThreat) {
       await _db.into(_db.speciesThreats).insertOnConflictUpdate(
             db.SpeciesThreatsCompanion(
@@ -665,12 +638,6 @@ class WildlifeRepository
           .go();
       return;
     }
-    if (instance is SpeciesSound) {
-      await (_db.delete(_db.speciesSounds)
-            ..where((t) => t.id.equals(instance.id)))
-          .go();
-      return;
-    }
     if (instance is SpeciesThreat) {
       await (_db.delete(_db.speciesThreats)
             ..where((t) => t.id.equals(instance.id)))
@@ -759,11 +726,6 @@ class WildlifeRepository
       return _speciesSiteTransformer
           .applyToWatch(_db.select(_db.speciesSites), query)
           .map((rows) => rows.map(_rowToSpeciesSite).toList().cast<T>());
-    }
-    if (T == SpeciesSound) {
-      return _speciesSoundTransformer
-          .applyToWatch(_db.select(_db.speciesSounds), query)
-          .map((rows) => rows.map(_rowToSpeciesSound).toList().cast<T>());
     }
     if (T == SpeciesThreat) {
       return _speciesThreatTransformer
@@ -937,17 +899,6 @@ class WildlifeRepository
         speciesId: r.speciesId,
         visitSiteId: r.visitSiteId,
         frequency: r.frequency,
-      );
-
-  SpeciesSound _rowToSpeciesSound(db.SpeciesSound r) => SpeciesSound(
-        id: r.id,
-        speciesId: r.speciesId,
-        soundUrl: r.soundUrl,
-        soundType: r.soundType,
-        descriptionEs: r.descriptionEs,
-        descriptionEn: r.descriptionEn,
-        recordedBy: r.recordedBy,
-        recordedDate: r.recordedDate,
       );
 
   SpeciesThreat _rowToSpeciesThreat(db.SpeciesThreat r) => SpeciesThreat(
