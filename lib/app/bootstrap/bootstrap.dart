@@ -29,8 +29,8 @@ class Bootstrap {
     await InitRepository.init();
     await InitBackground.init();
 
-    // Check for Shorebird patches (non-blocking, runs in background)
-    _checkForUpdate();
+    // Check for Shorebird patches (non-blocking, native only — not available on web)
+    if (!kIsWeb) _checkForUpdate();
   }
 
   /// Checks for OTA patches from Shorebird. Downloads silently in background.
