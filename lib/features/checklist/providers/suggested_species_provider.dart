@@ -21,7 +21,6 @@ const kDefaultSpeciesIds = <int>[
   22, // Flightless Cormorant
   10, // Galapagos Hawk
   2,  // Land Iguana
-  55, // Santa Fe Land Iguana
   13, // Galapagos Fur Seal
   // ── Extras (muy visibles, no en Big 15) ──
   41, // Sally Lightfoot Crab
