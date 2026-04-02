@@ -15,9 +15,9 @@ class UserTypeBadge extends StatelessWidget {
 
   static const _config = {
     'researcher': (icon: Icons.biotech, color: Colors.blue, labelEn: 'Researcher', labelEs: 'Investigador/a'),
-    'guide': (icon: Icons.explore, color: Colors.green, labelEn: 'Naturalist Guide', labelEs: 'Guia naturalista'),
-    'ranger': (icon: Icons.park, color: Colors.orange, labelEn: 'Park Ranger', labelEs: 'Guardaparque'),
-    'student': (icon: Icons.school, color: Colors.purple, labelEn: 'Student', labelEs: 'Estudiante'),
+    'guide': (icon: Icons.hiking, color: Colors.green, labelEn: 'Naturalist Guide', labelEs: 'Guia naturalista'),
+    'ranger': (icon: Icons.security, color: Colors.orange, labelEn: 'Park Ranger', labelEs: 'Guardaparque'),
+    'student': (icon: Icons.menu_book, color: Colors.purple, labelEn: 'Student', labelEs: 'Estudiante'),
   };
 
   @override
