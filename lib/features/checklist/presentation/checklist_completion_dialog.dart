@@ -25,7 +25,7 @@ class ChecklistCompletionDialog extends ConsumerStatefulWidget {
       context: context,
       barrierDismissible: true,
       barrierLabel: 'Close celebration',
-      barrierColor: Colors.black87,
+      barrierColor: Colors.black.withValues(alpha: 0.95),
       transitionDuration: const Duration(milliseconds: 400),
       pageBuilder: (_, _, _) => const ChecklistCompletionDialog(),
       transitionBuilder: (context, animation, _, child) {

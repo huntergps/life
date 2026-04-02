@@ -17,27 +17,27 @@ Future<void> showWallpaperUnlockSheet(BuildContext context) {
 class WallpaperUnlockSheet extends StatelessWidget {
   const WallpaperUnlockSheet({super.key});
 
-  // Use species hero images as wallpapers
+  // Use actual species images from Supabase Storage
   static const _wallpapers = [
     {
       'title': 'Marine Iguana',
       'url':
-          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/species/1/hero.jpg',
+          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/1/gallery_0_marine_iguana_closeup.jpeg',
     },
     {
       'title': 'Blue-footed Booby',
       'url':
-          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/species/5/hero.jpg',
+          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/5/gallery_0_blue_footed_booby_standing.jpg',
     },
     {
       'title': 'Giant Tortoise',
       'url':
-          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/species/3/hero.jpg',
+          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/3/gallery_0_giant_tortoise_pair.jpg',
     },
     {
       'title': 'Galapagos Penguin',
       'url':
-          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/species/8/hero.jpg',
+          'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/8/gallery_0_penguin_swimming.jpg',
     },
   ];
 
