@@ -107,39 +107,38 @@ class _ChecklistCompletionDialogState
   }
 
   Future<void> _requestCertificate() async {
-    // Certificate requires login to get user name and email
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
       if (!mounted) return;
-      Navigator.of(context).pop(); // close celebration dialog
+      Navigator.of(context).pop();
       context.push('/login');
       return;
     }
 
     setState(() => _requestingCertificate = true);
     try {
-      final speciesCount =
-          ref.read(checklistSpeciesProvider).asData?.value.length ??
-              kDefaultSpeciesIds.length;
-      await CertificateService.requestCertificate(
-        speciesCount: speciesCount,
-        context: context,
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Certificate sent to your email!'),
-          backgroundColor: AppColors.primary,
-        ),
-      );
+      if (CertificateService.isIssued) {
+        // Already issued — just re-download
+        await CertificateService.downloadExisting(context: context);
+      } else {
+        // First time — issue new certificate
+        final speciesCount =
+            ref.read(checklistSpeciesProvider).asData?.value.length ??
+                kDefaultSpeciesIds.length;
+        final issued = await CertificateService.issueCertificate(
+          speciesCount: speciesCount,
+          context: context,
+        );
+        if (!issued && mounted) {
+          // Server says already issued — download existing
+          await CertificateService.downloadExisting(context: context);
+        }
+      }
     } catch (e) {
-      AppLogger.error('Certificate request failed', e);
+      AppLogger.error('Certificate failed', e);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Could not request certificate: $e'),
-          backgroundColor: AppColors.error,
-        ),
+        SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
       );
     } finally {
       if (mounted) setState(() => _requestingCertificate = false);

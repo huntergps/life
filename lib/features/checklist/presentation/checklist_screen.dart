@@ -1387,14 +1387,22 @@ class _RewardsBanner extends StatelessWidget {
             children: [
               Expanded(
                 child: _RewardButton(
-                  icon: Icons.workspace_premium,
-                  label: isEs ? 'Certificado' : 'Certificate',
+                  icon: CertificateService.isIssued
+                      ? Icons.download
+                      : Icons.workspace_premium,
+                  label: CertificateService.isIssued
+                      ? (isEs ? 'Descargar' : 'Download')
+                      : (isEs ? 'Certificado' : 'Certificate'),
                   onTap: () {
                     final user = Supabase.instance.client.auth.currentUser;
                     if (user == null) {
                       context.push('/login');
+                      return;
+                    }
+                    if (CertificateService.isIssued) {
+                      CertificateService.downloadExisting(context: context);
                     } else {
-                      CertificateService.requestCertificate(
+                      CertificateService.issueCertificate(
                         speciesCount: 17,
                         context: context,
                       );
