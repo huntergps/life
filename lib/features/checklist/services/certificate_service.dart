@@ -3,13 +3,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/features/checklist/services/certificate_generator.dart';
 
-/// Service that generates a PDF certificate on-device and also
-/// sends a request to the server for email delivery.
 class CertificateService {
   CertificateService._();
 
-  /// Generates and shows the PDF certificate immediately, then also
-  /// saves the request to Supabase for email delivery later.
   static Future<void> requestCertificate({
     required int speciesCount,
     required BuildContext context,
@@ -19,11 +15,28 @@ class CertificateService {
     if (user == null) throw Exception('Not authenticated');
 
     final locale = LocaleSettings.currentLocale.languageCode;
-    final userName = user.userMetadata?['display_name'] ??
-        user.email?.split('@').first ??
-        'Explorer';
 
-    // Generate and show PDF immediately
+    // Get display name from profiles table (most reliable)
+    String userName = 'Explorer';
+    try {
+      final profile = await client
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .maybeSingle();
+      if (profile != null && profile['display_name'] != null) {
+        userName = profile['display_name'] as String;
+      } else {
+        userName = user.userMetadata?['display_name'] as String? ??
+            user.email?.split('@').first ??
+            'Explorer';
+      }
+    } catch (_) {
+      userName = user.userMetadata?['display_name'] as String? ??
+          user.email?.split('@').first ??
+          'Explorer';
+    }
+
     await CertificateGenerator.generateAndShare(
       userName: userName,
       speciesCount: speciesCount,
@@ -31,7 +44,7 @@ class CertificateService {
       locale: locale,
     );
 
-    // Also save to Supabase for email delivery
+    // Save to Supabase for email delivery
     try {
       await client.rpc('request_checklist_certificate', params: {
         'user_email': user.email ?? '',
@@ -39,8 +52,6 @@ class CertificateService {
         'species_count': speciesCount,
         'completed_at': DateTime.now().toIso8601String(),
       });
-    } catch (_) {
-      // Silently fail — the PDF was already shown to the user
-    }
+    } catch (_) {}
   }
 }
