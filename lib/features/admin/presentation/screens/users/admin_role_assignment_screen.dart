@@ -637,11 +637,81 @@ class _RoleAssignmentSheetState extends State<_RoleAssignmentSheet> {
                 ),
               ),
             ],
+            const SizedBox(height: 16),
+
+            // ── Certificate management ──
+            const Divider(),
+            const SizedBox(height: 8),
+            Text(
+              widget.isEs ? 'Certificado' : 'Certificate',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _isLoading ? null : () => _revokeCertificate(context),
+                icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                label: Text(
+                  widget.isEs
+                      ? 'Revocar certificado (permite re-emitir)'
+                      : 'Revoke certificate (allows re-issue)',
+                  style: const TextStyle(color: Colors.red, fontSize: 13),
+                ),
+                style: OutlinedButton.styleFrom(side: const BorderSide(color: Colors.red)),
+              ),
+            ),
             const SizedBox(height: 8),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _revokeCertificate(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(widget.isEs ? 'Revocar certificado' : 'Revoke Certificate'),
+        content: Text(widget.isEs
+            ? 'El usuario podra volver a emitir su certificado. ¿Continuar?'
+            : 'The user will be able to re-issue their certificate. Continue?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(widget.isEs ? 'Cancelar' : 'Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(widget.isEs ? 'Revocar' : 'Revoke'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !mounted) return;
+
+    setState(() => _isLoading = true);
+    try {
+      await Supabase.instance.client.rpc('revoke_checklist_certificate', params: {
+        'target_user_id': widget.user.userId,
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(widget.isEs ? 'Certificado revocado' : 'Certificate revoked')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   DateTime _computeExpiryDate() {
