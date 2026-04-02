@@ -3,18 +3,29 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 
-/// Default 10 species every tourist can see.
+/// Default checklist: Big 15 (Metropolitan Touring industry standard)
+/// + Sally Lightfoot Crab, Green Sea Turtle, Darwin's Finch = 18 species.
 const kDefaultSpeciesIds = <int>[
+  // ── Big 15 ──
   12, // Galapagos Sea Lion
-  1, // Marine Iguana
-  41, // Sally Lightfoot Crab
-  5, // Blue-footed Booby
-  3, // Santa Cruz Giant Tortoise
-  7, // Magnificent Frigatebird
-  14, // Green Sea Turtle
-  8, // Galapagos Penguin
-  11, // Medium Ground Finch
+  1,  // Marine Iguana
+  3,  // Giant Tortoise
+  5,  // Blue-footed Booby
+  6,  // Nazca Booby
+  20, // Red-footed Booby
+  8,  // Galapagos Penguin
   21, // American Flamingo
+  7,  // Magnificent Frigatebird
+  31, // Great Frigatebird
+  9,  // Waved Albatross
+  22, // Flightless Cormorant
+  10, // Galapagos Hawk
+  2,  // Land Iguana
+  55, // Santa Fe Land Iguana
+  13, // Galapagos Fur Seal
+  // ── Extras (muy visibles, no en Big 15) ──
+  41, // Sally Lightfoot Crab
+  14, // Green Sea Turtle
 ];
 
 const _cacheKey = 'checklist_species_ids';
