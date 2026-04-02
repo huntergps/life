@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
@@ -48,21 +49,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final pages = [
       _PageData(
         icon: Icons.pets,
+        imageUrl:
+            'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/1/gallery_0_marine_iguana_closeup.jpeg',
         title: t.discoverTitle,
         description: t.discoverDesc,
       ),
       _PageData(
         icon: Icons.map_outlined,
+        imageUrl:
+            'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/5/gallery_0_blue_footed_booby_standing.jpg',
         title: t.mapTitle,
         description: t.mapDesc,
       ),
       _PageData(
         icon: Icons.camera_alt_outlined,
+        imageUrl:
+            'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/3/gallery_0_giant_tortoise_pair.jpg',
         title: t.sightingsTitle,
         description: t.sightingsDesc,
       ),
       _PageData(
         icon: Icons.emoji_events_outlined,
+        imageUrl:
+            'https://vojbznerffkemxqlwapf.supabase.co/storage/v1/object/public/species-images/8/gallery_0_penguin_swimming.jpg',
         title: t.badgesTitle,
         description: t.badgesDesc,
       ),
@@ -96,16 +105,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          width: 120,
-                          height: 120,
+                          width: 200,
+                          height: 200,
                           decoration: BoxDecoration(
                             color: iconBgColor,
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
-                          child: Icon(
-                            page.icon,
-                            size: 56,
-                            color: AppColors.primary,
+                          clipBehavior: Clip.antiAlias,
+                          child: CachedNetworkImage(
+                            imageUrl: page.imageUrl,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Icon(
+                              page.icon,
+                              size: 56,
+                              color: AppColors.primary,
+                            ),
+                            errorWidget: (context, url, error) => Icon(
+                              page.icon,
+                              size: 56,
+                              color: AppColors.primary,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 40),
@@ -214,11 +240,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _PageData {
   final IconData icon;
+  final String imageUrl;
   final String title;
   final String description;
 
   const _PageData({
     required this.icon,
+    required this.imageUrl,
     required this.title,
     required this.description,
   });

@@ -14,6 +14,7 @@ import 'package:galapagos_wildlife/features/sightings/services/sightings_service
 import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/providers/recognition_feedback_service.dart';
 import 'package:galapagos_wildlife/features/ar_camera/providers/ar_camera_provider.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 
 // ── HUD palette ───────────────────────────────────────────────────────────────
 const _cyan       = Color(0xFF00E5FF);
@@ -105,6 +106,14 @@ class _PhotoIdScreenState extends ConsumerState<PhotoIdScreen>
     setState(() { _photo = null; _isProcessing = false; });
   }
 
+  bool get _isPremium {
+    final prefs = Bootstrap.prefs;
+    return (prefs.getBool('has_premium_role') ?? false)
+        || (prefs.getBool('is_beta_tester') ?? false)
+        || (prefs.getBool('has_pack') ?? false)
+        || (prefs.getBool('has_pro') ?? false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEs    = ref.watch(localeProvider.select((l) => l == 'es'));
@@ -120,6 +129,8 @@ class _PhotoIdScreenState extends ConsumerState<PhotoIdScreen>
               onBack:  () => context.pop(),
               onReset: _photo != null ? _reset : null,
             ),
+            if (!_isPremium)
+              _FreeUsageBanner(isEs: isEs),
             Expanded(
               child: _photo == null
                   ? _IdleView(
@@ -234,6 +245,60 @@ class _PIdHeader extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Free usage banner ────────────────────────────────────────────────────────
+
+class _FreeUsageBanner extends StatelessWidget {
+  final bool isEs;
+  const _FreeUsageBanner({required this.isEs});
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining = remainingFreePhotoIds();
+    final used = kFreePhotoIdLimit - remaining;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: _cyan.withValues(alpha: 0.1),
+      child: Row(
+        children: [
+          Icon(
+            remaining > 0 ? Icons.auto_awesome : Icons.lock_outline,
+            color: remaining > 0 ? _cyan : Colors.orange,
+            size: 16,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              isEs
+                  ? '$remaining de $kFreePhotoIdLimit identificaciones gratuitas hoy'
+                  : '$remaining of $kFreePhotoIdLimit free IDs remaining today',
+              style: TextStyle(
+                color: remaining > 0 ? _cyan : Colors.orange,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          // Visual dots
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: List.generate(kFreePhotoIdLimit, (i) => Container(
+              width: 8,
+              height: 8,
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: i < used ? _cyan.withValues(alpha: 0.3) : _cyan,
+              ),
+            )),
+          ),
         ],
       ),
     );

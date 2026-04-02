@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
@@ -8,10 +10,19 @@ final localeProvider = NotifierProvider<LocaleNotifier, String>(LocaleNotifier.n
 class LocaleNotifier extends Notifier<String> {
   @override
   String build() {
-    final saved = Bootstrap.prefs.getString('locale') ?? 'en';
-    // Apply locale on next microtask to avoid build-phase side effects
-    Future.microtask(() => LocaleSettings.setLocaleRaw(saved));
-    return saved;
+    final saved = Bootstrap.prefs.getString('locale');
+    if (saved != null) {
+      Future.microtask(() => LocaleSettings.setLocaleRaw(saved));
+      return saved;
+    }
+    // First launch: detect device language
+    final deviceLocale = ui.PlatformDispatcher.instance.locale.languageCode;
+    final detected = deviceLocale.startsWith('es') ? 'es' : 'en';
+    Future.microtask(() {
+      LocaleSettings.setLocaleRaw(detected);
+      Bootstrap.prefs.setString('locale', detected);
+    });
+    return detected;
   }
 
   Future<void> setLocale(String locale) async {
@@ -19,6 +30,37 @@ class LocaleNotifier extends Notifier<String> {
     await LocaleSettings.setLocaleRaw(locale);
     await Bootstrap.prefs.setString('locale', locale);
   }
+}
+
+// ── Photo ID daily usage counter ────────────────────────────────────────────
+
+const _photoIdCountKey = 'photo_id_count';
+const _photoIdDateKey = 'photo_id_date';
+const kFreePhotoIdLimit = 3;
+
+/// Returns how many Photo ID uses remain today for free users.
+int remainingFreePhotoIds() {
+  final today = DateTime.now().toIso8601String().substring(0, 10);
+  final savedDate = Bootstrap.prefs.getString(_photoIdDateKey) ?? '';
+  if (savedDate != today) return kFreePhotoIdLimit;
+  final count = Bootstrap.prefs.getInt(_photoIdCountKey) ?? 0;
+  return (kFreePhotoIdLimit - count).clamp(0, kFreePhotoIdLimit);
+}
+
+/// Records one Photo ID use. Returns false if limit reached.
+Future<bool> usePhotoId() async {
+  final today = DateTime.now().toIso8601String().substring(0, 10);
+  final savedDate = Bootstrap.prefs.getString(_photoIdDateKey) ?? '';
+  int count;
+  if (savedDate != today) {
+    count = 0;
+    await Bootstrap.prefs.setString(_photoIdDateKey, today);
+  } else {
+    count = Bootstrap.prefs.getInt(_photoIdCountKey) ?? 0;
+  }
+  if (count >= kFreePhotoIdLimit) return false;
+  await Bootstrap.prefs.setInt(_photoIdCountKey, count + 1);
+  return true;
 }
 
 final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(ThemeModeNotifier.new);

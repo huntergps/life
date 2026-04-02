@@ -933,22 +933,40 @@ class _ShareButton extends StatelessWidget {
       onPressed: () {
         final isEs = locale == 'es';
         final name = isEs ? species.commonNameEs : species.commonNameEn;
-        final text = context.t.share.shareText(
-          name: name,
-          scientificName: species.scientificName,
-        );
-        final details = StringBuffer(text);
-        if (species.conservationStatus != null) {
-          details.write(
-              '\n\u{1F539} ${context.t.species.conservationStatus}: ${species.conservationStatus}');
+        final scientific = species.scientificName as String;
+        final status = species.conservationStatus as String?;
+
+        final buf = StringBuffer();
+
+        // Emoji header with species name
+        buf.writeln('\u{1F98E} $name ($scientific)');
+
+        // Conservation status line
+        if (status != null && status.isNotEmpty) {
+          buf.writeln(isEs
+              ? 'Estado de conservacion: $status'
+              : 'Conservation status: $status');
         }
-        if (species.isEndemic) {
-          details.write('\n\u{1F539} ${context.t.species.endemic}');
+
+        // Endemic badge
+        if (species.isEndemic == true) {
+          buf.writeln(isEs
+              ? '\u{2B50} Endemica de Galapagos'
+              : '\u{2B50} Endemic to Galapagos');
         }
-        details.write('\n\ngalapagos://species/${species.id}');
+
+        // Closing line with app name + hashtags
+        buf.writeln();
+        buf.writeln(isEs
+            ? 'Descubierto en las Islas Galapagos con Galapagos Wildlife'
+            : 'Discovered in the Galapagos Islands with Galapagos Wildlife');
+        buf.writeln('#GalapagosWildlife #Galapagos #Ecuador');
+        buf.write('https://galapagos.tech');
+
         final box = context.findRenderObject() as RenderBox?;
         SharePlus.instance.share(ShareParams(
-          text: details.toString(),
+          text: buf.toString(),
+          subject: name,
           sharePositionOrigin: box != null
               ? box.localToGlobal(Offset.zero) & box.size
               : Rect.zero,

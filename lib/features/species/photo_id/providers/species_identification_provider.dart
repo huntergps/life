@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/data/mappers/data_helpers.dart';
 
+import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/label_parser.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/tflite_species_classifier.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/location_fallback_service.dart';
@@ -68,6 +70,22 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
   }) async {
     state = const AsyncValue.loading();
     try {
+      // Check daily limit for free users
+      final prefs = Bootstrap.prefs;
+      final isPremium = (prefs.getBool('has_premium_role') ?? false)
+          || (prefs.getBool('is_beta_tester') ?? false)
+          || (prefs.getBool('has_pack') ?? false)
+          || (prefs.getBool('has_pro') ?? false);
+      if (!isPremium) {
+        final canUse = await usePhotoId();
+        if (!canUse) {
+          state = AsyncValue.data(SpeciesIdState(
+            error: 'Daily limit reached ($kFreePhotoIdLimit/day). Upgrade for unlimited.',
+            modelAvailable: _classifier.isAvailable,
+          ));
+          return;
+        }
+      }
       final allSpecies = await fetchDeduped<Species>(idSelector: (s) => s.id);
 
       List<Species>? nearbySpecies;

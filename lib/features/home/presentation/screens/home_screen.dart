@@ -13,6 +13,8 @@ import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
+import 'package:galapagos_wildlife/features/home/providers/nearby_species_provider.dart';
+import 'dart:math' show min;
 
 // Search button shared across phone and tablet layouts
 class _SearchButton extends StatelessWidget {
@@ -61,6 +63,7 @@ class _PhoneHome extends StatelessWidget {
               ref.invalidate(categoriesProvider);
               ref.invalidate(featuredSpeciesProvider);
               ref.invalidate(allSpeciesProvider);
+              ref.invalidate(nearbySpeciesProvider);
             },
             child: CustomScrollView(
               slivers: [
@@ -91,6 +94,10 @@ class _PhoneHome extends StatelessWidget {
                   ),
                 ),
                 const SliverToBoxAdapter(child: CategoryGrid()),
+
+                // Near You section
+                SliverToBoxAdapter(child: _NearYouSection(ref: ref)),
+
                 // Featured Species
                 SliverToBoxAdapter(
                   child: Padding(
@@ -204,6 +211,7 @@ class _TabletHome extends StatelessWidget {
                 ref.invalidate(categoriesProvider);
                 ref.invalidate(featuredSpeciesProvider);
                 ref.invalidate(allSpeciesProvider);
+                ref.invalidate(nearbySpeciesProvider);
               },
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(24, 60, 16, 32),
@@ -273,6 +281,8 @@ class _TabletHome extends StatelessWidget {
                   const SizedBox(height: 8),
                   const CategoryGrid(),
                   const SizedBox(height: 24),
+                  // Near You section (tablet)
+                  _NearYouSection(ref: ref),
                   // Featured species list
                   Text(context.t.home.featured, style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
@@ -687,11 +697,7 @@ class _QuickActionsRow extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 16, 12, 4),
       child: Row(
         children: [
-          if ((Bootstrap.prefs.getBool('has_premium_role') ?? false)
-                  || (Bootstrap.prefs.getBool('is_beta_tester') ?? false)
-                  || (Bootstrap.prefs.getBool('has_pack') ?? false)
-                  || (Bootstrap.prefs.getBool('has_pro') ?? false))
-            _ActionBtn(
+          _ActionBtn(
               icon:  Icons.image_search_outlined,
               label: t.home.photoId,
               color: const Color(0xFF00E5FF),
@@ -859,6 +865,122 @@ class _UpgradeBanner extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Near You Section ───────────────────────────────────────────────────────
+
+class _NearYouSection extends StatelessWidget {
+  final WidgetRef ref;
+  const _NearYouSection({required this.ref});
+
+  @override
+  Widget build(BuildContext context) {
+    final nearbyAsync = ref.watch(nearbySpeciesProvider);
+    final isEs = ref.watch(localeProvider.select((l) => l == 'es'));
+
+    return nearbyAsync.when(
+      data: (species) {
+        if (species.isEmpty) return const SizedBox.shrink();
+        final count = min(species.length, 10);
+        final screenWidth = MediaQuery.sizeOf(context).width;
+        final cardWidth = (screenWidth * 0.32).clamp(120.0, 180.0);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.near_me, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    isEs ? 'Cerca de ti' : 'Near You',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 150,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: count,
+                itemBuilder: (_, i) => SizedBox(
+                  width: cardWidth,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: _NearbySpeciesCard(
+                      species: species[i],
+                      isEs: isEs,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _NearbySpeciesCard extends StatelessWidget {
+  final dynamic species;
+  final bool isEs;
+
+  const _NearbySpeciesCard({required this.species, required this.isEs});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final name = isEs ? species.commonNameEs : species.commonNameEn;
+    final thumb = species.thumbnailUrl ?? SpeciesAssets.thumbnail(species.id);
+
+    return GestureDetector(
+      onTap: () => context.goNamed(
+        'species-detail',
+        pathParameters: {'id': '${species.id}'},
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isDark ? AppColors.darkBorder : Colors.grey.shade200,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: CachedSpeciesImage(
+                imageUrl: thumb,
+                speciesId: species.id,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                name,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -24,7 +24,7 @@ final appRouter = GoRouter(
       Bootstrap.prefs.setString('last_route', path);
     }
     // Premium routes: accessible via role (sponsored/editor/curator/admin) OR purchase (pack/pro)
-    const premiumRoutes = {'/map', '/photo-id', '/field-camera'};
+    const premiumRoutes = {'/map', '/field-camera'};
     if (premiumRoutes.contains(path)) {
       final prefs = Bootstrap.prefs;
       final canAccess = (prefs.getBool('has_premium_role') ?? false)
