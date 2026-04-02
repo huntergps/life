@@ -1,9 +1,8 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 class CertificateGenerator {
   CertificateGenerator._();
@@ -230,11 +229,8 @@ class CertificateGenerator {
   }
 
   static Future<void> _sharePdf(List<int> bytes, bool isEs) async {
-    final tempDir = await getTemporaryDirectory();
     final fileName = isEs ? 'Certificado_Galapagos.pdf' : 'Galapagos_Certificate.pdf';
-    final file = File('${tempDir.path}/$fileName');
-    await file.writeAsBytes(bytes);
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+    await Printing.sharePdf(bytes: Uint8List.fromList(bytes), filename: fileName);
   }
 
   static pw.Widget _divider(PdfColor color) {

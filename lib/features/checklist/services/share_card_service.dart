@@ -1,11 +1,13 @@
-import 'dart:io';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+
+import 'share_card_io.dart' if (dart.library.js_interop) 'share_card_web.dart'
+    as platform_share;
 
 /// Generates a visual share card and shares it via the system share sheet.
 class ShareCardService {
@@ -70,18 +72,32 @@ class ShareCardService {
         return;
       }
 
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/galapagos_master_card.png');
-      await file.writeAsBytes(byteData.buffer.asUint8List());
+      final pngBytes = byteData.buffer.asUint8List();
 
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          text: _shareMessage(isEs, speciesCount),
-          subject:
-              isEs ? 'Mi checklist de Galapagos' : 'My Galapagos Checklist',
-        ),
-      );
+      if (kIsWeb) {
+        platform_share.shareImageBytes(
+          pngBytes,
+          'galapagos_master_card.png',
+        );
+        // Also share text via share_plus (works on web)
+        await SharePlus.instance.share(
+          ShareParams(text: _shareMessage(isEs, speciesCount)),
+        );
+      } else {
+        final filePath = await platform_share.saveTempImage(
+          pngBytes,
+          'galapagos_master_card.png',
+        );
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(filePath)],
+            text: _shareMessage(isEs, speciesCount),
+            subject: isEs
+                ? 'Mi checklist de Galapagos'
+                : 'My Galapagos Checklist',
+          ),
+        );
+      }
     } finally {
       entry.remove();
     }

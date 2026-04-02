@@ -149,6 +149,9 @@ class AdminRoleAssignmentScreen extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.85,
+      ),
       builder: (_) => _RoleAssignmentSheet(
         user: user,
         isEs: isEs,
@@ -652,7 +655,7 @@ class _RoleAssignmentSheetState extends State<_RoleAssignmentSheet> {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed: _isLoading ? null : () => _revokeCertificate(context),
+                onPressed: _isLoading ? null : _revokeCertificate,
                 icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
                 label: Text(
                   widget.isEs
@@ -670,7 +673,7 @@ class _RoleAssignmentSheetState extends State<_RoleAssignmentSheet> {
     );
   }
 
-  Future<void> _revokeCertificate(BuildContext context) async {
+  Future<void> _revokeCertificate() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
