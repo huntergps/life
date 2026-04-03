@@ -8,6 +8,8 @@ import 'package:galapagos_wildlife/features/settings/providers/settings_provider
 import 'package:galapagos_wildlife/features/species/photo_id/services/label_parser.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/tflite_species_classifier.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/location_fallback_service.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/server_identification_service.dart';
+import 'package:galapagos_wildlife/core/providers/connectivity_provider.dart';
 
 // ── Data classes ─────────────────────────────────────────────────────
 
@@ -110,6 +112,44 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
         suggestions = _locationFallback(nearbySpecies ?? allSpecies.take(6).toList());
       }
 
+      // ── Server fallback (LLaVA) ──────────────────────────────────
+      // If the top TFLite confidence is below 70% and the device is
+      // online, try the remote LLaVA server for a second opinion.
+      final topScore = suggestions.isNotEmpty ? suggestions.first.score : 0.0;
+      if (topScore < 0.7) {
+        final isOnline =
+            ref.read(connectivityProvider).asData?.value ?? false;
+        if (isOnline) {
+          try {
+            final serverResult =
+                await ServerIdentificationService.identify(imageBytes);
+            if (serverResult != null &&
+                serverResult.species != 'unknown' &&
+                serverResult.confidence > 0.5) {
+              final matched = _matchSpeciesToDb(
+                serverResult.species,
+                allSpecies,
+              );
+              if (matched != null) {
+                suggestions.insert(
+                  0,
+                  SpeciesIdSuggestion(
+                    scientificName: matched.scientificName,
+                    commonNameEn: matched.commonNameEn,
+                    commonNameEs: matched.commonNameEs,
+                    score: serverResult.confidence,
+                    source: 'server',
+                    matchedSpecies: matched,
+                  ),
+                );
+              }
+            }
+          } catch (_) {
+            // Server unavailable — continue with TFLite/location results
+          }
+        }
+      }
+
       state = AsyncValue.data(SpeciesIdState(
         suggestions: suggestions,
         modelAvailable: _classifier.isAvailable,
@@ -117,6 +157,16 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
     } catch (e, st) {
       state = AsyncValue.error(e, st);
     }
+  }
+
+  /// Match a common English name (from the LLaVA server) to a [Species]
+  /// in the local database (case-insensitive).
+  Species? _matchSpeciesToDb(String name, List<Species> allSpecies) {
+    final lower = name.toLowerCase();
+    for (final sp in allSpecies) {
+      if (sp.commonNameEn.toLowerCase() == lower) return sp;
+    }
+    return null;
   }
 
   Future<List<SpeciesIdSuggestion>> _runClassification(
