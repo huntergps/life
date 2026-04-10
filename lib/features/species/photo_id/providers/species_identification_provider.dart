@@ -9,6 +9,7 @@ import 'package:galapagos_wildlife/features/species/photo_id/services/label_pars
 import 'package:galapagos_wildlife/features/species/photo_id/services/tflite_species_classifier.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/location_fallback_service.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/server_identification_service.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 import 'package:galapagos_wildlife/core/providers/connectivity_provider.dart';
 
 // ── Data classes ─────────────────────────────────────────────────────
@@ -112,11 +113,41 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
         suggestions = _locationFallback(nearbySpecies ?? allSpecies.take(6).toList());
       }
 
-      // ── Server fallback (LLaVA) ──────────────────────────────────
-      // If the top TFLite confidence is below 70% and the device is
-      // online, try the remote LLaVA server for a second opinion.
+      // ── Level 2: Gemma 4 E2B on-device (if downloaded) ──────────
       final topScore = suggestions.isNotEmpty ? suggestions.first.score : 0.0;
       if (topScore < 0.7) {
+        try {
+          final gemmaResult = await GemmaSpeciesService.identify(imageBytes);
+          if (gemmaResult != null && gemmaResult.confidence > 0.5) {
+            final matched = _matchSpeciesToDb(
+              gemmaResult.speciesName,
+              allSpecies,
+            );
+            if (matched != null) {
+              suggestions.insert(
+                0,
+                SpeciesIdSuggestion(
+                  scientificName: matched.scientificName,
+                  commonNameEn: matched.commonNameEn,
+                  commonNameEs: matched.commonNameEs,
+                  score: gemmaResult.confidence,
+                  source: 'gemma',
+                  matchedSpecies: matched,
+                ),
+              );
+            }
+          }
+        } catch (_) {
+          // Gemma failed — continue to server fallback
+        }
+      }
+
+      // ── Level 3: Server fallback (LLaVA) ───────────────────────
+      // If confidence is still below 70% and the device is online,
+      // try the remote LLaVA server for a second opinion.
+      final topScoreAfterGemma =
+          suggestions.isNotEmpty ? suggestions.first.score : 0.0;
+      if (topScoreAfterGemma < 0.7) {
         final isOnline =
             ref.read(connectivityProvider).asData?.value ?? false;
         if (isOnline) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,8 @@ import 'package:galapagos_wildlife/features/auth/services/account_deletion_servi
 import 'package:url_launcher/url_launcher.dart';
 import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
 import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/providers/gemma_model_provider.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -305,6 +308,12 @@ class SettingsScreen extends ConsumerWidget {
       _SectionHeader(title: context.t.settings.offlineImages),
       _SyncDataTile(isDark: isDark),
       const Divider(),
+      // AI Model (native only)
+      if (!kIsWeb) ...[
+        _SectionHeader(title: 'AI'),
+        _GemmaModelTile(isDark: isDark),
+        const Divider(),
+      ],
       // About
       _SectionHeader(title: context.t.settings.about),
       ListTile(
@@ -706,6 +715,158 @@ class _TextSizeSlider extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _GemmaModelTile extends ConsumerStatefulWidget {
+  final bool isDark;
+  const _GemmaModelTile({required this.isDark});
+
+  @override
+  ConsumerState<_GemmaModelTile> createState() => _GemmaModelTileState();
+}
+
+class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
+  double? _downloadProgress;
+  bool _isDownloading = false;
+
+  Future<void> _startDownload() async {
+    if (_isDownloading) return;
+    setState(() {
+      _isDownloading = true;
+      _downloadProgress = 0;
+    });
+    try {
+      await for (final progress in GemmaSpeciesService.downloadModel()) {
+        if (!mounted) return;
+        setState(() => _downloadProgress = progress);
+      }
+      ref.invalidate(gemmaModelStatusProvider);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download failed: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+          _downloadProgress = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _deleteModel() async {
+    await GemmaSpeciesService.deleteModel();
+    ref.invalidate(gemmaModelStatusProvider);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final statusAsync = ref.watch(gemmaModelStatusProvider);
+    final hasPro = ref.watch(hasProProvider);
+    final locale = ref.watch(localeProvider);
+    final isEs = locale == 'es';
+
+    return statusAsync.when(
+      data: (status) {
+        final String subtitle;
+        final Widget? trailing;
+
+        if (_isDownloading && _downloadProgress != null) {
+          final pct = (_downloadProgress! * 100).toInt();
+          subtitle = isEs
+              ? 'Descargando... $pct%'
+              : 'Downloading... $pct%';
+          trailing = SizedBox(
+            width: 48,
+            height: 48,
+            child: CircularProgressIndicator(
+              value: _downloadProgress,
+              strokeWidth: 3,
+            ),
+          );
+        } else {
+          switch (status) {
+            case GemmaModelStatus.ready:
+              subtitle = isEs
+                  ? 'Listo (${GemmaSpeciesService.modelSizeLabel})'
+                  : 'Ready (${GemmaSpeciesService.modelSizeLabel})';
+              trailing = IconButton(
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                tooltip: isEs ? 'Eliminar modelo' : 'Delete model',
+                onPressed: _deleteModel,
+              );
+            case GemmaModelStatus.notDownloaded:
+              subtitle = isEs
+                  ? 'No descargado (${GemmaSpeciesService.modelSizeLabel})'
+                  : 'Not downloaded (${GemmaSpeciesService.modelSizeLabel})';
+              trailing = hasPro
+                  ? ElevatedButton(
+                      onPressed: _startDownload,
+                      child: Text(isEs ? 'Descargar' : 'Download'),
+                    )
+                  : TextButton(
+                      onPressed: () => showPaywall(context),
+                      child: Text(isEs ? 'Pro' : 'Pro'),
+                    );
+            case GemmaModelStatus.downloading:
+              subtitle = isEs ? 'Descargando...' : 'Downloading...';
+              trailing = const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              );
+            case GemmaModelStatus.unsupported:
+              subtitle = isEs
+                  ? 'No soportado en este dispositivo'
+                  : 'Not supported on this device';
+              trailing = null;
+          }
+        }
+
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundColor: widget.isDark
+                ? Colors.deepPurple.withValues(alpha: 0.15)
+                : Colors.deepPurple.withValues(alpha: 0.1),
+            child: Icon(
+              Icons.auto_awesome,
+              color: widget.isDark ? Colors.deepPurpleAccent : Colors.deepPurple,
+            ),
+          ),
+          title: Text(
+            isEs ? 'IA avanzada (${GemmaSpeciesService.modelSizeLabel})' : 'Enhanced AI (${GemmaSpeciesService.modelSizeLabel})',
+            style: TextStyle(color: widget.isDark ? Colors.white : null),
+          ),
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(color: widget.isDark ? Colors.white54 : null),
+          ),
+          trailing: trailing,
+        );
+      },
+      loading: () => ListTile(
+        leading: CircleAvatar(
+          backgroundColor: widget.isDark
+              ? Colors.deepPurple.withValues(alpha: 0.15)
+              : Colors.deepPurple.withValues(alpha: 0.1),
+          child: Icon(
+            Icons.auto_awesome,
+            color: widget.isDark ? Colors.deepPurpleAccent : Colors.deepPurple,
+          ),
+        ),
+        title: Text(isEs ? 'IA avanzada' : 'Enhanced AI'),
+        trailing: const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      ),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
