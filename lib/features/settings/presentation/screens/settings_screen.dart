@@ -24,6 +24,7 @@ import 'package:galapagos_wildlife/features/purchases/providers/purchase_provide
 import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/providers/gemma_model_provider.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_model_config.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -893,21 +894,74 @@ class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
                 onPressed: _deleteModel,
               );
             case GemmaModelStatus.notDownloaded:
-              final source = GemmaSpeciesService.hasCustomUrl ? '(Local)' : '(HuggingFace)';
+              final model = GemmaModelConfig.selected;
+              final source = GemmaSpeciesService.hasCustomUrl ? 'Local' : 'HuggingFace';
               subtitle = isEs
-                  ? 'No descargado (${GemmaSpeciesService.modelSizeLabel}) $source'
-                  : 'Not downloaded (${GemmaSpeciesService.modelSizeLabel}) $source';
+                  ? '${model.label} (${model.sizeLabel}) · $source'
+                  : '${model.label} (${model.sizeLabel}) · $source';
               trailing = isPremium
                   ? Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // Model selector (E2B/E4B)
+                        PopupMenuButton<GemmaModelTier>(
+                          icon: const Icon(Icons.memory, size: 20),
+                          tooltip: isEs ? 'Seleccionar modelo' : 'Select model',
+                          onSelected: (tier) async {
+                            await GemmaModelConfig.selectTier(tier);
+                            if (mounted) setState(() {});
+                          },
+                          itemBuilder: (_) => [
+                            PopupMenuItem(
+                              value: GemmaModelTier.e2b,
+                              child: Row(
+                                children: [
+                                  if (model.tier == GemmaModelTier.e2b) const Icon(Icons.check, size: 16, color: Colors.green),
+                                  if (model.tier != GemmaModelTier.e2b) const SizedBox(width: 16),
+                                  const SizedBox(width: 8),
+                                  const Expanded(child: Text('E2B (2.5 GB) — Standard', style: TextStyle(fontSize: 13))),
+                                ],
+                              ),
+                            ),
+                            PopupMenuItem(
+                              enabled: GemmaModelConfig.canRunE4B,
+                              value: GemmaModelTier.e4b,
+                              child: Row(
+                                children: [
+                                  if (model.tier == GemmaModelTier.e4b) const Icon(Icons.check, size: 16, color: Colors.green),
+                                  if (model.tier != GemmaModelTier.e4b) const SizedBox(width: 16),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: Text(
+                                    'E4B (4.3 GB) — High-end${GemmaModelConfig.canRunE4B ? "" : " (not supported)"}',
+                                    style: const TextStyle(fontSize: 13),
+                                  )),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        // URL config
                         IconButton(
                           icon: const Icon(Icons.settings_ethernet, size: 20),
                           tooltip: isEs ? 'Configurar URL' : 'Configure URL',
                           onPressed: _showUrlConfig,
                         ),
+                        // Download button with space check
                         ElevatedButton(
-                          onPressed: _startDownload,
+                          onPressed: () async {
+                            final (hasSpace, freeLabel) = await GemmaSpeciesService.checkDiskSpace();
+                            if (!hasSpace && mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(
+                                  isEs
+                                      ? 'Espacio insuficiente ($freeLabel libre, necesita ${model.sizeLabel})'
+                                      : 'Not enough space ($freeLabel free, needs ${model.sizeLabel})',
+                                )),
+                              );
+                              return;
+                            }
+                            _startDownload();
+                          },
                           child: Text(isEs ? 'Descargar' : 'Download'),
                         ),
                       ],

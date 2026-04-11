@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_gemma/core/model.dart';
 import 'package:flutter_gemma/pigeon.g.dart' show PreferredBackend;
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/core/services/app_logger.dart';
+import 'gemma_model_config.dart';
 
 /// Status of the Gemma 4 E2B model on this device.
 enum GemmaModelStatus {
@@ -16,16 +19,11 @@ enum GemmaModelStatus {
   unsupported,
 }
 
-/// Service for on-device species identification using Gemma 4 E2B.
+/// Service for on-device species identification using Gemma 4 E2B/E4B.
 /// Download uses background_downloader (continues when app is suspended/screen locked).
 class GemmaSpeciesService {
-  static const modelSizeLabel = '2.5 GB';
+  static String get modelSizeLabel => GemmaModelConfig.selected.sizeLabel;
 
-  /// Default: HuggingFace CDN
-  static const _defaultModelUrl =
-      'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm';
-
-  static const _modelFileName = 'gemma-4-E2B-it.litertlm';
   static const _downloadTaskId = 'gemma_model_download';
   static const _customUrlKey = 'gemma_custom_url';
 
@@ -33,7 +31,7 @@ class GemmaSpeciesService {
 
   /// Get the download URL (custom local or default HuggingFace)
   static String get modelUrl =>
-      Bootstrap.prefs.getString(_customUrlKey) ?? _defaultModelUrl;
+      Bootstrap.prefs.getString(_customUrlKey) ?? GemmaModelConfig.selected.url;
 
   /// Set a custom download URL (e.g. local Mac server)
   static Future<void> setCustomUrl(String url) async {
@@ -91,6 +89,29 @@ class GemmaSpeciesService {
   /// Start downloading the model using background_downloader.
   /// Continues even when app is in background / screen locked.
   /// Returns immediately — listen to progress via [onProgress]/[onDone]/[onError].
+  /// Check if there's enough free disk space for the selected model.
+  /// Returns (hasSpace, freeSpaceLabel) for UI feedback.
+  static Future<(bool, String)> checkDiskSpace() async {
+    try {
+      final dir = await getApplicationSupportDirectory();
+      final stat = await Process.run('df', ['-k', dir.path]);
+      if (stat.exitCode == 0) {
+        final lines = (stat.stdout as String).split('\n');
+        if (lines.length > 1) {
+          final parts = lines[1].split(RegExp(r'\s+'));
+          if (parts.length >= 4) {
+            final freeKB = int.tryParse(parts[3]) ?? 0;
+            final freeGB = freeKB / 1024 / 1024;
+            final needed = GemmaModelConfig.selected.approximateSizeBytes / 1024 / 1024 / 1024;
+            final freeLabel = '${freeGB.toStringAsFixed(1)} GB';
+            return (freeGB > needed + 0.5, freeLabel); // need model + 500MB buffer
+          }
+        }
+      }
+    } catch (_) {}
+    return (true, ''); // can't determine — allow attempt
+  }
+
   static Future<void> startDownload({
     ValueChanged<double>? onProgress,
     VoidCallback? onDone,
@@ -103,7 +124,7 @@ class GemmaSpeciesService {
     final task = DownloadTask(
       taskId: _downloadTaskId,
       url: modelUrl,
-      filename: _modelFileName,
+      filename: GemmaModelConfig.selected.fileName,
       directory: 'gemma_model',
       baseDirectory: BaseDirectory.applicationSupport,
       updates: Updates.statusAndProgress,
@@ -150,7 +171,7 @@ class GemmaSpeciesService {
     // We need to tell flutter_gemma about it
     try {
       final filePath = await FileDownloader().pathInSharedStorage(
-        _modelFileName,
+        GemmaModelConfig.selected.fileName,
         SharedStorage.downloads,
       );
       AppLogger.info('Gemma: model downloaded to $filePath');
@@ -165,7 +186,7 @@ class GemmaSpeciesService {
     await FileDownloader().pause(DownloadTask(
       taskId: _downloadTaskId,
       url: modelUrl,
-      filename: _modelFileName,
+      filename: GemmaModelConfig.selected.fileName,
     ));
     AppLogger.info('Gemma: download paused');
   }
