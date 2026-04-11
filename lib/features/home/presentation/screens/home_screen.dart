@@ -14,6 +14,8 @@ import 'package:galapagos_wildlife/features/settings/providers/settings_provider
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 import 'package:galapagos_wildlife/features/purchases/presentation/paywall_screen.dart';
 import 'package:galapagos_wildlife/features/home/providers/nearby_species_provider.dart';
+import 'package:galapagos_wildlife/features/home/services/ai_what_to_see_service.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 import 'dart:math' show min;
 
 // Search button shared across phone and tablet layouts
@@ -97,6 +99,9 @@ class _PhoneHome extends StatelessWidget {
 
                 // Near You section
                 SliverToBoxAdapter(child: _NearYouSection(ref: ref)),
+
+                // What to see now (AI) — premium + Gemma only
+                SliverToBoxAdapter(child: _WhatToSeeSection(ref: ref)),
 
                 // Featured Species
                 SliverToBoxAdapter(
@@ -283,6 +288,9 @@ class _TabletHome extends StatelessWidget {
                   const SizedBox(height: 24),
                   // Near You section (tablet)
                   _NearYouSection(ref: ref),
+                  // What to see now (AI) — premium + Gemma only
+                  _WhatToSeeSection(ref: ref),
+                  const SizedBox(height: 16),
                   // Featured species list
                   Text(context.t.home.featured, style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 8),
@@ -990,6 +998,142 @@ class _NearbySpeciesCard extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── What to See Now (AI) ──────────────────────────────────────────────────
+
+class _WhatToSeeSection extends StatefulWidget {
+  final WidgetRef ref;
+  const _WhatToSeeSection({required this.ref});
+
+  @override
+  State<_WhatToSeeSection> createState() => _WhatToSeeSectionState();
+}
+
+class _WhatToSeeSectionState extends State<_WhatToSeeSection> {
+  Future<String?>? _future;
+  bool _isEs = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_future == null) {
+      _isEs = LocaleSettings.currentLocale == AppLocale.es;
+      if (_isPremiumUser()) {
+        _future = _loadIfReady();
+      }
+    }
+  }
+
+  Future<String?> _loadIfReady() async {
+    final status = await GemmaSpeciesService.checkStatus();
+    if (status != GemmaModelStatus.ready) return null;
+    return AiWhatToSeeService.getWhatToSee(isEs: _isEs);
+  }
+
+  void _refresh() {
+    setState(() {
+      _future = () async {
+        await AiWhatToSeeService.clearCache();
+        return AiWhatToSeeService.getWhatToSee(isEs: _isEs);
+      }();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isPremiumUser()) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return FutureBuilder<String?>(
+      future: _future,
+      builder: (context, snapshot) {
+        // Hide entirely if Gemma not ready or no result
+        if (snapshot.connectionState == ConnectionState.done &&
+            snapshot.data == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 8, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.auto_awesome, size: 20, color: Colors.deepPurple),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _isEs ? 'Que ver ahora' : 'What to see now',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  if (snapshot.connectionState == ConnectionState.done &&
+                      snapshot.data != null)
+                    IconButton(
+                      icon: const Icon(Icons.refresh, size: 20),
+                      tooltip: _isEs ? 'Regenerar' : 'Regenerate',
+                      onPressed: _refresh,
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.deepPurple.withValues(alpha: 0.15)
+                      : Colors.deepPurple.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.deepPurple.withValues(alpha: 0.3)
+                        : Colors.deepPurple.withValues(alpha: 0.15),
+                  ),
+                ),
+                child: snapshot.connectionState != ConnectionState.done
+                    ? _buildShimmer(isDark)
+                    : Text(
+                        snapshot.data ?? '',
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.5,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildShimmer(bool isDark) {
+    final color = isDark ? Colors.white10 : Colors.grey.shade200;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(
+        5,
+        (i) => Padding(
+          padding: EdgeInsets.only(bottom: i < 4 ? 8 : 0),
+          child: Container(
+            height: 14,
+            width: i < 4 ? double.infinity : 160,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
         ),
       ),
     );

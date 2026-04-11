@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:galapagos_wildlife/models/island.model.dart';
@@ -8,6 +9,9 @@ import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/widgets/cached_species_image.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/ai_chat/services/ai_chat_service.dart';
+import 'package:galapagos_wildlife/features/map/services/ai_narrator_service.dart';
 import '../../providers/map_provider.dart';
 import '../../providers/site_wishlist_provider.dart';
 
@@ -355,11 +359,177 @@ class SiteInfoSheet extends ConsumerWidget {
                     );
                   },
                 ),
+
+                // ── AI Narration (premium + Gemma only) ──
+                Consumer(builder: (ctx, ref, _) {
+                  final isPremium = ref.watch(isPremiumProvider);
+                  if (!isPremium) return const SizedBox.shrink();
+                  return _AiNarrationSection(site: site, isEs: isEs, isDark: isDark);
+                }),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// AI Narration widget (premium + Gemma)
+// ---------------------------------------------------------------------------
+
+class _AiNarrationSection extends StatefulWidget {
+  final VisitSite site;
+  final bool isEs;
+  final bool isDark;
+
+  const _AiNarrationSection({
+    required this.site,
+    required this.isEs,
+    required this.isDark,
+  });
+
+  @override
+  State<_AiNarrationSection> createState() => _AiNarrationSectionState();
+}
+
+class _AiNarrationSectionState extends State<_AiNarrationSection> {
+  bool _loading = false;
+  String? _narration;
+  bool _gemmaReady = false;
+  bool _checkedGemma = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkGemma();
+  }
+
+  Future<void> _checkGemma() async {
+    final status = await AiNarratorService.narrateSite(widget.site,
+        isEs: widget.isEs);
+    // If there's a cached narration, show it immediately
+    if (status != null && mounted) {
+      setState(() {
+        _narration = status;
+        _gemmaReady = true;
+        _checkedGemma = true;
+      });
+      return;
+    }
+    // Otherwise just check if Gemma is ready
+    final ready = await AiChatService.isAvailable();
+    if (mounted) {
+      setState(() {
+        _gemmaReady = ready;
+        _checkedGemma = true;
+      });
+    }
+  }
+
+  Future<void> _generate() async {
+    setState(() => _loading = true);
+    try {
+      final result =
+          await AiNarratorService.narrateSite(widget.site, isEs: widget.isEs);
+      if (mounted) {
+        setState(() {
+          _narration = result;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_checkedGemma || !_gemmaReady) return const SizedBox.shrink();
+
+    final tt = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 20),
+        const Divider(),
+        const SizedBox(height: 4),
+        _SectionTitle(widget.isEs ? 'Narracion AI' : 'AI Narration'),
+        const SizedBox(height: 8),
+        if (_narration != null) ...[
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: widget.isDark
+                  ? AppColors.primaryLight.withValues(alpha: 0.08)
+                  : AppColors.primary.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: widget.isDark
+                    ? AppColors.primaryLight.withValues(alpha: 0.2)
+                    : AppColors.primary.withValues(alpha: 0.15),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SelectableText(
+                  _narration!,
+                  style: tt.bodyMedium?.copyWith(height: 1.5),
+                ),
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: IconButton(
+                    icon: const Icon(Icons.copy, size: 18),
+                    tooltip: widget.isEs ? 'Copiar' : 'Copy',
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: _narration!));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(widget.isEs
+                              ? 'Copiado al portapapeles'
+                              : 'Copied to clipboard'),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ] else if (_loading) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text('Generating narration...'),
+                ],
+              ),
+            ),
+          ),
+        ] else ...[
+          Center(
+            child: FilledButton.tonal(
+              onPressed: _generate,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.mic, size: 18),
+                  const SizedBox(width: 8),
+                  Text(widget.isEs ? 'Narrar' : 'Narrate'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

@@ -11,9 +11,12 @@ import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/models/species_threat.model.dart';
 import 'package:galapagos_wildlife/models/species_reference.model.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:galapagos_wildlife/models/species.model.dart';
+import 'package:galapagos_wildlife/features/species/shared/ai_caption_service.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 import 'package:galapagos_wildlife/features/auth/providers/auth_provider.dart';
 import 'package:galapagos_wildlife/features/species/shared/species_checklist_provider.dart';
 import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
@@ -143,6 +146,7 @@ class _PhoneDetail extends StatelessWidget {
           ),
           actions: [
             _ShareButton(species: species, locale: locale),
+            _AiCaptionButton(species: species, locale: locale),
             FavoriteHeartButton(speciesId: speciesId, iconSize: 32, showBackground: false, compact: false),
             Consumer(builder: (context, ref, _) {
               final isSeen = ref.watch(isSpeciesSeenProvider(speciesId));
@@ -835,6 +839,7 @@ class _TabletDetail extends StatelessWidget {
               title: Text(locale == 'es' ? species.commonNameEs : species.commonNameEn),
               actions: [
                 _ShareButton(species: species, locale: locale),
+                _AiCaptionButton(species: species, locale: locale),
                 FavoriteHeartButton(speciesId: speciesId, iconSize: 32, showBackground: false, compact: false),
                 Consumer(builder: (context, ref, _) {
                   final isSeen = ref.watch(isSpeciesSeenProvider(speciesId));
@@ -961,6 +966,113 @@ class _ShareButton extends StatelessWidget {
               : Rect.zero,
         ));
       },
+    );
+  }
+}
+
+class _AiCaptionButton extends ConsumerWidget {
+  final dynamic species;
+  final String locale;
+
+  const _AiCaptionButton({required this.species, required this.locale});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isPremium = ref.watch(isPremiumProvider);
+    if (!isPremium) return const SizedBox.shrink();
+
+    return FutureBuilder<GemmaModelStatus>(
+      future: GemmaSpeciesService.checkStatus(),
+      builder: (context, snap) {
+        if (snap.data != GemmaModelStatus.ready) return const SizedBox.shrink();
+        return IconButton(
+          icon: const Icon(Icons.auto_awesome),
+          tooltip: locale == 'es' ? 'Caption IA' : 'AI Caption',
+          onPressed: () => _generate(context),
+        );
+      },
+    );
+  }
+
+  Future<void> _generate(BuildContext context) async {
+    final isEs = locale == 'es';
+    final messenger = ScaffoldMessenger.of(context);
+
+    messenger.showSnackBar(SnackBar(
+      content: Text(isEs ? 'Generando caption...' : 'Generating caption...'),
+      duration: const Duration(seconds: 30),
+    ));
+
+    final caption = await AiCaptionService.generateCaption(
+      species as Species,
+      isEs: isEs,
+    );
+
+    messenger.hideCurrentSnackBar();
+
+    if (caption == null) {
+      messenger.showSnackBar(SnackBar(
+        content: Text(isEs ? 'No se pudo generar el caption' : 'Could not generate caption'),
+      ));
+      return;
+    }
+
+    // Copy to clipboard and show share option
+    await Clipboard.setData(ClipboardData(text: caption));
+
+    if (!context.mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, color: Colors.deepPurple),
+                  const SizedBox(width: 8),
+                  Text(
+                    isEs ? 'Caption generado' : 'Generated Caption',
+                    style: Theme.of(ctx).textTheme.titleMedium,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(caption, style: const TextStyle(fontSize: 14, height: 1.5)),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.check_circle, size: 16, color: Colors.green.shade700),
+                  const SizedBox(width: 6),
+                  Text(
+                    isEs ? 'Copiado al portapapeles' : 'Copied to clipboard',
+                    style: TextStyle(fontSize: 12, color: Colors.green.shade700),
+                  ),
+                  const Spacer(),
+                  FilledButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      final box = context.findRenderObject() as RenderBox?;
+                      SharePlus.instance.share(ShareParams(
+                        text: caption,
+                        sharePositionOrigin: box != null
+                            ? box.localToGlobal(Offset.zero) & box.size
+                            : Rect.zero,
+                      ));
+                    },
+                    icon: const Icon(Icons.share, size: 18),
+                    label: Text(isEs ? 'Compartir' : 'Share'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

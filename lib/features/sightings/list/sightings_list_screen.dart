@@ -15,6 +15,7 @@ import 'package:galapagos_wildlife/features/sightings/providers/sightings_ui_pro
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_csv_export.dart';
 import 'package:galapagos_wildlife/features/sightings/services/ai_trip_report_service.dart';
+import 'package:galapagos_wildlife/features/sightings/services/ai_diary_service.dart';
 import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
@@ -132,6 +133,13 @@ class _PhoneSightings extends ConsumerWidget {
           // Feature 10: AI Trip Report (premium + Gemma only)
           if (ref.watch(isPremiumProvider))
             _AiTripReportButton(
+              filteredAsync: filteredAsync,
+              speciesMap: speciesMapForExport,
+              isEs: isEs,
+            ),
+          // Feature 17: AI Diary (premium + Gemma only)
+          if (ref.watch(isPremiumProvider))
+            _AiDiaryButton(
               filteredAsync: filteredAsync,
               speciesMap: speciesMapForExport,
               isEs: isEs,
@@ -299,6 +307,13 @@ class _TabletSightings extends StatelessWidget {
           // Feature 10: AI Trip Report (premium + Gemma only)
           if (ref.watch(isPremiumProvider))
             _AiTripReportButton(
+              filteredAsync: filteredAsync,
+              speciesMap: speciesMap,
+              isEs: isEs,
+            ),
+          // Feature 17: AI Diary (premium + Gemma only)
+          if (ref.watch(isPremiumProvider))
+            _AiDiaryButton(
               filteredAsync: filteredAsync,
               speciesMap: speciesMap,
               isEs: isEs,
@@ -1311,6 +1326,254 @@ class _TripReportSheetState extends State<_TripReportSheet> {
                               _report ?? '',
                               style:
                                   Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ── Feature 17: AI Diary ──
+
+class _AiDiaryButton extends StatefulWidget {
+  final AsyncValue<List<Sighting>> filteredAsync;
+  final Map<int, Species> speciesMap;
+  final bool isEs;
+
+  const _AiDiaryButton({
+    required this.filteredAsync,
+    required this.speciesMap,
+    required this.isEs,
+  });
+
+  @override
+  State<_AiDiaryButton> createState() => _AiDiaryButtonState();
+}
+
+class _AiDiaryButtonState extends State<_AiDiaryButton> {
+  bool _gemmaReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkGemma();
+  }
+
+  Future<void> _checkGemma() async {
+    final status = await GemmaSpeciesService.checkStatus();
+    if (mounted) {
+      setState(() => _gemmaReady = status == GemmaModelStatus.ready);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_gemmaReady) return const SizedBox.shrink();
+
+    return IconButton(
+      icon: const Icon(Icons.book),
+      tooltip: widget.isEs ? 'Diario del dia' : "Today's Diary",
+      onPressed: () {
+        final data = widget.filteredAsync.asData?.value ?? [];
+        if (data.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.sightings.noSightingsToExport)),
+          );
+          return;
+        }
+        // Filter today's sightings
+        final now = DateTime.now();
+        final todaySightings = data.where((s) {
+          if (s.observedAt == null) return false;
+          return s.observedAt!.year == now.year &&
+              s.observedAt!.month == now.month &&
+              s.observedAt!.day == now.day;
+        }).toList();
+
+        if (todaySightings.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(widget.isEs
+                  ? 'No hay avistamientos de hoy'
+                  : 'No sightings for today'),
+            ),
+          );
+          return;
+        }
+
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          useSafeArea: true,
+          builder: (ctx) => _DiarySheet(
+            date: now,
+            sightings: todaySightings,
+            speciesMap: widget.speciesMap,
+            isEs: widget.isEs,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DiarySheet extends StatefulWidget {
+  final DateTime date;
+  final List<Sighting> sightings;
+  final Map<int, Species> speciesMap;
+  final bool isEs;
+
+  const _DiarySheet({
+    required this.date,
+    required this.sightings,
+    required this.speciesMap,
+    required this.isEs,
+  });
+
+  @override
+  State<_DiarySheet> createState() => _DiarySheetState();
+}
+
+class _DiarySheetState extends State<_DiarySheet> {
+  String? _diary;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _generate();
+  }
+
+  Future<void> _generate() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final diary = await AiDiaryService.generateDiaryEntry(
+        date: widget.date,
+        sightings: widget.sightings,
+        speciesMap: widget.speciesMap,
+        isEs: widget.isEs,
+      );
+      if (mounted) {
+        setState(() {
+          _diary = diary;
+          _loading = false;
+          if (diary == null) _error = 'AI model not available';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e.toString();
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dateStr = DateFormat.yMMMMd(widget.isEs ? 'es' : 'en')
+        .format(widget.date);
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (ctx, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.book, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '${widget.isEs ? 'Diario de Viaje' : 'Travel Diary'} \u2014 $dateStr',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                  ),
+                  if (_diary != null) ...[
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 20),
+                      tooltip: widget.isEs ? 'Copiar' : 'Copy',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: _diary!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(widget.isEs
+                                ? 'Copiado al portapapeles'
+                                : 'Copied to clipboard'),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.share, size: 20),
+                      tooltip: widget.isEs ? 'Compartir' : 'Share',
+                      onPressed: () {
+                        final box = context.findRenderObject() as RenderBox?;
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text: _diary!,
+                            subject: widget.isEs
+                                ? 'Diario Galapagos - $dateStr'
+                                : 'Galapagos Diary - $dateStr',
+                            sharePositionOrigin: box != null
+                                ? box.localToGlobal(Offset.zero) & box.size
+                                : Rect.zero,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: _loading
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(),
+                            const SizedBox(height: 16),
+                            Text(widget.isEs
+                                ? 'Escribiendo tu diario...'
+                                : 'Writing your diary...'),
+                          ],
+                        ),
+                      )
+                    : _error != null
+                        ? Center(child: Text(_error!))
+                        : SingleChildScrollView(
+                            controller: scrollController,
+                            child: SelectableText(
+                              _diary ?? '',
+                              style: Theme.of(context).textTheme.bodyLarge,
                             ),
                           ),
               ),
