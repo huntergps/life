@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
@@ -197,7 +198,13 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              context.go('/');
+            }
+          },
         ),
         title: Row(
           mainAxisSize: MainAxisSize.min,
@@ -327,7 +334,10 @@ class _ModelBanner extends StatelessWidget {
           ),
           if (status == GemmaModelStatus.notDownloaded)
             TextButton(
-              onPressed: () => Navigator.of(context).pushNamed('/settings'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                context.goNamed('settings');
+              },
               child: Text(
                 isEs ? 'Ir a Ajustes' : 'Go to Settings',
                 style: TextStyle(
