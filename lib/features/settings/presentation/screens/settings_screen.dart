@@ -730,39 +730,120 @@ class _GemmaModelTile extends ConsumerStatefulWidget {
 class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
   double? _downloadProgress;
   bool _isDownloading = false;
+  bool _isPaused = false;
 
   Future<void> _startDownload() async {
     if (_isDownloading) return;
     setState(() {
       _isDownloading = true;
+      _isPaused = false;
       _downloadProgress = 0;
     });
-    try {
-      await for (final progress in GemmaSpeciesService.downloadModel()) {
-        if (!mounted) return;
-        setState(() => _downloadProgress = progress);
-      }
-      ref.invalidate(gemmaModelStatusProvider);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Download failed: $e')),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isDownloading = false;
-          _downloadProgress = null;
-        });
-      }
-    }
+    await GemmaSpeciesService.startDownload(
+      onProgress: (progress) {
+        if (mounted) setState(() => _downloadProgress = progress);
+      },
+      onDone: () {
+        if (mounted) {
+          setState(() { _isDownloading = false; _downloadProgress = null; });
+          ref.invalidate(gemmaModelStatusProvider);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(ref.read(localeProvider) == 'es' ? 'Modelo descargado' : 'Model downloaded')),
+          );
+        }
+      },
+      onError: (error) {
+        if (mounted) {
+          setState(() { _isDownloading = false; _downloadProgress = null; });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error)),
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> _pauseDownload() async {
+    await GemmaSpeciesService.pauseDownload();
+    if (mounted) setState(() => _isPaused = true);
+  }
+
+  Future<void> _resumeDownload() async {
+    await GemmaSpeciesService.resumeDownload();
+    if (mounted) setState(() => _isPaused = false);
+  }
+
+  Future<void> _cancelDownload() async {
+    await GemmaSpeciesService.cancelDownload();
+    if (mounted) setState(() { _isDownloading = false; _isPaused = false; _downloadProgress = null; });
+    ref.invalidate(gemmaModelStatusProvider);
   }
 
   Future<void> _deleteModel() async {
     await GemmaSpeciesService.deleteModel();
     ref.invalidate(gemmaModelStatusProvider);
   }
+
+  void _showUrlConfig() {
+    final isEs = ref.read(localeProvider) == 'es';
+    final controller = TextEditingController(
+      text: GemmaSpeciesService.hasCustomUrl ? GemmaSpeciesService.modelUrl : '',
+    );
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(isEs ? 'URL de descarga' : 'Download URL'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(isEs ? 'Para descargar desde una red local:' : 'To download from a local network:', style: const TextStyle(fontSize: 13)),
+            const SizedBox(height: 4),
+            Text('python3 -m http.server 8080', style: TextStyle(fontSize: 11, fontFamily: 'monospace', color: Colors.grey.shade600)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: 'http://192.168.x.x:8080/$_modelFileName',
+                hintStyle: const TextStyle(fontSize: 12),
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+              style: const TextStyle(fontSize: 13),
+            ),
+          ],
+        ),
+        actions: [
+          if (GemmaSpeciesService.hasCustomUrl)
+            TextButton(
+              onPressed: () async {
+                await GemmaSpeciesService.clearCustomUrl();
+                Navigator.pop(ctx);
+                if (mounted) setState(() {});
+              },
+              child: Text(isEs ? 'Usar HuggingFace' : 'Use HuggingFace'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(isEs ? 'Cancelar' : 'Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final url = controller.text.trim();
+              if (url.isNotEmpty) {
+                await GemmaSpeciesService.setCustomUrl(url);
+              }
+              Navigator.pop(ctx);
+              if (mounted) setState(() {});
+            },
+            child: Text(isEs ? 'Guardar' : 'Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static const _modelFileName = 'gemma-4-E2B-it.litertlm';
 
   @override
   Widget build(BuildContext context) {
@@ -778,16 +859,27 @@ class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
 
         if (_isDownloading && _downloadProgress != null) {
           final pct = (_downloadProgress! * 100).toInt();
-          subtitle = isEs
-              ? 'Descargando... $pct%'
-              : 'Downloading... $pct%';
-          trailing = SizedBox(
-            width: 48,
-            height: 48,
-            child: CircularProgressIndicator(
-              value: _downloadProgress,
-              strokeWidth: 3,
-            ),
+          subtitle = _isPaused
+              ? (isEs ? 'Pausado $pct%' : 'Paused $pct%')
+              : (isEs ? 'Descargando... $pct%' : 'Downloading... $pct%');
+          trailing = Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Pause/Resume button
+              IconButton(
+                icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause, size: 20),
+                tooltip: _isPaused
+                    ? (isEs ? 'Reanudar' : 'Resume')
+                    : (isEs ? 'Pausar' : 'Pause'),
+                onPressed: _isPaused ? _resumeDownload : _pauseDownload,
+              ),
+              // Cancel button
+              IconButton(
+                icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                tooltip: isEs ? 'Cancelar' : 'Cancel',
+                onPressed: _cancelDownload,
+              ),
+            ],
           );
         } else {
           switch (status) {
@@ -801,13 +893,24 @@ class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
                 onPressed: _deleteModel,
               );
             case GemmaModelStatus.notDownloaded:
+              final source = GemmaSpeciesService.hasCustomUrl ? '(Local)' : '(HuggingFace)';
               subtitle = isEs
-                  ? 'No descargado (${GemmaSpeciesService.modelSizeLabel})'
-                  : 'Not downloaded (${GemmaSpeciesService.modelSizeLabel})';
+                  ? 'No descargado (${GemmaSpeciesService.modelSizeLabel}) $source'
+                  : 'Not downloaded (${GemmaSpeciesService.modelSizeLabel}) $source';
               trailing = isPremium
-                  ? ElevatedButton(
-                      onPressed: _startDownload,
-                      child: Text(isEs ? 'Descargar' : 'Download'),
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.settings_ethernet, size: 20),
+                          tooltip: isEs ? 'Configurar URL' : 'Configure URL',
+                          onPressed: _showUrlConfig,
+                        ),
+                        ElevatedButton(
+                          onPressed: _startDownload,
+                          child: Text(isEs ? 'Descargar' : 'Download'),
+                        ),
+                      ],
                     )
                   : TextButton(
                       onPressed: () => showPaywall(context),

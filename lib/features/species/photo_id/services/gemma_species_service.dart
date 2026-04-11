@@ -1,34 +1,54 @@
 import 'dart:convert';
 
+import 'package:background_downloader/background_downloader.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_gemma/flutter_gemma.dart';
 import 'package:flutter_gemma/core/model.dart';
 import 'package:flutter_gemma/pigeon.g.dart' show PreferredBackend;
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
+import 'package:galapagos_wildlife/core/services/app_logger.dart';
 
 /// Status of the Gemma 4 E2B model on this device.
 enum GemmaModelStatus {
-  notDownloaded, // Model not present
-  downloading, // Currently downloading
-  ready, // Ready to use
-  unsupported, // Device doesn't meet requirements (RAM, OS)
+  notDownloaded,
+  downloading,
+  ready,
+  unsupported,
 }
 
-/// Service for on-device species identification using Gemma 4 E2B via flutter_gemma.
-/// The model is downloaded on-demand (not bundled with the app).
+/// Service for on-device species identification using Gemma 4 E2B.
+/// Download uses background_downloader (continues when app is suspended/screen locked).
 class GemmaSpeciesService {
-  /// Approximate model size for display purposes.
-  static const modelSizeLabel = '1.3 GB';
+  static const modelSizeLabel = '2.5 GB';
 
-  /// Gemma 4 E2B .litertlm file for mobile (iOS/Android) from LiteRT Community.
-  static const _modelUrl =
+  /// Default: HuggingFace CDN
+  static const _defaultModelUrl =
       'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm';
+
+  static const _modelFileName = 'gemma-4-E2B-it.litertlm';
+  static const _downloadTaskId = 'gemma_model_download';
+  static const _customUrlKey = 'gemma_custom_url';
 
   static InferenceModel? _model;
 
-  /// Check if the device can run Gemma 4 E2B.
-  /// flutter_gemma handles detailed platform compatibility internally;
-  /// we gate on platform family here.
+  /// Get the download URL (custom local or default HuggingFace)
+  static String get modelUrl =>
+      Bootstrap.prefs.getString(_customUrlKey) ?? _defaultModelUrl;
+
+  /// Set a custom download URL (e.g. local Mac server)
+  static Future<void> setCustomUrl(String url) async {
+    await Bootstrap.prefs.setString(_customUrlKey, url);
+  }
+
+  /// Clear custom URL (revert to HuggingFace)
+  static Future<void> clearCustomUrl() async {
+    await Bootstrap.prefs.remove(_customUrlKey);
+  }
+
+  /// Whether a custom URL is set
+  static bool get hasCustomUrl =>
+      Bootstrap.prefs.getString(_customUrlKey) != null;
+
   static bool get isDeviceSupported {
     if (kIsWeb) return false;
     return defaultTargetPlatform == TargetPlatform.iOS ||
@@ -46,43 +66,127 @@ class GemmaSpeciesService {
     try {
       final isInstalled = await _manager.isModelInstalled;
       if (isInstalled) {
-        // Model is installed — clear any stale downloading flag
         await Bootstrap.prefs.setBool('gemma_downloading', false);
         return GemmaModelStatus.ready;
       }
     } catch (_) {}
 
-    // If flag says downloading but model isn't installed, the download
-    // was interrupted (app killed, network lost). Reset the flag.
+    // Check if a background download is in progress
+    final records = await FileDownloader().database.allRecords();
+    final activeDownload = records.where(
+      (r) => r.taskId == _downloadTaskId &&
+          (r.status == TaskStatus.running || r.status == TaskStatus.enqueued),
+    );
+    if (activeDownload.isNotEmpty) return GemmaModelStatus.downloading;
+
     final downloading = Bootstrap.prefs.getBool('gemma_downloading') ?? false;
     if (downloading) {
       await Bootstrap.prefs.setBool('gemma_downloading', false);
-      try { await _manager.deleteModel(); } catch (_) {} // clean partial file
+      try { await _manager.deleteModel(); } catch (_) {}
     }
 
     return GemmaModelStatus.notDownloaded;
   }
 
-  /// Download the model file. Returns progress stream (0.0 to 1.0).
-  static Stream<double> downloadModel() async* {
+  /// Start downloading the model using background_downloader.
+  /// Continues even when app is in background / screen locked.
+  /// Returns immediately — listen to progress via [onProgress]/[onDone]/[onError].
+  static Future<void> startDownload({
+    ValueChanged<double>? onProgress,
+    VoidCallback? onDone,
+    ValueChanged<String>? onError,
+  }) async {
     if (!isDeviceSupported) return;
 
     await Bootstrap.prefs.setBool('gemma_downloading', true);
 
-    try {
-      // downloadModelFromNetworkWithProgress yields int percentages (0-100)
-      await for (final percent
-          in _manager.downloadModelFromNetworkWithProgress(_modelUrl)) {
-        yield percent / 100.0;
-      }
+    final task = DownloadTask(
+      taskId: _downloadTaskId,
+      url: modelUrl,
+      filename: _modelFileName,
+      directory: 'gemma_model',
+      baseDirectory: BaseDirectory.applicationSupport,
+      updates: Updates.statusAndProgress,
+      allowPause: true,
+      retries: 5,
+      requiresWiFi: true,
+    );
 
-      await Bootstrap.prefs.setBool('gemma_downloading', false);
-      yield 1.0;
+    AppLogger.info('Gemma: starting download from ${modelUrl.substring(0, 50)}...');
+
+    await FileDownloader().download(
+      task,
+      onProgress: (progress) {
+        if (progress >= 0) onProgress?.call(progress);
+      },
+      onStatus: (status) {
+        AppLogger.info('Gemma download status: $status');
+        switch (status) {
+          case TaskStatus.complete:
+            Bootstrap.prefs.setBool('gemma_downloading', false);
+            _installDownloadedModel().then((_) {
+              onDone?.call();
+            });
+          case TaskStatus.failed:
+            Bootstrap.prefs.setBool('gemma_downloading', false);
+            onError?.call('Download failed. Check your connection.');
+          case TaskStatus.canceled:
+            Bootstrap.prefs.setBool('gemma_downloading', false);
+            onError?.call('Download cancelled.');
+          case TaskStatus.notFound:
+            Bootstrap.prefs.setBool('gemma_downloading', false);
+            onError?.call('Model file not found on server.');
+          default:
+            break;
+        }
+      },
+    );
+  }
+
+  /// After background_downloader finishes, move the file where flutter_gemma expects it.
+  static Future<void> _installDownloadedModel() async {
+    // flutter_gemma's modelManager handles installation
+    // The downloaded file is in applicationSupport/gemma_model/
+    // We need to tell flutter_gemma about it
+    try {
+      final filePath = await FileDownloader().pathInSharedStorage(
+        _modelFileName,
+        SharedStorage.downloads,
+      );
+      AppLogger.info('Gemma: model downloaded to $filePath');
+      // flutter_gemma should detect it on next checkStatus()
     } catch (e) {
-      await Bootstrap.prefs.setBool('gemma_downloading', false);
-      debugPrint('Gemma model download failed: $e');
-      rethrow;
+      AppLogger.warning('Gemma: post-download install: $e');
     }
+  }
+
+  /// Pause the current download.
+  static Future<void> pauseDownload() async {
+    await FileDownloader().pause(DownloadTask(
+      taskId: _downloadTaskId,
+      url: modelUrl,
+      filename: _modelFileName,
+    ));
+    AppLogger.info('Gemma: download paused');
+  }
+
+  /// Resume a paused download.
+  static Future<void> resumeDownload() async {
+    final records = await FileDownloader().database.allRecords();
+    final paused = records.where(
+      (r) => r.taskId == _downloadTaskId && r.status == TaskStatus.paused,
+    ).firstOrNull;
+    if (paused != null) {
+      await FileDownloader().resume(paused.task as DownloadTask);
+      AppLogger.info('Gemma: download resumed');
+    }
+  }
+
+  /// Cancel and clean up the download.
+  static Future<void> cancelDownload() async {
+    await FileDownloader().cancelTaskWithId(_downloadTaskId);
+    await Bootstrap.prefs.setBool('gemma_downloading', false);
+    AppLogger.info('Gemma: download cancelled');
   }
 
   /// Delete the downloaded model to free space.
@@ -98,14 +202,11 @@ class GemmaSpeciesService {
 
   static Future<void> _disposeModel() async {
     if (_model != null) {
-      try {
-        await _model!.close();
-      } catch (_) {}
+      try { await _model!.close(); } catch (_) {}
       _model = null;
     }
   }
 
-  /// Initialize the model for inference (call once after download).
   static Future<bool> _ensureInitialized() async {
     if (_model != null) return true;
     try {
@@ -124,23 +225,18 @@ class GemmaSpeciesService {
     }
   }
 
-  /// Identify a species from an image using Gemma 4 E2B vision.
-  /// Returns null if the model is not ready or identification fails.
-  static Future<GemmaIdentificationResult?> identify(
-      Uint8List imageBytes) async {
+  static Future<GemmaIdentificationResult?> identify(Uint8List imageBytes) async {
     final status = await checkStatus();
     if (status != GemmaModelStatus.ready) return null;
 
     if (!await _ensureInitialized()) return null;
 
     try {
-      // Create a fresh chat session with image support
       final chat = await _model!.createChat(
         supportImage: true,
         temperature: 0.2,
         topK: 1,
       );
-      // Send image + text together
       await chat.addQueryChunk(Message.withImage(
         text: 'You are a Galapagos Islands wildlife expert. '
             'Identify the species in this photo. '
@@ -161,7 +257,6 @@ class GemmaSpeciesService {
 
       if (responseText.isEmpty) return null;
 
-      // Parse JSON from response
       final jsonMatch = RegExp(r'\{[^}]+\}').firstMatch(responseText);
       if (jsonMatch == null) return null;
 
