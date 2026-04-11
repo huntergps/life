@@ -28,9 +28,12 @@ class HasProNotifier extends Notifier<bool> {
   }
 }
 
-/// Whether premium features are unlocked (Pack OR Pro)
+/// Whether premium features are unlocked (Pack OR Pro OR server role)
 final isPremiumProvider = Provider<bool>((ref) {
-  return ref.watch(hasPackProvider) || ref.watch(hasProProvider);
+  return ref.watch(hasPackProvider) ||
+         ref.watch(hasProProvider) ||
+         (InitStorage.prefs.getBool('has_premium_role') ?? false) ||
+         (InitStorage.prefs.getBool('is_beta_tester') ?? false);
 });
 
 /// Product details for the paywall UI
