@@ -63,6 +63,23 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
 
   Future<void> _sendText(String text) async {
     if (text.trim().isEmpty) return;
+
+    // Check if model is installed
+    final status = await GemmaSpeciesService.checkStatus();
+    if (status != GemmaModelStatus.ready) {
+      setState(() {
+        _messages.add(_ChatMessage(text: text, isUser: true));
+        _messages.add(_ChatMessage(
+          text: _isEs
+              ? 'Debes descargar la IA Mejorada primero. Ve a Ajustes > AI.'
+              : 'You need to download Enhanced AI first. Go to Settings > AI.',
+          isUser: false,
+        ));
+      });
+      _scrollToBottom();
+      return;
+    }
+
     _controller.clear();
 
     setState(() {
@@ -80,7 +97,9 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
     } catch (e) {
       setState(() {
         _messages.add(_ChatMessage(
-          text: _isEs ? 'Error al procesar: $e' : 'Processing error: $e',
+          text: _isEs
+              ? 'No pude procesar tu consulta. Intenta de nuevo.'
+              : 'Could not process your request. Try again.',
           isUser: false,
         ));
         _isProcessing = false;
@@ -90,6 +109,26 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
   }
 
   Future<void> _sendWithImage(Uint8List imageBytes, String text) async {
+    // Check if model is installed
+    final status = await GemmaSpeciesService.checkStatus();
+    if (status != GemmaModelStatus.ready) {
+      setState(() {
+        _messages.add(_ChatMessage(
+          text: text.isEmpty ? (_isEs ? 'Que es esto?' : 'What is this?') : text,
+          isUser: true,
+          image: imageBytes,
+        ));
+        _messages.add(_ChatMessage(
+          text: _isEs
+              ? 'Debes descargar la IA Mejorada primero. Ve a Ajustes > AI.'
+              : 'You need to download Enhanced AI first. Go to Settings > AI.',
+          isUser: false,
+        ));
+      });
+      _scrollToBottom();
+      return;
+    }
+
     setState(() {
       _messages.add(_ChatMessage(
         text: text.isEmpty
@@ -113,7 +152,9 @@ class _AiChatScreenState extends ConsumerState<AiChatScreen>
     } catch (e) {
       setState(() {
         _messages.add(_ChatMessage(
-          text: _isEs ? 'Error al procesar: $e' : 'Processing error: $e',
+          text: _isEs
+              ? 'No pude procesar tu consulta. Intenta de nuevo.'
+              : 'Could not process your request. Try again.',
           isUser: false,
         ));
         _isProcessing = false;

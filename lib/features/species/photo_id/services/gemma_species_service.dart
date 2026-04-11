@@ -20,9 +20,9 @@ class GemmaSpeciesService {
   /// Approximate model size for display purposes.
   static const modelSizeLabel = '1.3 GB';
 
-  /// Gemma 4 E2B .task file from LiteRT Community (HuggingFace).
+  /// Gemma 4 E2B .litertlm file for mobile (iOS/Android) from LiteRT Community.
   static const _modelUrl =
-      'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it-web.task';
+      'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm';
 
   static InferenceModel? _model;
 
