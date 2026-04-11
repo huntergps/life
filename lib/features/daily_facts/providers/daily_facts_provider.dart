@@ -1,7 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/daily_facts/models/daily_fact_definition.dart';
+import 'package:galapagos_wildlife/features/daily_facts/services/ai_daily_fact_service.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_provider.dart';
+
+/// Feature 13: AI-generated daily fact (premium + Gemma only).
+/// Returns null if Gemma is unavailable or the user is not premium.
+final aiDailyFactProvider = FutureProvider<String?>((ref) async {
+  final isPremium = ref.watch(isPremiumProvider);
+  if (!isPremium) return null;
+
+  final locale = ref.watch(localeProvider);
+  final isEs = locale == 'es';
+
+  return AiDailyFactService.getDailyFact(isEs: isEs);
+});
 
 /// Provides progress for all daily facts based on user's sighting count
 /// Pattern copied from: lib/features/badges/providers/badges_provider.dart

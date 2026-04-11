@@ -21,6 +21,8 @@ import 'package:galapagos_wildlife/features/home/providers/home_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/providers/species_identification_provider.dart';
 import 'package:galapagos_wildlife/features/species/shared/species_id_sheet.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/sightings/services/ai_description_service.dart';
 import 'species_picker_sheet.dart';
 import 'location_picker_screen.dart';
 
@@ -43,6 +45,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
   bool _isLoadingLocation = false;
   bool _isProcessingPhoto = false;
   bool _isIdentifying = false;
+  bool _isGeneratingDescription = false;
 
   bool get _hasData =>
       _selectedSpecies != null ||
@@ -308,6 +311,23 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
     }
   }
 
+  Future<void> _generateAiDescription() async {
+    if (_photoBytes == null) return;
+    setState(() => _isGeneratingDescription = true);
+    try {
+      final isEs = LocaleSettings.currentLocale == AppLocale.es;
+      final description = await AiDescriptionService.generateDescription(
+        _photoBytes!,
+        isEs: isEs,
+      );
+      if (description != null && mounted) {
+        _notesController.text = description;
+      }
+    } finally {
+      if (mounted) setState(() => _isGeneratingDescription = false);
+    }
+  }
+
   Future<void> _save() async {
     if (_selectedSpecies == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -503,15 +523,7 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
         ),
         const SizedBox(height: 16),
         // Notes
-        TextField(
-          controller: _notesController,
-          decoration: InputDecoration(
-            labelText: context.t.sightings.notes,
-            hintText: context.t.sightings.notesHint,
-            alignLabelWithHint: true,
-          ),
-          maxLines: 4,
-        ),
+        _buildNotesField(isEs),
         const SizedBox(height: 16),
         // Location
         Card(
@@ -572,6 +584,44 @@ class _AddSightingScreenState extends ConsumerState<AddSightingScreen> {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNotesField(bool isEs) {
+    final isPremium = ref.watch(isPremiumProvider);
+    final showAiButton = isPremium && _photoBytes != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          controller: _notesController,
+          decoration: InputDecoration(
+            labelText: context.t.sightings.notes,
+            hintText: context.t.sightings.notesHint,
+            alignLabelWithHint: true,
+            suffixIcon: showAiButton
+                ? _isGeneratingDescription
+                    ? const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    : IconButton(
+                        icon: const Icon(Icons.auto_awesome, size: 20),
+                        tooltip: isEs
+                            ? 'Generar descripcion con IA'
+                            : 'Generate AI description',
+                        onPressed: _generateAiDescription,
+                      )
+                : null,
+          ),
+          maxLines: 4,
         ),
       ],
     );

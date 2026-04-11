@@ -5,6 +5,12 @@ import 'package:galapagos_wildlife/app/theme/app_colors.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/core/utils/error_handler.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
+import 'package:galapagos_wildlife/features/editorial/services/ai_editorial_service.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
+import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
+import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
+import 'package:galapagos_wildlife/models/species.model.dart' as sp_model;
 import '../../../providers/admin_category_provider.dart';
 import '../../../providers/admin_species_provider.dart';
 import '../../../providers/admin_taxonomy_provider.dart';
@@ -437,6 +443,9 @@ class _AdminSpeciesFormScreenState
               : '${context.t.admin.newItem} ${context.t.admin.species}'),
           backgroundColor: isDark ? AppColors.darkBackground : null,
           actions: [
+            // Feature 14: AI editorial review (staff + premium + Gemma)
+            if (isEditing)
+              _AiReviewButton(speciesId: widget.speciesId!),
             if (_isLoading)
               const Padding(
                 padding: EdgeInsets.all(16),
@@ -1565,6 +1574,169 @@ class _TabDetallesState extends State<_TabDetalles>
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+// ── Feature 14: AI Editorial Review button ──
+
+class _AiReviewButton extends ConsumerStatefulWidget {
+  final int speciesId;
+
+  const _AiReviewButton({required this.speciesId});
+
+  @override
+  ConsumerState<_AiReviewButton> createState() => _AiReviewButtonState();
+}
+
+class _AiReviewButtonState extends ConsumerState<_AiReviewButton> {
+  bool _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAvailability();
+  }
+
+  Future<void> _checkAvailability() async {
+    final status = await GemmaSpeciesService.checkStatus();
+    if (mounted) {
+      setState(() => _visible = status == GemmaModelStatus.ready);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPremium = ref.watch(isPremiumProvider);
+    final isStaff = ref.watch(isStaffProvider);
+    final isStaffValue = isStaff.when(
+      data: (v) => v,
+      loading: () => false,
+      error: (_, _) => false,
+    );
+
+    if (!_visible || !isPremium || !isStaffValue) {
+      return const SizedBox.shrink();
+    }
+
+    return IconButton(
+      icon: const Icon(Icons.auto_awesome),
+      tooltip: 'AI Review',
+      onPressed: _runReview,
+    );
+  }
+
+  Future<void> _runReview() async {
+    final speciesAsync = ref.read(adminSpeciesProvider(widget.speciesId));
+    final data = speciesAsync.asData?.value;
+    if (data == null) return;
+
+    final isEs = ref.read(localeProvider) == 'es';
+
+    // Build a minimal Species model from the loaded form data
+    final species = sp_model.Species(
+      id: data['id'] as int? ?? 0,
+      categoryId: data['category_id'] as int? ?? 0,
+      commonNameEs: data['common_name_es'] as String? ?? '',
+      commonNameEn: data['common_name_en'] as String? ?? '',
+      scientificName: data['scientific_name'] as String? ?? '',
+      descriptionEs: data['description_es'] as String?,
+      descriptionEn: data['description_en'] as String?,
+      habitatEs: data['habitat_es'] as String?,
+      habitatEn: data['habitat_en'] as String?,
+      isEndemic: data['is_endemic'] as bool? ?? false,
+    );
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => _AiReviewDialog(species: species, isEs: isEs),
+    );
+  }
+}
+
+class _AiReviewDialog extends StatefulWidget {
+  final sp_model.Species species;
+  final bool isEs;
+
+  const _AiReviewDialog({required this.species, required this.isEs});
+
+  @override
+  State<_AiReviewDialog> createState() => _AiReviewDialogState();
+}
+
+class _AiReviewDialogState extends State<_AiReviewDialog> {
+  String? _result;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _run();
+  }
+
+  Future<void> _run() async {
+    try {
+      final result = await AiEditorialService.reviewSpeciesContent(
+        widget.species,
+        isEs: widget.isEs,
+      );
+      if (mounted) {
+        setState(() {
+          _result = result;
+          _loading = false;
+          if (result == null) _error = 'AI model not available';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e.toString();
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Row(
+        children: [
+          Icon(Icons.auto_awesome, size: 20),
+          SizedBox(width: 8),
+          Text('AI Review'),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: _loading
+            ? const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Analyzing species content...'),
+                ],
+              )
+            : _error != null
+                ? Text(_error!)
+                : SingleChildScrollView(
+                    child: SelectableText(
+                      _result ?? '',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.t.common.close),
         ),
       ],
     );

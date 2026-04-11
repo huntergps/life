@@ -14,7 +14,12 @@ import 'package:galapagos_wildlife/features/sightings/list/sighting_filters_prov
 import 'package:galapagos_wildlife/features/sightings/providers/sightings_ui_provider.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_service.dart';
 import 'package:galapagos_wildlife/features/sightings/services/sightings_csv_export.dart';
+import 'package:galapagos_wildlife/features/sightings/services/ai_trip_report_service.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:intl/intl.dart';
 import 'package:galapagos_wildlife/features/sightings/list/sighting_detail.dart';
 import 'package:galapagos_wildlife/features/sightings/list/sightings_filter_bar.dart';
@@ -124,6 +129,13 @@ class _PhoneSightings extends ConsumerWidget {
                   isCalendar ? SightingsViewMode.list : SightingsViewMode.calendar;
             },
           ),
+          // Feature 10: AI Trip Report (premium + Gemma only)
+          if (ref.watch(isPremiumProvider))
+            _AiTripReportButton(
+              filteredAsync: filteredAsync,
+              speciesMap: speciesMapForExport,
+              isEs: isEs,
+            ),
           IconButton(
             icon: const Icon(Icons.file_download_outlined),
             tooltip: context.t.sightings.export,
@@ -284,6 +296,13 @@ class _TabletSightings extends StatelessWidget {
                   isCalendar ? SightingsViewMode.list : SightingsViewMode.calendar;
             },
           ),
+          // Feature 10: AI Trip Report (premium + Gemma only)
+          if (ref.watch(isPremiumProvider))
+            _AiTripReportButton(
+              filteredAsync: filteredAsync,
+              speciesMap: speciesMap,
+              isEs: isEs,
+            ),
           IconButton(
             icon: const Icon(Icons.file_download_outlined),
             tooltip: context.t.sightings.export,
@@ -1077,5 +1096,228 @@ Future<void> _confirmDelete(
         );
       }
     }
+  }
+}
+
+// ── Feature 10: AI Trip Report button ──
+
+class _AiTripReportButton extends StatefulWidget {
+  final AsyncValue<List<Sighting>> filteredAsync;
+  final Map<int, Species> speciesMap;
+  final bool isEs;
+
+  const _AiTripReportButton({
+    required this.filteredAsync,
+    required this.speciesMap,
+    required this.isEs,
+  });
+
+  @override
+  State<_AiTripReportButton> createState() => _AiTripReportButtonState();
+}
+
+class _AiTripReportButtonState extends State<_AiTripReportButton> {
+  bool _gemmaReady = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkGemma();
+  }
+
+  Future<void> _checkGemma() async {
+    final status = await GemmaSpeciesService.checkStatus();
+    if (mounted) {
+      setState(() => _gemmaReady = status == GemmaModelStatus.ready);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_gemmaReady) return const SizedBox.shrink();
+
+    return IconButton(
+      icon: const Icon(Icons.article),
+      tooltip: 'AI Trip Report',
+      onPressed: () {
+        final data = widget.filteredAsync.asData?.value ?? [];
+        if (data.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.t.sightings.noSightingsToExport)),
+          );
+          return;
+        }
+        _showTripReportSheet(context, data, widget.speciesMap, widget.isEs);
+      },
+    );
+  }
+}
+
+Future<void> _showTripReportSheet(
+  BuildContext context,
+  List<Sighting> sightings,
+  Map<int, Species> speciesMap,
+  bool isEs,
+) async {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (ctx) => _TripReportSheet(
+      sightings: sightings,
+      speciesMap: speciesMap,
+      isEs: isEs,
+    ),
+  );
+}
+
+class _TripReportSheet extends StatefulWidget {
+  final List<Sighting> sightings;
+  final Map<int, Species> speciesMap;
+  final bool isEs;
+
+  const _TripReportSheet({
+    required this.sightings,
+    required this.speciesMap,
+    required this.isEs,
+  });
+
+  @override
+  State<_TripReportSheet> createState() => _TripReportSheetState();
+}
+
+class _TripReportSheetState extends State<_TripReportSheet> {
+  String? _report;
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _generate();
+  }
+
+  Future<void> _generate() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final report = await AiTripReportService.generateReport(
+        sightings: widget.sightings,
+        speciesMap: widget.speciesMap,
+        isEs: widget.isEs,
+      );
+      if (mounted) {
+        setState(() {
+          _report = report;
+          _loading = false;
+          if (report == null) _error = 'AI model not available';
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _error = e.toString();
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DraggableScrollableSheet(
+      initialChildSize: 0.7,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (ctx, scrollController) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade400,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.auto_awesome, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    'AI Trip Report',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const Spacer(),
+                  if (_report != null) ...[
+                    IconButton(
+                      icon: const Icon(Icons.copy, size: 20),
+                      tooltip: 'Copy',
+                      onPressed: () {
+                        Clipboard.setData(ClipboardData(text: _report!));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Copied to clipboard')),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.share, size: 20),
+                      tooltip: 'Share',
+                      onPressed: () {
+                        final box =
+                            context.findRenderObject() as RenderBox?;
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text: _report!,
+                            subject: 'Galapagos Trip Report',
+                            sharePositionOrigin: box != null
+                                ? box.localToGlobal(Offset.zero) & box.size
+                                : Rect.zero,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: _loading
+                    ? const Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Generating your trip report...'),
+                          ],
+                        ),
+                      )
+                    : _error != null
+                        ? Center(child: Text(_error!))
+                        : SingleChildScrollView(
+                            controller: scrollController,
+                            child: SelectableText(
+                              _report ?? '',
+                              style:
+                                  Theme.of(context).textTheme.bodyLarge,
+                            ),
+                          ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

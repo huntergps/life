@@ -113,6 +113,33 @@ class SpeciesIdNotifier extends AsyncNotifier<SpeciesIdState> {
         suggestions = _locationFallback(nearbySpecies ?? allSpecies.take(6).toList());
       }
 
+      // ── Feature 11: Validate high-confidence TFLite with Gemma ──
+      final topConfidence = suggestions.isNotEmpty ? suggestions.first.score : 0.0;
+      if (topConfidence >= 0.7 &&
+          await GemmaSpeciesService.checkStatus() == GemmaModelStatus.ready) {
+        try {
+          final validation = await GemmaSpeciesService.identify(imageBytes);
+          if (validation != null && suggestions.first.matchedSpecies != null) {
+            final topSpecies = suggestions.first.matchedSpecies!;
+            if (validation.speciesName.toLowerCase() !=
+                topSpecies.commonNameEn.toLowerCase()) {
+              // Gemma disagrees -- reduce confidence and note the discrepancy
+              suggestions[0] = SpeciesIdSuggestion(
+                scientificName: suggestions[0].scientificName,
+                commonNameEn: suggestions[0].commonNameEn,
+                commonNameEs: suggestions[0].commonNameEs,
+                score: suggestions[0].score * 0.8,
+                source:
+                    '${suggestions[0].source} (AI: may be ${validation.speciesName})',
+                matchedSpecies: suggestions[0].matchedSpecies,
+              );
+            }
+          }
+        } catch (_) {
+          // Gemma validation failed — continue with original results
+        }
+      }
+
       // ── Level 2: Gemma 4 E2B on-device (if downloaded) ──────────
       final topScore = suggestions.isNotEmpty ? suggestions.first.score : 0.0;
       if (topScore < 0.7) {

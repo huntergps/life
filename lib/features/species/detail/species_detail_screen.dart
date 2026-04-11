@@ -19,6 +19,8 @@ import 'package:galapagos_wildlife/features/species/shared/species_checklist_pro
 import 'package:galapagos_wildlife/features/admin/providers/admin_auth_provider.dart';
 import 'package:galapagos_wildlife/features/editorial/presentation/sheets/field_proposal_sheet.dart';
 import 'package:galapagos_wildlife/features/editorial/services/proposal_service.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
+import 'package:galapagos_wildlife/features/species/shared/ai_translator_service.dart';
 import 'species_detail_provider.dart';
 import 'quick_facts_row.dart';
 import 'taxonomy_tree.dart';
@@ -286,9 +288,8 @@ class _DetailContent extends ConsumerWidget {
         // Visit sites strip — where to find this species
         _VisitSitesStrip(speciesId: species.id, locale: locale, isDark: isDark),
         const SizedBox(height: 20),
-        // Description
-        ..._editableLocalizedSection(
-          context,
+        // Description (with translate button for premium + Gemma)
+        _TranslatableDescriptionSection(
           label: context.t.species.description,
           en: species.descriptionEn,
           es: species.descriptionEs,
@@ -1309,6 +1310,196 @@ class _VisitSitesStrip extends ConsumerWidget {
               },
             ),
           ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Translatable description section (premium + Gemma)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _TranslatableDescriptionSection extends ConsumerStatefulWidget {
+  final String label;
+  final String? en;
+  final String? es;
+  final String locale;
+  final bool isEditor;
+  final bool hasPending;
+  final VoidCallback onEdit;
+
+  const _TranslatableDescriptionSection({
+    required this.label,
+    this.en,
+    this.es,
+    required this.locale,
+    required this.isEditor,
+    required this.hasPending,
+    required this.onEdit,
+  });
+
+  @override
+  ConsumerState<_TranslatableDescriptionSection> createState() =>
+      _TranslatableDescriptionSectionState();
+}
+
+class _TranslatableDescriptionSectionState
+    extends ConsumerState<_TranslatableDescriptionSection> {
+  String? _translatedText;
+  String? _translatedLang;
+  bool _isTranslating = false;
+
+  Future<void> _showLanguagePicker() async {
+    final text = widget.locale == 'es'
+        ? (widget.es ?? widget.en)
+        : widget.en;
+    if (text == null) return;
+
+    final lang = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                widget.locale == 'es' ? 'Traducir a...' : 'Translate to...',
+                style: Theme.of(ctx).textTheme.titleMedium,
+              ),
+            ),
+            ...AiTranslatorService.supportedLanguages.entries.map((e) =>
+              ListTile(
+                title: Text(e.value),
+                onTap: () => Navigator.pop(ctx, e.key),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (lang == null || !mounted) return;
+
+    setState(() {
+      _isTranslating = true;
+      _translatedText = null;
+      _translatedLang = null;
+    });
+
+    final result = await AiTranslatorService.translate(text, lang);
+    if (mounted) {
+      setState(() {
+        _isTranslating = false;
+        _translatedText = result;
+        _translatedLang =
+            AiTranslatorService.supportedLanguages[lang] ?? lang;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final text = widget.locale == 'es'
+        ? (widget.es ?? widget.en)
+        : widget.en;
+    if (text == null && !widget.isEditor) return const SizedBox.shrink();
+
+    final isPremium = ref.watch(isPremiumProvider);
+    final showTranslate = isPremium && text != null;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header row with edit + translate buttons
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: _sectionHeaderRow(
+                context,
+                label: widget.label,
+                hasPending: widget.hasPending,
+                isEditor: widget.isEditor,
+                onEdit: widget.onEdit,
+              ),
+            ),
+            if (showTranslate)
+              _isTranslating
+                  ? const Padding(
+                      padding: EdgeInsets.only(left: 4),
+                      child: SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.translate, size: 20),
+                      tooltip: widget.locale == 'es'
+                          ? 'Traducir con IA'
+                          : 'Translate with AI',
+                      onPressed: _showLanguagePicker,
+                    ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (text != null)
+          Text(text, style: Theme.of(context).textTheme.bodyMedium)
+        else
+          Text(
+            '(sin contenido \u2014 toca \u270f para agregar)',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Colors.grey,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        // Translated text
+        if (_translatedText != null) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.deepPurple.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.translate, size: 14,
+                        color: Colors.deepPurple),
+                    const SizedBox(width: 6),
+                    Text(
+                      _translatedLang ?? '',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Colors.deepPurple,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const Spacer(),
+                    GestureDetector(
+                      onTap: () => setState(() {
+                        _translatedText = null;
+                        _translatedLang = null;
+                      }),
+                      child: const Icon(Icons.close, size: 16,
+                          color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(_translatedText!,
+                    style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        ],
+        const SizedBox(height: 20),
       ],
     );
   }

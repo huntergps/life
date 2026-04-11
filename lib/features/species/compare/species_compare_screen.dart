@@ -4,6 +4,8 @@ import 'package:galapagos_wildlife/models/species.model.dart';
 import 'package:galapagos_wildlife/core/constants/species_assets.dart';
 import 'package:galapagos_wildlife/core/l10n/strings.g.dart';
 import 'package:galapagos_wildlife/app/theme/app_colors.dart';
+import 'package:galapagos_wildlife/features/ai_chat/services/ai_chat_service.dart';
+import 'package:galapagos_wildlife/features/purchases/providers/purchase_provider.dart';
 import 'package:galapagos_wildlife/features/settings/providers/settings_provider.dart';
 import 'package:galapagos_wildlife/features/species/list/species_list_provider.dart';
 
@@ -74,14 +76,21 @@ class _SpeciesCompareScreenState extends ConsumerState<SpeciesCompareScreen> {
                 ),
                 const SizedBox(height: 24),
                 // Comparison table
-                if (_speciesA != null && _speciesB != null)
+                if (_speciesA != null && _speciesB != null) ...[
                   _ComparisonTable(
                     a: _speciesA!,
                     b: _speciesB!,
                     locale: locale,
                     isDark: isDark,
-                  )
-                else
+                  ),
+                  const SizedBox(height: 24),
+                  _AiComparisonSection(
+                    speciesA: _speciesA!,
+                    speciesB: _speciesB!,
+                    locale: locale,
+                    isDark: isDark,
+                  ),
+                ] else
                   Padding(
                     padding: const EdgeInsets.only(top: 48),
                     child: Text(
@@ -368,4 +377,126 @@ class _CompareRow {
   final bool italic;
 
   const _CompareRow(this.label, this.valueA, this.valueB, {this.italic = false});
+}
+
+class _AiComparisonSection extends ConsumerStatefulWidget {
+  final Species speciesA;
+  final Species speciesB;
+  final String locale;
+  final bool isDark;
+
+  const _AiComparisonSection({
+    required this.speciesA,
+    required this.speciesB,
+    required this.locale,
+    required this.isDark,
+  });
+
+  @override
+  ConsumerState<_AiComparisonSection> createState() =>
+      _AiComparisonSectionState();
+}
+
+class _AiComparisonSectionState extends ConsumerState<_AiComparisonSection> {
+  String? _aiResponse;
+  bool _isLoading = false;
+
+  Future<void> _compareWithAi() async {
+    final isEs = widget.locale == 'es';
+    final name1 = isEs
+        ? widget.speciesA.commonNameEs
+        : widget.speciesA.commonNameEn;
+    final name2 = isEs
+        ? widget.speciesB.commonNameEs
+        : widget.speciesB.commonNameEn;
+
+    final prompt = isEs
+        ? 'Compara brevemente estas dos especies de Galapagos: $name1 vs $name2. Diferencias clave en 3 puntos.'
+        : 'Briefly compare these two Galapagos species: $name1 vs $name2. Key differences in 3 points.';
+
+    setState(() => _isLoading = true);
+    try {
+      final response = await AiChatService.sendMessage(prompt);
+      if (mounted) {
+        setState(() {
+          _aiResponse = response;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isPremium = ref.watch(isPremiumProvider);
+    if (!isPremium) return const SizedBox.shrink();
+
+    final isEs = widget.locale == 'es';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          isEs ? 'Analisis IA' : 'AI Analysis',
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_aiResponse != null)
+          Card(
+            color: widget.isDark
+                ? AppColors.darkSurface
+                : Colors.deepPurple.shade50,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.auto_awesome,
+                          size: 16, color: Colors.deepPurple),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Gemma AI',
+                        style: Theme.of(context)
+                            .textTheme
+                            .labelSmall
+                            ?.copyWith(
+                              color: Colors.deepPurple,
+                              fontWeight: FontWeight.w600,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(_aiResponse!,
+                      style: Theme.of(context).textTheme.bodyMedium),
+                ],
+              ),
+            ),
+          )
+        else
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              icon: _isLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.auto_awesome, size: 18),
+              label: Text(
+                isEs ? 'Comparar con IA' : 'Compare with AI',
+              ),
+              onPressed: _isLoading ? null : _compareWithAi,
+            ),
+          ),
+      ],
+    );
+  }
 }
