@@ -1,5 +1,5 @@
-# iOS 15.5+ required by google_mlkit_image_labeling 0.13+
-platform :ios, '15.5'
+# iOS 16.0+ required by flutter_gemma (Gemma 4 E2B on-device AI)
+platform :ios, '16.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
@@ -28,7 +28,7 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_frameworks!
+  use_frameworks! :linkage => :static
 
   # tflite_flutter requires TensorFlowLiteSwift but it clones the full TF repo (4GB+).
   # Override with a local stub that wraps TensorFlowLiteC (binary distribution, no git clone).
