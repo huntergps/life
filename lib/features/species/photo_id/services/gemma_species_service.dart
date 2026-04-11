@@ -45,11 +45,20 @@ class GemmaSpeciesService {
 
     try {
       final isInstalled = await _manager.isModelInstalled;
-      if (isInstalled) return GemmaModelStatus.ready;
+      if (isInstalled) {
+        // Model is installed — clear any stale downloading flag
+        await Bootstrap.prefs.setBool('gemma_downloading', false);
+        return GemmaModelStatus.ready;
+      }
     } catch (_) {}
 
+    // If flag says downloading but model isn't installed, the download
+    // was interrupted (app killed, network lost). Reset the flag.
     final downloading = Bootstrap.prefs.getBool('gemma_downloading') ?? false;
-    if (downloading) return GemmaModelStatus.downloading;
+    if (downloading) {
+      await Bootstrap.prefs.setBool('gemma_downloading', false);
+      try { await _manager.deleteModel(); } catch (_) {} // clean partial file
+    }
 
     return GemmaModelStatus.notDownloaded;
   }
