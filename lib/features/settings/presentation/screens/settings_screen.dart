@@ -767,7 +767,7 @@ class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
   @override
   Widget build(BuildContext context) {
     final statusAsync = ref.watch(gemmaModelStatusProvider);
-    final hasPro = ref.watch(hasProProvider);
+    final isPremium = ref.watch(isPremiumProvider);
     final locale = ref.watch(localeProvider);
     final isEs = locale == 'es';
 
@@ -804,7 +804,7 @@ class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
               subtitle = isEs
                   ? 'No descargado (${GemmaSpeciesService.modelSizeLabel})'
                   : 'Not downloaded (${GemmaSpeciesService.modelSizeLabel})';
-              trailing = hasPro
+              trailing = isPremium
                   ? ElevatedButton(
                       onPressed: _startDownload,
                       child: Text(isEs ? 'Descargar' : 'Download'),
