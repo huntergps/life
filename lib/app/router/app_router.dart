@@ -4,6 +4,7 @@ import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
 import 'package:galapagos_wildlife/features/ar_camera/presentation/screens/ar_camera_screen.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/presentation/photo_id_screen.dart';
 import 'package:galapagos_wildlife/features/purchases/presentation/upgrade_screen.dart';
+import 'package:galapagos_wildlife/features/ai_chat/presentation/ai_chat_screen.dart';
 import 'router_keys.dart';
 import 'routes/app_routes.dart';
 import 'routes/admin_routes.dart';
@@ -87,6 +88,12 @@ final appRouter = GoRouter(
       name: 'photo-id',
       parentNavigatorKey: rootNavigatorKey,
       builder: (context, state) => const PhotoIdScreen(),
+    ),
+    GoRoute(
+      path: '/ai-chat',
+      name: 'ai-chat',
+      parentNavigatorKey: rootNavigatorKey,
+      builder: (context, state) => const AiChatScreen(),
     ),
   ],
 );

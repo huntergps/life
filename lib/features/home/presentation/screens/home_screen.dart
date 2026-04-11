@@ -729,6 +729,15 @@ class _QuickActionsRow extends StatelessWidget {
               isDark: isDark,
               onTap: () => context.goNamed('map'),
             ),
+          _ActionBtn(
+            icon: Icons.auto_awesome,
+            label: LocaleSettings.currentLocale == AppLocale.es
+                ? 'Guia IA'
+                : 'AI Guide',
+            color: Colors.deepPurple,
+            isDark: isDark,
+            onTap: () => context.push('/ai-chat'),
+          ),
         ].map((w) => Expanded(child: w)).toList(),
       ),
     );
