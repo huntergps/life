@@ -20,9 +20,9 @@ class GemmaSpeciesService {
   /// Approximate model size for display purposes.
   static const modelSizeLabel = '1.3 GB';
 
-  /// Gemma 4 E2B int4 quantized .task file for MediaPipe LLM Inference.
+  /// Gemma 4 E2B .task file from LiteRT Community (HuggingFace).
   static const _modelUrl =
-      'https://huggingface.co/google/gemma-4-E2B-it-mediapipe/resolve/main/gemma4-e2b-it-int4.task';
+      'https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it-web.task';
 
   static InferenceModel? _model;
 
