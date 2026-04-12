@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:galapagos_wildlife/app/bootstrap/bootstrap.dart';
@@ -5,6 +6,7 @@ import 'package:galapagos_wildlife/features/ar_camera/presentation/screens/ar_ca
 import 'package:galapagos_wildlife/features/species/photo_id/presentation/photo_id_screen.dart';
 import 'package:galapagos_wildlife/features/purchases/presentation/upgrade_screen.dart';
 import 'package:galapagos_wildlife/features/ai_chat/presentation/ai_chat_screen.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_file_receiver.dart';
 import 'router_keys.dart';
 import 'routes/app_routes.dart';
 import 'routes/admin_routes.dart';
@@ -19,6 +21,15 @@ final appRouter = GoRouter(
   initialLocation: Bootstrap.prefs.getString('last_route') ?? '/',
   redirect: (context, state) {
     final path = state.uri.path;
+
+    // Intercept file:// URLs (e.g. AirDrop .litertlm files)
+    final fullUri = state.uri.toString();
+    if (fullUri.startsWith('file://') || path.endsWith('.litertlm') || path.endsWith('.task')) {
+      debugPrint('Router: intercepted file URL, checking for model file...');
+      GemmaFileReceiver.checkForReceivedModel();
+      return '/';
+    }
+
     // Persist current route for cold-start restoration (skip transient screens)
     const noSave = {'/login', '/profile', '/field-camera', '/photo-id'};
     if (!noSave.contains(path)) {

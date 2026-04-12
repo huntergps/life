@@ -33,6 +33,43 @@ class GemmaFileReceiver {
       // 2. Check Documents root (Finder File Sharing / iTunes)
       final result = await _scanAndInstall(docsDir);
       if (result) return true;
+
+      // 3. Check File Provider Storage (AirDrop on newer iOS)
+      // iOS may put AirDropped files in the app group container
+      final appSupportDir = await getApplicationSupportDirectory();
+      // Walk up to find the container root and check common paths
+      final containerRoot = appSupportDir.parent;
+      final possiblePaths = [
+        '${containerRoot.path}/File Provider Storage/Downloads',
+        '${containerRoot.path}/tmp',
+        '${containerRoot.path}/Documents',
+      ];
+      for (final p in possiblePaths) {
+        final dir = Directory(p);
+        if (await dir.exists()) {
+          final found = await _scanAndInstall(dir);
+          if (found) return true;
+        }
+      }
+
+      // 4. Also scan the shared AppGroup container
+      // The path from the error: /private/var/mobile/Containers/Shared/AppGroup/*/File Provider Storage/Downloads/
+      try {
+        final sharedBase = Directory('/private/var/mobile/Containers/Shared/AppGroup');
+        if (await sharedBase.exists()) {
+          await for (final groupDir in sharedBase.list()) {
+            if (groupDir is Directory) {
+              final fpDir = Directory('${groupDir.path}/File Provider Storage/Downloads');
+              if (await fpDir.exists()) {
+                final found = await _scanAndInstall(fpDir);
+                if (found) return true;
+              }
+            }
+          }
+        }
+      } catch (_) {
+        // Permission denied for shared containers — expected on sandboxed iOS
+      }
     } catch (e) {
       AppLogger.warning('GemmaFileReceiver: check failed', e);
     }
