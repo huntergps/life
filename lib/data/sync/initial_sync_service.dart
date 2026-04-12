@@ -74,8 +74,12 @@ class InitialSyncService {
         policy: OfflineFirstGetPolicy.awaitRemote,
       ).timeout(timeout);
 
-      // 5. Species-Sites relationships
+      // 5. Species-Sites relationships (clear local first — deletions in Supabase
+      // aren't synced by the offline-first upsert pattern)
       onProgress?.call(5, total, tables[4]);
+      try {
+        await _repo.driftDb.customStatement('DELETE FROM species_sites');
+      } catch (_) {}
       await _repo.get<SpeciesSite>(
         policy: OfflineFirstGetPolicy.awaitRemote,
       ).timeout(timeout);
