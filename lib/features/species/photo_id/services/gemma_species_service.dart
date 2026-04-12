@@ -119,11 +119,24 @@ class GemmaSpeciesService {
   }) async {
     if (!isDeviceSupported) return;
 
+    final url = modelUrl;
+    final isLocal = url.startsWith('http://192.') ||
+                    url.startsWith('http://172.') ||
+                    url.startsWith('http://10.') ||
+                    url.startsWith('http://localhost');
+
+    if (isLocal) {
+      // Use direct HttpClient for local network (more reliable on iOS)
+      await _directDownload(url, onProgress: onProgress, onDone: onDone, onError: onError);
+      return;
+    }
+
+    // Use background_downloader for internet downloads (supports background/pause)
     await Bootstrap.prefs.setBool('gemma_downloading', true);
 
     final task = DownloadTask(
       taskId: _downloadTaskId,
-      url: modelUrl,
+      url: url,
       filename: GemmaModelConfig.selected.fileName,
       directory: 'gemma_model',
       baseDirectory: BaseDirectory.applicationSupport,
@@ -133,7 +146,7 @@ class GemmaSpeciesService {
       requiresWiFi: false,
     );
 
-    AppLogger.info('Gemma: starting download from ${modelUrl.substring(0, 50)}...');
+    AppLogger.info('Gemma: starting background download from ${url.substring(0, 50)}...');
 
     await FileDownloader().download(
       task,
@@ -162,6 +175,60 @@ class GemmaSpeciesService {
         }
       },
     );
+  }
+
+  /// Direct download using Dart HttpClient — for local network transfers.
+  /// More reliable than background_downloader for HTTP local servers.
+  static Future<void> _directDownload(
+    String url, {
+    ValueChanged<double>? onProgress,
+    VoidCallback? onDone,
+    ValueChanged<String>? onError,
+  }) async {
+    await Bootstrap.prefs.setBool('gemma_downloading', true);
+    AppLogger.info('Gemma: direct download from $url');
+
+    try {
+      final supportDir = await getApplicationSupportDirectory();
+      final destDir = Directory('${supportDir.path}/gemma_model');
+      if (!await destDir.exists()) await destDir.create(recursive: true);
+      final destFile = File('${destDir.path}/${GemmaModelConfig.selected.fileName}');
+
+      final client = HttpClient();
+      client.connectionTimeout = const Duration(seconds: 10);
+      final request = await client.getUrl(Uri.parse(url));
+      final response = await request.close();
+
+      if (response.statusCode != 200) {
+        await Bootstrap.prefs.setBool('gemma_downloading', false);
+        onError?.call('Server returned ${response.statusCode}');
+        client.close();
+        return;
+      }
+
+      final totalBytes = response.contentLength;
+      var receivedBytes = 0;
+      final sink = destFile.openWrite();
+
+      await for (final chunk in response) {
+        sink.add(chunk);
+        receivedBytes += chunk.length;
+        if (totalBytes > 0) {
+          onProgress?.call(receivedBytes / totalBytes);
+        }
+      }
+
+      await sink.close();
+      client.close();
+      await Bootstrap.prefs.setBool('gemma_downloading', false);
+
+      AppLogger.info('Gemma: direct download complete (${receivedBytes ~/ 1024 ~/ 1024} MB)');
+      onDone?.call();
+    } catch (e) {
+      await Bootstrap.prefs.setBool('gemma_downloading', false);
+      AppLogger.warning('Gemma: direct download failed', e);
+      onError?.call('Download failed: $e');
+    }
   }
 
   /// After background_downloader finishes, move the file where flutter_gemma expects it.
