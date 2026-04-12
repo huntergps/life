@@ -6,9 +6,14 @@ import 'data/local/drift/repository/wildlife_repository.dart';
 import 'core/l10n/strings.g.dart';
 import 'core/presentation/screens/sync_screen.dart';
 import 'data/sync/initial_sync_service.dart';
+import 'features/species/photo_id/services/gemma_file_receiver.dart';
 
 Future<void> main() async {
   await Bootstrap.init();
+
+  // Check if a Gemma model was received via AirDrop or Finder File Sharing.
+  // Non-blocking — result is consumed later in settings screen.
+  GemmaFileReceiver.checkForReceivedModel();
 
   // Drift offline-first runs on all platforms (native SQLite + web Wasm/IndexedDB).
   final syncService = InitialSyncService(WildlifeRepository.instance);

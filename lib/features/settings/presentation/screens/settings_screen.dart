@@ -25,6 +25,7 @@ import 'package:galapagos_wildlife/features/purchases/presentation/paywall_scree
 import 'package:galapagos_wildlife/features/species/photo_id/providers/gemma_model_provider.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_species_service.dart';
 import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_model_config.dart';
+import 'package:galapagos_wildlife/features/species/photo_id/services/gemma_file_receiver.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -732,6 +733,28 @@ class _GemmaModelTileState extends ConsumerState<_GemmaModelTile> {
   double? _downloadProgress;
   bool _isDownloading = false;
   bool _isPaused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkForReceivedModel();
+  }
+
+  /// Check if a model file was received via AirDrop or Finder File Sharing.
+  Future<void> _checkForReceivedModel() async {
+    final received = await GemmaFileReceiver.checkForReceivedModel();
+    if (received && mounted) {
+      ref.invalidate(gemmaModelStatusProvider);
+      final isEs = ref.read(localeProvider) == 'es';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(isEs
+              ? 'Modelo de IA recibido e instalado'
+              : 'AI model received and installed!'),
+        ),
+      );
+    }
+  }
 
   Future<void> _startDownload() async {
     if (_isDownloading) return;
