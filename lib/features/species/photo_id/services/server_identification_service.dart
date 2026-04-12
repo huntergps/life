@@ -23,7 +23,7 @@ class ServerIdentificationResult {
 /// low-confidence results and the device has internet connectivity.
 class ServerIdentificationService {
   // TODO: Move to environment config / .env
-  static const _baseUrl = 'http://186.3.241.59:8089';
+  static const _baseUrl = 'https://life-api.galapagos.tech';
 
   /// Check if the server is available (with a short timeout).
   static Future<bool> isAvailable() async {
