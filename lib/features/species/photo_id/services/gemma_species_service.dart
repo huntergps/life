@@ -130,7 +130,7 @@ class GemmaSpeciesService {
       updates: Updates.statusAndProgress,
       allowPause: true,
       retries: 5,
-      requiresWiFi: true,
+      requiresWiFi: false,
     );
 
     AppLogger.info('Gemma: starting download from ${modelUrl.substring(0, 50)}...');
