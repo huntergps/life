@@ -145,6 +145,11 @@ class _PhoneDetail extends StatelessWidget {
             ),
           ),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.map_outlined),
+              tooltip: locale == 'es' ? 'Ver en mapa' : 'View on map',
+              onPressed: () => context.push('/species/$speciesId/map', extra: species),
+            ),
             _ShareButton(species: species, locale: locale),
             _AiCaptionButton(species: species, locale: locale),
             FavoriteHeartButton(speciesId: speciesId, iconSize: 32, showBackground: false, compact: false),
@@ -838,6 +843,11 @@ class _TabletDetail extends StatelessWidget {
             appBar: AppBar(
               title: Text(locale == 'es' ? species.commonNameEs : species.commonNameEn),
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.map_outlined),
+                  tooltip: locale == 'es' ? 'Ver en mapa' : 'View on map',
+                  onPressed: () => context.push('/species/$speciesId/map', extra: species),
+                ),
                 _ShareButton(species: species, locale: locale),
                 _AiCaptionButton(species: species, locale: locale),
                 FavoriteHeartButton(speciesId: speciesId, iconSize: 32, showBackground: false, compact: false),

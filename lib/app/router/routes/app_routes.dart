@@ -1,7 +1,9 @@
 import 'package:go_router/go_router.dart';
 import '../../../features/home/presentation/screens/home_screen.dart';
 import '../../../features/species/list/species_list_screen.dart';
+import '../../../models/species.model.dart';
 import '../../../features/species/detail/species_detail_screen.dart';
+import '../../../features/species/detail/species_map_screen.dart';
 import '../../../features/species/compare/species_compare_screen.dart';
 import '../../../features/map/presentation/screens/map_screen.dart';
 import '../../../features/sightings/list/sightings_list_screen.dart';
@@ -48,6 +50,17 @@ List<RouteBase> appRoutes() => [
               final id = int.parse(state.pathParameters['id']!);
               return SpeciesDetailScreen(speciesId: id);
             },
+            routes: [
+              GoRoute(
+                path: 'map',
+                name: 'species-map',
+                parentNavigatorKey: rootNavigatorKey,
+                builder: (context, state) {
+                  final species = state.extra as Species;
+                  return SpeciesMapScreen(species: species);
+                },
+              ),
+            ],
           ),
         ],
       ),
